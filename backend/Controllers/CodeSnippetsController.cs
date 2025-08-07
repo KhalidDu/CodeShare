@@ -320,11 +320,12 @@ public class CodeSnippetsController : ControllerBase
     }
 
     /// <summary>
-    /// 复制代码片段 - 增加复制次数
+    /// 复制代码片段 - 增加复制次数（已弃用，请使用 /api/clipboard/copy/{id}）
     /// </summary>
     /// <param name="id">代码片段ID</param>
     /// <returns>复制结果</returns>
     [HttpPost("{id:guid}/copy")]
+    [Obsolete("此端点已弃用，请使用 /api/clipboard/copy/{id}")]
     public async Task<ActionResult> CopySnippet(Guid id)
     {
         try
@@ -343,8 +344,11 @@ public class CodeSnippetsController : ControllerBase
                 return NotFound(new { message = "代码片段不存在或无权限访问" });
             }
 
-            _logger.LogInformation("代码片段 {SnippetId} 复制次数增加成功", id);
-            return Ok(new { message = "复制成功" });
+            _logger.LogInformation("代码片段 {SnippetId} 复制次数增加成功（使用已弃用的端点）", id);
+            return Ok(new { 
+                message = "复制成功", 
+                warning = "此端点已弃用，请使用 /api/clipboard/copy/" + id 
+            });
         }
         catch (UnauthorizedAccessException ex)
         {

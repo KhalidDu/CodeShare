@@ -49,4 +49,26 @@ public interface IClipboardHistoryRepository
     /// <param name="snippetId">代码片段ID</param>
     /// <returns>复制次数</returns>
     Task<int> GetCopyCountAsync(Guid snippetId);
+
+    /// <summary>
+    /// 获取用户的剪贴板历史记录数量
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <returns>历史记录数量</returns>
+    Task<int> GetUserHistoryCountAsync(Guid userId);
+
+    /// <summary>
+    /// 删除用户最旧的剪贴板历史记录
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <param name="countToDelete">要删除的记录数</param>
+    /// <returns>实际删除的记录数</returns>
+    Task<int> DeleteOldestUserRecordsAsync(Guid userId, int countToDelete);
+
+    /// <summary>
+    /// 批量获取多个代码片段的复制统计
+    /// </summary>
+    /// <param name="snippetIds">代码片段ID列表</param>
+    /// <returns>代码片段ID和复制次数的字典</returns>
+    Task<Dictionary<Guid, int>> GetCopyCountsBatchAsync(IEnumerable<Guid> snippetIds);
 }

@@ -36,4 +36,18 @@ public interface IClipboardService
     /// <param name="daysToKeep">保留天数</param>
     /// <returns>删除的记录数</returns>
     Task<int> CleanupExpiredHistoryAsync(int daysToKeep = 30);
+
+    /// <summary>
+    /// 获取用户的剪贴板历史记录数量
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <returns>历史记录数量</returns>
+    Task<int> GetUserHistoryCountAsync(Guid userId);
+
+    /// <summary>
+    /// 批量获取代码片段的复制统计
+    /// </summary>
+    /// <param name="snippetIds">代码片段ID列表</param>
+    /// <returns>代码片段ID和复制次数的字典</returns>
+    Task<Dictionary<Guid, int>> GetCopyCountsBatchAsync(IEnumerable<Guid> snippetIds);
 }
