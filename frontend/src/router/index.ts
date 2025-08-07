@@ -52,6 +52,12 @@ const router = createRouter({
         requiresAuth: true,
         requiredRoles: [UserRole.Admin, UserRole.Editor]
       }
+    },
+    {
+      path: '/editor-test',
+      name: 'editor-test',
+      component: () => import('../views/EditorTestView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

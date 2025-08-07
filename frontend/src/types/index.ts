@@ -105,3 +105,44 @@ export interface SnippetFilter {
   page: number
   pageSize: number
 }
+
+// 编辑器相关类型
+export interface SupportedLanguage {
+  value: string
+  label: string
+}
+
+export type EditorTheme = 'vs' | 'vs-dark' | 'hc-black'
+
+export interface EditorOptions {
+  language?: string
+  theme?: EditorTheme
+  readonly?: boolean
+  height?: string
+  fontSize?: number
+  tabSize?: number
+  insertSpaces?: boolean
+  wordWrap?: 'on' | 'off' | 'wordWrapColumn' | 'bounded'
+  minimap?: {
+    enabled: boolean
+  }
+  lineNumbers?: 'on' | 'off' | 'relative' | 'interval'
+  renderWhitespace?: 'none' | 'boundary' | 'selection' | 'trailing' | 'all'
+  folding?: boolean
+  showFoldingControls?: 'always' | 'mouseover'
+}
+
+export interface EditorInstance {
+  setValue: (value: string) => void
+  getValue: () => string
+  setLanguage: (language: string) => void
+  setTheme: (theme: string) => void
+  focus: () => void
+  formatCode: () => Promise<void>
+}
+
+export interface EditorEvents {
+  'update:modelValue': (value: string) => void
+  'language-change': (language: string) => void
+  'theme-change': (theme: string) => void
+}
