@@ -15,13 +15,16 @@ namespace CodeSnippetManager.Api.Controllers;
 public class CodeSnippetsController : ControllerBase
 {
     private readonly ICodeSnippetService _codeSnippetService;
+    private readonly IVersionManagementService _versionManagementService;
     private readonly ILogger<CodeSnippetsController> _logger;
 
     public CodeSnippetsController(
         ICodeSnippetService codeSnippetService,
+        IVersionManagementService versionManagementService,
         ILogger<CodeSnippetsController> logger)
     {
         _codeSnippetService = codeSnippetService ?? throw new ArgumentNullException(nameof(codeSnippetService));
+        _versionManagementService = versionManagementService ?? throw new ArgumentNullException(nameof(versionManagementService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -352,6 +355,52 @@ public class CodeSnippetsController : ControllerBase
         {
             _logger.LogError(ex, "复制代码片段时发生错误，ID: {SnippetId}", id);
             return StatusCode(500, new { message = "复制代码片段时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 获取代码片段的版本历史 (便捷接口)
+    /// </summary>
+    /// <param name="id">代码片段ID</param>
+    /// <returns>版本历史列表</returns>
+    [HttpGet("{id:guid}/versions")]
+    public async Task<ActionResult<IEnumerable<SnippetVersionDto>>> GetSnippetVersions(Guid id)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "代码片段ID不能为空" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized(new { message = "用户未登录" });
+            }
+
+            // 首先检查代码片段是否存在以及用户是否有权限访问
+            var snippet = await _codeSnippetService.GetSnippetAsync(id, currentUserId);
+            if (snippet == null)
+            {
+                return NotFound(new { message = "代码片段不存在或无权限访问" });
+            }
+
+            var versions = await _versionManagementService.GetVersionHistoryAsync(id);
+
+            _logger.LogInformation("获取代码片段 {SnippetId} 的版本历史成功", id);
+            return Ok(versions);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户无权限访问代码片段版本历史 {SnippetId}: {Message}", id, ex.Message);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "获取代码片段版本历史时发生错误，ID: {SnippetId}", id);
+            return StatusCode(500, new { message = "获取版本历史时发生内部错误" });
         }
     }
 

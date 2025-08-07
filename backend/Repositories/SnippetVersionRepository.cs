@@ -82,6 +82,21 @@ public class SnippetVersionRepository : ISnippetVersionRepository
     }
 
     /// <summary>
+    /// 在事务中创建新版本
+    /// </summary>
+    public async Task<SnippetVersion> CreateWithTransactionAsync(SnippetVersion version, IDbTransaction transaction)
+    {
+        const string sql = @"
+            INSERT INTO SnippetVersions (Id, SnippetId, VersionNumber, Title, Description, Code, Language, 
+                                       CreatedBy, CreatedAt, ChangeDescription)
+            VALUES (@Id, @SnippetId, @VersionNumber, @Title, @Description, @Code, @Language, 
+                    @CreatedBy, @CreatedAt, @ChangeDescription)";
+
+        await transaction.Connection!.ExecuteAsync(sql, version, transaction);
+        return version;
+    }
+
+    /// <summary>
     /// 获取下一个版本号
     /// </summary>
     public async Task<int> GetNextVersionNumberAsync(Guid snippetId)

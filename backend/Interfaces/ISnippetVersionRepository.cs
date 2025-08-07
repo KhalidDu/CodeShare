@@ -48,4 +48,12 @@ public interface ISnippetVersionRepository
     /// <param name="snippetId">代码片段ID</param>
     /// <returns>是否成功</returns>
     Task<bool> DeleteBySnippetIdAsync(Guid snippetId);
+
+    /// <summary>
+    /// 在事务中创建新版本
+    /// </summary>
+    /// <param name="version">版本实体</param>
+    /// <param name="transaction">数据库事务</param>
+    /// <returns>创建的版本</returns>
+    Task<SnippetVersion> CreateWithTransactionAsync(SnippetVersion version, System.Data.IDbTransaction transaction);
 }

@@ -12,15 +12,18 @@ public class CodeSnippetService : ICodeSnippetService
     private readonly ICodeSnippetRepository _repository;
     private readonly IPermissionService _permissionService;
     private readonly ITagRepository _tagRepository;
+    private readonly IVersionManagementService _versionManagementService;
 
     public CodeSnippetService(
         ICodeSnippetRepository repository,
         IPermissionService permissionService,
-        ITagRepository tagRepository)
+        ITagRepository tagRepository,
+        IVersionManagementService versionManagementService)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _tagRepository = tagRepository ?? throw new ArgumentNullException(nameof(tagRepository));
+        _versionManagementService = versionManagementService ?? throw new ArgumentNullException(nameof(versionManagementService));
     }
 
     /// <summary>
@@ -127,6 +130,9 @@ public class CodeSnippetService : ICodeSnippetService
 
         var created = await _repository.CreateAsync(entity);
 
+        // 创建初始版本
+        await _versionManagementService.CreateInitialVersionAsync(created.Id);
+
         // 处理标签
         if (snippet.Tags.Any())
         {
@@ -159,19 +165,53 @@ public class CodeSnippetService : ICodeSnippetService
             throw new UnauthorizedAccessException("用户没有编辑此代码片段的权限");
         }
 
-        // 更新基本信息
-        if (!string.IsNullOrEmpty(snippet.Title))
+        // 检查是否有实质性变更，如果有则创建版本
+        bool hasContentChanges = false;
+        var changeDescriptions = new List<string>();
+
+        if (!string.IsNullOrEmpty(snippet.Title) && existing.Title != snippet.Title)
+        {
+            changeDescriptions.Add($"标题从 '{existing.Title}' 更改为 '{snippet.Title}'");
             existing.Title = snippet.Title;
-        if (!string.IsNullOrEmpty(snippet.Description))
+            hasContentChanges = true;
+        }
+
+        if (!string.IsNullOrEmpty(snippet.Description) && existing.Description != snippet.Description)
+        {
+            changeDescriptions.Add("描述已更新");
             existing.Description = snippet.Description;
-        if (!string.IsNullOrEmpty(snippet.Code))
+            hasContentChanges = true;
+        }
+
+        if (!string.IsNullOrEmpty(snippet.Code) && existing.Code != snippet.Code)
+        {
+            changeDescriptions.Add("代码内容已更新");
             existing.Code = snippet.Code;
-        if (!string.IsNullOrEmpty(snippet.Language))
+            hasContentChanges = true;
+        }
+
+        if (!string.IsNullOrEmpty(snippet.Language) && existing.Language != snippet.Language)
+        {
+            changeDescriptions.Add($"语言从 '{existing.Language}' 更改为 '{snippet.Language}'");
             existing.Language = snippet.Language;
-        if (snippet.IsPublic.HasValue)
+            hasContentChanges = true;
+        }
+
+        if (snippet.IsPublic.HasValue && existing.IsPublic != snippet.IsPublic.Value)
+        {
+            changeDescriptions.Add($"可见性更改为 {(snippet.IsPublic.Value ? "公开" : "私有")}");
             existing.IsPublic = snippet.IsPublic.Value;
+            hasContentChanges = true;
+        }
 
         existing.UpdatedAt = DateTime.UtcNow;
+
+        // 如果有内容变更，先创建版本再更新
+        if (hasContentChanges)
+        {
+            var changeDescription = string.Join("; ", changeDescriptions);
+            await _versionManagementService.CreateVersionAsync(id, changeDescription);
+        }
 
         var updated = await _repository.UpdateAsync(existing);
 
