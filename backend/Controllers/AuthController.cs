@@ -181,4 +181,49 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { message = "获取用户信息时发生内部错误" });
         }
     }
+
+    /// <summary>
+    /// 修改密码
+    /// </summary>
+    /// <param name="changePasswordDto">修改密码请求</param>
+    /// <returns>操作结果</returns>
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized(new { message = "无效的用户信息" });
+            }
+
+            var result = await _authService.ChangePasswordAsync(userGuid, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            if (result)
+            {
+                _logger.LogInformation("用户 {UserId} 修改密码成功", userId);
+                return Ok(new { message = "密码修改成功" });
+            }
+            else
+            {
+                return BadRequest(new { message = "修改密码失败" });
+            }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户修改密码失败: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "修改密码时发生错误");
+            return StatusCode(500, new { message = "修改密码时发生内部错误" });
+        }
+    }
 }

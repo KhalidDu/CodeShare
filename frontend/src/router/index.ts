@@ -70,6 +70,21 @@ const router = createRouter({
       name: 'editor-test',
       component: () => import('../views/EditorTestView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/users',
+      name: 'user-management',
+      component: () => import('../views/UserManagementView.vue'),
+      meta: {
+        requiresAuth: true,
+        requiredRoles: [UserRole.Admin]
+      }
+    },
+    {
+      path: '/settings',
+      name: 'user-settings',
+      component: () => import('../views/UserSettingsView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

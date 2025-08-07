@@ -78,6 +78,19 @@ public class UserService : IUserService
         return users.Select(MapToDto);
     }
 
+    public async Task<bool> ResetPasswordAsync(Guid id, string newPassword)
+    {
+        var user = await _repository.GetByIdAsync(id);
+        if (user == null)
+            return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.UpdateAsync(user);
+        return true;
+    }
+
     private static UserDto MapToDto(User user)
     {
         return new UserDto

@@ -60,6 +60,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // 更新用户信息
+  function updateUser(updatedUser: User) {
+    user.value = updatedUser
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+  }
+
   // 初始化状态
   initialize()
 
@@ -76,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    initialize
+    initialize,
+    updateUser
   }
 })

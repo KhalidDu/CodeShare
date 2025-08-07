@@ -39,6 +39,10 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.getToken()
   }
+
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    await api.post('/auth/change-password', data)
+  }
 }
 
 export const authService = new AuthService()

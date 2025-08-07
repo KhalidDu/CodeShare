@@ -27,3 +27,14 @@ public class UpdateUserDto
     public UserRole? Role { get; set; }
     public bool? IsActive { get; set; }
 }
+
+public class ResetPasswordDto
+{
+    public string NewPassword { get; set; } = string.Empty;
+}
+
+public class ChangePasswordDto
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+}

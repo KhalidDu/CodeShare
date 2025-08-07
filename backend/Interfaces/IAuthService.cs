@@ -11,4 +11,5 @@ public interface IAuthService
     Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
     Task<bool> LogoutAsync(string token);
     Task<UserDto> RegisterAsync(RegisterDto registerDto);
+    Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
 }
