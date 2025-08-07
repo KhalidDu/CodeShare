@@ -87,15 +87,45 @@
           </div>
         </div>
 
-        <!-- 代码查看器 -->
-        <div class="snippet-code">
-          <h3>代码</h3>
-          <CodeViewer
-            :code="snippet.code"
-            :language="snippet.language"
-            :height="codeViewerHeight"
-            @copy="onCodeCopy"
-          />
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+          <!-- 标签页导航 -->
+          <div class="tab-navigation">
+            <button 
+              @click="activeTab = 'code'"
+              :class="{ active: activeTab === 'code' }"
+              class="tab-button"
+            >
+              代码
+            </button>
+            <button 
+              @click="activeTab = 'history'"
+              :class="{ active: activeTab === 'history' }"
+              class="tab-button"
+            >
+              版本历史
+            </button>
+          </div>
+
+          <!-- 代码查看器 -->
+          <div v-show="activeTab === 'code'" class="tab-content">
+            <CodeViewer
+              :code="displayCode"
+              :language="displayLanguage"
+              :height="codeViewerHeight"
+              @copy="onCodeCopy"
+            />
+          </div>
+
+          <!-- 版本历史 -->
+          <div v-show="activeTab === 'history'" class="tab-content">
+            <VersionHistory
+              :snippet-id="snippetId"
+              :current-version-number="currentVersionNumber"
+              @version-restored="onVersionRestored"
+              @version-selected="onVersionSelected"
+            />
+          </div>
         </div>
 
         <!-- 统计信息 -->
@@ -130,9 +160,10 @@ import { useRoute, useRouter } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import CodeViewer from '@/components/editor/CodeViewer.vue'
+import VersionHistory from '@/components/snippets/VersionHistory.vue'
 import { codeSnippetService } from '@/services/codeSnippetService'
 import { useAuthStore } from '@/stores/auth'
-import type { CodeSnippet, SupportedLanguage } from '@/types'
+import type { CodeSnippet, SupportedLanguage, SnippetVersion } from '@/types'
 
 // 路由和认证
 const route = useRoute()
@@ -145,6 +176,9 @@ const loading = ref(false)
 const error = ref('')
 const copying = ref(false)
 const codeViewerHeight = ref('500px')
+const activeTab = ref<'code' | 'history'>('code')
+const selectedVersion = ref<SnippetVersion | null>(null)
+const currentVersionNumber = ref<number>(1)
 
 // 支持的编程语言
 const supportedLanguages: SupportedLanguage[] = [
@@ -194,6 +228,14 @@ const breadcrumbItems = computed(() => [
   { title: '代码片段', path: '/snippets' },
   { title: snippet.value?.title || '详情', path: '' }
 ])
+
+const displayCode = computed(() => {
+  return selectedVersion.value?.code || snippet.value?.code || ''
+})
+
+const displayLanguage = computed(() => {
+  return selectedVersion.value?.language || snippet.value?.language || 'text'
+})
 
 /**
  * 获取语言显示标签
@@ -294,7 +336,7 @@ const copySnippet = async () => {
 /**
  * 代码复制处理（来自 CodeViewer 组件）
  */
-const onCodeCopy = async (code: string) => {
+const onCodeCopy = async () => {
   try {
     // 记录复制统计
     await codeSnippetService.copySnippet(snippetId.value)
@@ -308,6 +350,28 @@ const onCodeCopy = async (code: string) => {
   } catch (err) {
     console.error('Failed to record copy:', err)
   }
+}
+
+/**
+ * 版本恢复处理
+ */
+const onVersionRestored = async (version: SnippetVersion) => {
+  // 重新加载代码片段以获取最新数据
+  await loadSnippet()
+  
+  // 切换回代码标签页
+  activeTab.value = 'code'
+  selectedVersion.value = null
+  
+  console.log(`版本 ${version.versionNumber} 已恢复`)
+}
+
+/**
+ * 版本选择处理
+ */
+const onVersionSelected = (version: SnippetVersion) => {
+  selectedVersion.value = version
+  console.log(`已选择版本 ${version.versionNumber}`)
 }
 
 // 生命周期
@@ -424,11 +488,50 @@ onMounted(() => {
 }
 
 .snippet-description,
-.snippet-tags,
-.snippet-code {
+.snippet-tags {
   background: #fff;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
+  padding: 20px;
+}
+
+.main-content {
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tab-navigation {
+  display: flex;
+  border-bottom: 1px solid #e1e5e9;
+  background: #f6f8fa;
+}
+
+.tab-button {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: #656d76;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+  color: #24292f;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.tab-button.active {
+  color: #0969da;
+  background: #fff;
+  border-bottom-color: #0969da;
+}
+
+.tab-content {
   padding: 20px;
 }
 
@@ -565,9 +668,17 @@ onMounted(() => {
   }
 
   .snippet-description,
-  .snippet-tags,
-  .snippet-code {
+  .snippet-tags {
     padding: 16px;
+  }
+
+  .tab-content {
+    padding: 16px;
+  }
+
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }
 </style>

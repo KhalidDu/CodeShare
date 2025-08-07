@@ -54,6 +54,12 @@ const router = createRouter({
       }
     },
     {
+      path: '/snippets/:snippetId/compare',
+      name: 'version-compare',
+      component: () => import('../views/VersionCompareView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/editor-test',
       name: 'editor-test',
       component: () => import('../views/EditorTestView.vue'),

@@ -106,6 +106,34 @@ export interface SnippetFilter {
   pageSize: number
 }
 
+// 版本相关类型
+export interface SnippetVersion {
+  id: string
+  snippetId: string
+  versionNumber: number
+  title: string
+  description: string
+  code: string
+  language: string
+  createdBy: string
+  creatorName: string
+  createdAt: string
+  changeDescription: string
+}
+
+export interface VersionComparison {
+  oldVersion: SnippetVersion
+  newVersion: SnippetVersion
+  differences: VersionDifference[]
+}
+
+export interface VersionDifference {
+  type: 'added' | 'removed' | 'modified'
+  lineNumber: number
+  oldContent?: string
+  newContent?: string
+}
+
 // 编辑器相关类型
 export interface SupportedLanguage {
   value: string
