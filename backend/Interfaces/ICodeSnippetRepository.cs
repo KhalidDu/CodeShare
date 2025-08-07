@@ -9,10 +9,16 @@ namespace CodeSnippetManager.Api.Interfaces;
 public interface ICodeSnippetRepository
 {
     Task<CodeSnippet?> GetByIdAsync(Guid id);
+    Task<CodeSnippet?> GetByIdWithTagsAsync(Guid id);
     Task<PaginatedResult<CodeSnippet>> GetPagedAsync(SnippetFilter filter);
     Task<CodeSnippet> CreateAsync(CodeSnippet snippet);
     Task<CodeSnippet> UpdateAsync(CodeSnippet snippet);
     Task<bool> DeleteAsync(Guid id);
     Task<IEnumerable<CodeSnippet>> GetByUserIdAsync(Guid userId);
     Task<IEnumerable<CodeSnippet>> GetByTagAsync(string tag);
+    Task<bool> AddTagToSnippetAsync(Guid snippetId, Guid tagId);
+    Task<bool> RemoveTagFromSnippetAsync(Guid snippetId, Guid tagId);
+    Task<bool> UpdateSnippetTagsAsync(Guid snippetId, IEnumerable<Guid> tagIds);
+    Task<bool> IncrementViewCountAsync(Guid id);
+    Task<bool> IncrementCopyCountAsync(Guid id);
 }

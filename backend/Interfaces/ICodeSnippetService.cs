@@ -7,9 +7,12 @@ namespace CodeSnippetManager.Api.Interfaces;
 /// </summary>
 public interface ICodeSnippetService
 {
-    Task<PaginatedResult<CodeSnippetDto>> GetSnippetsAsync(SnippetFilterDto filter);
-    Task<CodeSnippetDto?> GetSnippetAsync(Guid id);
-    Task<CodeSnippetDto> CreateSnippetAsync(CreateSnippetDto snippet);
-    Task<CodeSnippetDto> UpdateSnippetAsync(Guid id, UpdateSnippetDto snippet);
-    Task<bool> DeleteSnippetAsync(Guid id);
+    Task<PaginatedResult<CodeSnippetDto>> GetSnippetsAsync(SnippetFilterDto filter, Guid? currentUserId = null);
+    Task<CodeSnippetDto?> GetSnippetAsync(Guid id, Guid? currentUserId = null);
+    Task<CodeSnippetDto> CreateSnippetAsync(CreateSnippetDto snippet, Guid currentUserId);
+    Task<CodeSnippetDto> UpdateSnippetAsync(Guid id, UpdateSnippetDto snippet, Guid currentUserId);
+    Task<bool> DeleteSnippetAsync(Guid id, Guid currentUserId);
+    Task<IEnumerable<CodeSnippetDto>> GetUserSnippetsAsync(Guid userId, Guid? currentUserId = null);
+    Task<bool> IncrementViewCountAsync(Guid id, Guid? currentUserId = null);
+    Task<bool> IncrementCopyCountAsync(Guid id, Guid? currentUserId = null);
 }

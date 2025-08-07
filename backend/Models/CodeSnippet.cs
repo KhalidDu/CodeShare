@@ -16,4 +16,8 @@ public class CodeSnippet
     public bool IsPublic { get; set; }
     public int ViewCount { get; set; }
     public int CopyCount { get; set; }
+    
+    // 导航属性 - 用于 Multi-mapping 查询结果
+    public string CreatorName { get; set; } = string.Empty;
+    public List<Tag> Tags { get; set; } = new();
 }
