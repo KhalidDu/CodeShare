@@ -1,4 +1,5 @@
 using CodeSnippetManager.Api.Extensions;
+using CodeSnippetManager.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ app.UseHttpsRedirection();
 
 // 使用 CORS
 app.UseCors("AllowFrontend");
+
+// 使用JWT中间件
+app.UseMiddleware<JwtMiddleware>();
 
 // 使用认证和授权
 app.UseAuthentication();

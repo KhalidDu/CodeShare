@@ -67,8 +67,9 @@ async function handleLogin() {
   try {
     await authStore.login(form.value)
     router.push('/')
-  } catch (err: any) {
-    error.value = err.response?.data?.message || '登录失败，请检查用户名和密码'
+  } catch (err: unknown) {
+    const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+    error.value = errorMessage || '登录失败，请检查用户名和密码'
   } finally {
     isLoading.value = false
   }

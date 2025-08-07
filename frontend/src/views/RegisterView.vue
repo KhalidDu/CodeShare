@@ -37,6 +37,17 @@
           />
         </div>
 
+        <div class="form-group">
+          <label for="confirmPassword">确认密码</label>
+          <input
+            id="confirmPassword"
+            v-model="form.confirmPassword"
+            type="password"
+            required
+            :disabled="isLoading"
+          />
+        </div>
+
         <button type="submit" class="btn btn-primary" :disabled="isLoading">
           {{ isLoading ? '注册中...' : '注册' }}
         </button>
@@ -68,7 +79,8 @@ const authStore = useAuthStore()
 const form = ref({
   username: '',
   email: '',
-  password: ''
+  password: '',
+  confirmPassword: ''
 })
 
 const error = ref('')
@@ -80,6 +92,18 @@ async function handleRegister() {
 
   error.value = ''
   success.value = ''
+
+  // 客户端验证
+  if (form.value.password !== form.value.confirmPassword) {
+    error.value = '密码和确认密码不匹配'
+    return
+  }
+
+  if (form.value.password.length < 6) {
+    error.value = '密码长度至少为6个字符'
+    return
+  }
+
   isLoading.value = true
 
   try {
@@ -88,8 +112,9 @@ async function handleRegister() {
     setTimeout(() => {
       router.push('/login')
     }, 2000)
-  } catch (err: any) {
-    error.value = err.response?.data?.message || '注册失败，请重试'
+  } catch (err: unknown) {
+    const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+    error.value = errorMessage || '注册失败，请重试'
   } finally {
     isLoading.value = false
   }

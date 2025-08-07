@@ -10,7 +10,6 @@
 
 - [x] 2. 数据库设计和 Dapper 实体模型实现
 
-
   - 创建 Dapper POCO 实体类 (User, CodeSnippet, SnippetVersion, Tag, SnippetTag, ClipboardHistory)
   - 实现 IDbConnectionFactory 接口和 MySQL 连接工厂，注册为单例服务
   - 创建数据库表结构 SQL 脚本并初始化数据库
@@ -24,7 +23,8 @@
   - 验证依赖注入配置的正确性和对象生命周期管理
   - _需求: 技术约束 - 面向接口编程和容器管理_
 
-- [ ] 3. 用户认证和权限管理系统
+- [x] 3. 用户认证和权限管理系统
+
 
   - 定义 IAuthService 和 IPermissionService 接口，实现面向接口编程
   - 实现 JWT Token 认证机制和中间件，通过 DI 容器注入依赖

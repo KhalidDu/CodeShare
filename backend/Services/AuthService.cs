@@ -47,7 +47,7 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
+    public Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
     {
         // TODO: Implement refresh token validation
         throw new NotImplementedException("Refresh token functionality will be implemented in later tasks");
@@ -56,8 +56,8 @@ public class AuthService : IAuthService
     public async Task<bool> LogoutAsync(string token)
     {
         // TODO: Implement token blacklisting
-        await Task.CompletedTask;
-        return true;
+        // 当前实现只是简单返回成功，实际应该实现Token黑名单功能
+        return await Task.FromResult(true);
     }
 
     public async Task<UserDto> RegisterAsync(RegisterDto registerDto)
