@@ -1,75 +1,162 @@
 <template>
-  <div class="login-container">
-    <div class="login-form">
-      <h2>登录</h2>
+  <AuthForm
+    title="欢迎回来"
+    subtitle="登录您的账户以继续使用代码片段管理工具"
+    submit-text="登录"
+    loading-text="登录中..."
+    :is-loading="isLoading"
+    :is-form-valid="isFormValid"
+    :error="error"
+    @submit="handleLogin"
+  >
+    <template #fields>
+      <FormField
+        id="username"
+        label="用户名"
+        type="text"
+        v-model="form.username"
+        placeholder="请输入用户名"
+        icon="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
+        autocomplete="username"
+        required
+        :disabled="isLoading"
+        :error-message="fieldErrors.username"
+      />
 
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="username">用户名</label>
+      <FormField
+        id="password"
+        label="密码"
+        type="password"
+        v-model="form.password"
+        placeholder="请输入密码"
+        icon="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"
+        autocomplete="current-password"
+        required
+        :disabled="isLoading"
+        :error-message="fieldErrors.password"
+      />
+
+      <!-- 记住我选项 -->
+      <div class="login-options">
+        <label class="checkbox-label">
           <input
-            id="username"
-            v-model="form.username"
-            type="text"
-            required
+            type="checkbox"
+            v-model="form.rememberMe"
             :disabled="isLoading"
+            class="checkbox-input"
           />
-        </div>
+          <span class="checkbox-custom"></span>
+          <span class="checkbox-text">记住我</span>
+        </label>
 
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            required
-            :disabled="isLoading"
-          />
-        </div>
-
-        <button type="submit" class="btn btn-primary" :disabled="isLoading">
-          {{ isLoading ? '登录中...' : '登录' }}
-        </button>
-      </form>
-
-      <div class="form-footer">
-        <p>还没有账户？ <router-link to="/register">立即注册</router-link></p>
+        <router-link to="/forgot-password" class="forgot-link">
+          忘记密码？
+        </router-link>
       </div>
+    </template>
 
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
-    </div>
-  </div>
+    <template #footer>
+      <p class="footer-text">
+        还没有账户？
+        <router-link to="/register" class="footer-link">立即注册</router-link>
+      </p>
+    </template>
+  </AuthForm>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import AuthForm from '@/components/auth/AuthForm.vue'
+import FormField from '@/components/auth/FormField.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
+// 表单数据
 const form = ref({
   username: '',
-  password: ''
+  password: '',
+  rememberMe: false
 })
 
+// 状态管理
 const error = ref('')
 const isLoading = ref(false)
+const fieldErrors = ref<Record<string, string>>({})
 
+// 计算属性
+const isFormValid = computed(() => {
+  return form.value.username.trim() !== '' &&
+         form.value.password.trim() !== '' &&
+         Object.keys(fieldErrors.value).length === 0
+})
+
+/**
+ * 验证表单字段
+ */
+function validateForm() {
+  const errors: Record<string, string> = {}
+
+  // 验证用户名
+  if (!form.value.username.trim()) {
+    errors.username = '请输入用户名'
+  } else if (form.value.username.length < 3) {
+    errors.username = '用户名至少需要3个字符'
+  }
+
+  // 验证密码
+  if (!form.value.password.trim()) {
+    errors.password = '请输入密码'
+  } else if (form.value.password.length < 6) {
+    errors.password = '密码至少需要6个字符'
+  }
+
+  fieldErrors.value = errors
+  return Object.keys(errors).length === 0
+}
+
+/**
+ * 处理登录
+ */
 async function handleLogin() {
   if (isLoading.value) return
 
+  // 清除之前的错误
   error.value = ''
+  fieldErrors.value = {}
+
+  // 验证表单
+  if (!validateForm()) {
+    return
+  }
+
   isLoading.value = true
 
   try {
-    await authStore.login(form.value)
+    await authStore.login({
+      username: form.value.username,
+      password: form.value.password
+    })
+
+    // 登录成功，重定向到首页
     router.push('/')
-  } catch (err: unknown) {
-    const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-    error.value = errorMessage || '登录失败，请检查用户名和密码'
+  } catch (err: any) {
+    console.error('登录失败:', err)
+
+    // 处理不同类型的错误
+    if (err.response?.status === 401) {
+      error.value = '用户名或密码错误'
+    } else if (err.response?.status === 429) {
+      error.value = '登录尝试过于频繁，请稍后再试'
+    } else if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else if (err.message) {
+      error.value = err.message
+    } else {
+      error.value = '登录失败，请检查网络连接后重试'
+    }
   } finally {
     isLoading.value = false
   }
@@ -77,91 +164,129 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-.login-container {
+/* 登录选项样式 */
+.login-options {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
+  gap: 1rem;
 }
 
-.login-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.btn {
-  width: 100%;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 0.875rem;
+  color: #374151;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: #0056b3;
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
 }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.checkbox-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 10px;
+  height: 10px;
+  background-color: #3b82f6;
+  border-radius: 2px;
+  transition: transform 0.2s ease;
 }
 
-.form-footer {
-  text-align: center;
-  margin-top: 1rem;
+.checkbox-input:checked + .checkbox-custom {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
 }
 
-.form-footer a {
-  color: #007bff;
+.checkbox-input:checked + .checkbox-custom::after {
+  transform: translate(-50%, -50%) scale(1);
+  background-color: white;
+}
+
+.checkbox-input:focus + .checkbox-custom {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.checkbox-text {
+  user-select: none;
+}
+
+.forgot-link {
+  color: #3b82f6;
   text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.3s ease;
 }
 
-.form-footer a:hover {
+.forgot-link:hover {
+  color: #2563eb;
   text-decoration: underline;
 }
 
-.error-message {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
+/* 底部链接样式 */
+.footer-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.footer-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .login-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+/* 无障碍性增强 */
+@media (prefers-reduced-motion: reduce) {
+  .checkbox-custom,
+  .checkbox-custom::after,
+  .forgot-link,
+  .footer-link {
+    transition: none;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .checkbox-custom {
+    border-width: 2px;
+  }
+
+  .checkbox-input:checked + .checkbox-custom {
+    border-width: 2px;
+  }
 }
 </style>

@@ -1,106 +1,133 @@
 <template>
   <div id="app">
-    <nav v-if="isAuthenticated" class="navbar">
-      <div class="nav-brand">
-        <router-link to="/">代码片段管理</router-link>
-      </div>
-
-      <div class="nav-links">
-        <router-link to="/">首页</router-link>
-        <router-link to="/snippets">代码片段</router-link>
-        <router-link to="/snippets/create">创建片段</router-link>
-      </div>
-
-      <div class="nav-user">
-        <span v-if="user">{{ user.username }}</span>
-        <button @click="handleLogout" class="logout-btn">登出</button>
-      </div>
-    </nav>
-
-    <main class="main-content">
+    <!-- 未认证用户显示简单布局 -->
+    <template v-if="!isAuthenticated">
       <RouterView />
-    </main>
+    </template>
+
+    <!-- 已认证用户显示完整布局 -->
+    <template v-else>
+      <AppLayout>
+        <RouterView />
+      </AppLayout>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import AppLayout from '@/components/layout/AppLayout.vue'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
-const user = computed(() => authStore.user)
-
-async function handleLogout() {
-  await authStore.logout()
-  router.push('/login')
-}
 </script>
 
-<style scoped>
+<style>
+/* 全局样式重置 */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
 #app {
   min-height: 100vh;
-  background-color: #f8f9fa;
 }
 
-.navbar {
-  background-color: #343a40;
-  color: white;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nav-brand a {
-  color: white;
+/* 链接样式 */
+a {
+  color: #007bff;
   text-decoration: none;
-  font-size: 1.25rem;
-  font-weight: bold;
 }
 
-.nav-links {
-  display: flex;
-  gap: 1rem;
+a:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
+/* 按钮基础样式 */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* 表单元素样式 */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
   border-radius: 4px;
-  transition: background-color 0.3s;
 }
 
-.nav-links a:hover,
-.nav-links a.router-link-active {
-  background-color: #495057;
-}
-
-.nav-user {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.logout-btn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
   border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-.logout-btn:hover {
-  background-color: #c82333;
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
-.main-content {
-  min-height: calc(100vh - 80px);
+/* 无障碍性增强 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  body {
+    background-color: white;
+    color: black;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  body {
+    background-color: white;
+    color: black;
+  }
+
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
 }
 </style>

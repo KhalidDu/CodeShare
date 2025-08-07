@@ -98,6 +98,10 @@ export interface SnippetFilter {
   search?: string
   language?: string
   tag?: string
+  creator?: string
+  showPublic?: boolean
+  showPrivate?: boolean
+  sortBy?: string
   page: number
   pageSize: number
 }
