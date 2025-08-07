@@ -2,21 +2,21 @@
 
 - [x] 1. 项目初始化和基础架构搭建
 
-
   - 创建 .NET 8 Web API 项目结构，配置基础中间件和依赖注入容器
   - 创建 Vue 3 前端项目，配置 Vite、Vue Router、Pinia 和 Axios
   - 配置 MySQL 数据库连接和 Dapper ORM，实现三层架构基础结构
   - 设计和定义所有核心接口，遵循面向接口编程原则
   - _需求: 技术约束_
 
-- [ ] 2. 数据库设计和 Dapper 实体模型实现
+- [x] 2. 数据库设计和 Dapper 实体模型实现
+
 
   - 创建 Dapper POCO 实体类 (User, CodeSnippet, SnippetVersion, Tag, SnippetTag, ClipboardHistory)
   - 实现 IDbConnectionFactory 接口和 MySQL 连接工厂，注册为单例服务
   - 创建数据库表结构 SQL 脚本并初始化数据库
   - _需求: 1.1, 2.1, 3.1, 4.1, 6.1, 7.1_
 
-- [ ] 2.1 依赖注入容器配置和接口注册
+- [x] 2.1 依赖注入容器配置和接口注册
 
   - 配置 .NET DI 容器，注册所有接口和实现类的映射关系
   - 设置不同服务的生命周期 (Singleton, Scoped, Transient)
