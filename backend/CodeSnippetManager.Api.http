@@ -1,6 +1,71 @@
-@CodeSnippetManager.Api_HostAddress = http://localhost:5274
+@CodeSnippetManager.Api_HostAddress = http://localhost:5000
+@token = your_jwt_token_here
 
-GET {{CodeSnippetManager.Api_HostAddress}}/weatherforecast/
+### 用户认证
+POST {{CodeSnippetManager.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+### 获取代码片段列表
+GET {{CodeSnippetManager.Api_HostAddress}}/api/codesnippets
+Authorization: Bearer {{token}}
 Accept: application/json
 
-###
+### 创建代码片段
+POST {{CodeSnippetManager.Api_HostAddress}}/api/codesnippets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "测试代码片段",
+  "description": "这是一个测试用的代码片段",
+  "code": "console.log('Hello World');",
+  "language": "javascript",
+  "isPublic": true,
+  "tags": ["test", "javascript"]
+}
+
+### 获取特定代码片段
+GET {{CodeSnippetManager.Api_HostAddress}}/api/codesnippets/{{snippetId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 版本管理 API 测试
+
+### 获取代码片段的版本历史
+GET {{CodeSnippetManager.Api_HostAddress}}/api/versions/snippet/{{snippetId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 获取特定版本详情
+GET {{CodeSnippetManager.Api_HostAddress}}/api/versions/{{versionId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 手动创建版本
+POST {{CodeSnippetManager.Api_HostAddress}}/api/versions/snippet/{{snippetId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "changeDescription": "重要功能更新"
+}
+
+### 恢复到指定版本
+POST {{CodeSnippetManager.Api_HostAddress}}/api/versions/snippet/{{snippetId}}/restore/{{versionId}}
+Authorization: Bearer {{token}}
+
+### 比较两个版本
+GET {{CodeSnippetManager.Api_HostAddress}}/api/versions/compare/{{fromVersionId}}/{{toVersionId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 示例变量 (替换为实际值)
+# @snippetId = 12345678-1234-1234-1234-123456789012
+# @versionId = 87654321-4321-4321-4321-210987654321
+# @fromVersionId = 11111111-1111-1111-1111-111111111111
+# @toVersionId = 22222222-2222-2222-2222-222222222222
