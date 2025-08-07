@@ -174,3 +174,21 @@ export interface EditorEvents {
   'language-change': (language: string) => void
   'theme-change': (theme: string) => void
 }
+
+// 剪贴板历史相关类型
+export interface ClipboardHistoryItem {
+  id: string
+  userId: string
+  snippetId: string
+  snippetTitle: string
+  snippetCode: string
+  snippetLanguage: string
+  copiedAt: string
+}
+
+export interface ClipboardHistoryFilter {
+  page: number
+  pageSize: number
+  startDate?: string
+  endDate?: string
+}

@@ -60,6 +60,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/clipboard/history',
+      name: 'clipboard-history',
+      component: () => import('../views/ClipboardHistoryView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/editor-test',
       name: 'editor-test',
       component: () => import('../views/EditorTestView.vue'),

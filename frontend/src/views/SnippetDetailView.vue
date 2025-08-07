@@ -56,13 +56,15 @@
             >
               编辑
             </button>
-            <button
-              @click="copySnippet"
-              class="btn btn-primary"
-              :disabled="copying"
-            >
-              {{ copying ? '复制中...' : '复制代码' }}
-            </button>
+            <CopyButton
+              v-if="snippet"
+              :text="displayCode"
+              :snippet-id="snippet.id"
+              :custom-text="'复制代码'"
+              button-class="btn btn-primary"
+              @copy-success="onCopySuccess"
+              @copy-error="onCopyError"
+            />
           </div>
         </div>
 
@@ -161,8 +163,10 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import CodeViewer from '@/components/editor/CodeViewer.vue'
 import VersionHistory from '@/components/snippets/VersionHistory.vue'
+import CopyButton from '@/components/common/CopyButton.vue'
 import { codeSnippetService } from '@/services/codeSnippetService'
 import { useAuthStore } from '@/stores/auth'
+import { useCopy } from '@/composables/useCopy'
 import type { CodeSnippet, SupportedLanguage, SnippetVersion } from '@/types'
 
 // 路由和认证
@@ -170,11 +174,13 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
+// 复制功能
+const { copyCodeSnippet } = useCopy()
+
 // 响应式数据
 const snippet = ref<CodeSnippet | null>(null)
 const loading = ref(false)
 const error = ref('')
-const copying = ref(false)
 const codeViewerHeight = ref('500px')
 const activeTab = ref<'code' | 'history'>('code')
 const selectedVersion = ref<SnippetVersion | null>(null)
@@ -289,66 +295,35 @@ const editSnippet = () => {
 }
 
 /**
- * 复制代码片段
+ * 复制成功处理
  */
-const copySnippet = async () => {
-  if (!snippet.value || copying.value) return
-
-  copying.value = true
-
-  try {
-    // 调用复制 API 记录统计
-    await codeSnippetService.copySnippet(snippetId.value)
-
-    // 复制到剪贴板
-    await navigator.clipboard.writeText(snippet.value.code)
-
-    // 更新本地复制次数
+const onCopySuccess = () => {
+  // 更新本地复制次数
+  if (snippet.value) {
     snippet.value.copyCount += 1
-
-    // 显示成功提示
-    console.log('代码已复制到剪贴板')
-
-  } catch (err) {
-    console.error('Failed to copy snippet:', err)
-
-    // 降级处理：尝试选择文本
-    try {
-      const textArea = document.createElement('textarea')
-      textArea.value = snippet.value.code
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textArea)
-
-      // 仍然记录统计
-      await codeSnippetService.copySnippet(snippetId.value)
-      snippet.value.copyCount += 1
-
-    } catch (fallbackErr) {
-      console.error('Fallback copy also failed:', fallbackErr)
-    }
-  } finally {
-    copying.value = false
   }
+}
+
+/**
+ * 复制失败处理
+ */
+const onCopyError = (error: Error) => {
+  console.error('Copy failed:', error)
 }
 
 /**
  * 代码复制处理（来自 CodeViewer 组件）
  */
 const onCodeCopy = async () => {
-  try {
-    // 记录复制统计
-    await codeSnippetService.copySnippet(snippetId.value)
-
-    // 更新本地复制次数
-    if (snippet.value) {
-      snippet.value.copyCount += 1
-    }
-
-    console.log('代码已复制到剪贴板')
-  } catch (err) {
-    console.error('Failed to record copy:', err)
+  // 使用统一的复制功能
+  const success = await copyCodeSnippet(
+    displayCode.value,
+    displayLanguage.value,
+    snippet.value?.id
+  )
+  
+  if (success && snippet.value) {
+    snippet.value.copyCount += 1
   }
 }
 
