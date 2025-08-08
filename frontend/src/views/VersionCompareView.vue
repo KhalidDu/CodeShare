@@ -80,7 +80,6 @@ const loadComparison = async () => {
 
   try {
     comparison.value = await codeSnippetService.compareVersions(
-      snippetId.value,
       oldVersionId.value,
       newVersionId.value
     )

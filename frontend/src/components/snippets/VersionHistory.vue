@@ -3,13 +3,13 @@
     <div class="version-history-header">
       <h3>版本历史</h3>
       <div v-if="selectedVersions.length === 2" class="compare-actions">
-        <button 
+        <button
           @click="compareVersions"
           class="btn btn-primary btn-sm"
         >
           快速比较
         </button>
-        <button 
+        <button
           @click="compareVersionsFullscreen"
           class="btn btn-secondary btn-sm"
         >
@@ -33,20 +33,20 @@
     </div>
 
     <div v-else class="version-list">
-      <div 
-        v-for="version in versions" 
+      <div
+        v-for="version in versions"
         :key="version.id"
         class="version-item"
-        :class="{ 
+        :class="{
           'selected': selectedVersions.includes(version.id),
           'current': version.versionNumber === currentVersionNumber
         }"
       >
         <div class="version-header">
           <div class="version-info">
-            <input 
+            <input
               v-if="version.versionNumber !== currentVersionNumber"
-              type="checkbox" 
+              type="checkbox"
               :value="version.id"
               v-model="selectedVersions"
               :disabled="selectedVersions.length >= 2 && !selectedVersions.includes(version.id)"
@@ -65,14 +65,14 @@
             </div>
           </div>
           <div class="version-actions">
-            <button 
+            <button
               @click="viewVersion(version)"
               class="btn btn-outline btn-sm"
               title="查看此版本"
             >
               查看
             </button>
-            <button 
+            <button
               v-if="version.versionNumber !== currentVersionNumber && canRestore"
               @click="restoreVersion(version)"
               class="btn btn-secondary btn-sm"
@@ -111,7 +111,7 @@
           <button @click="closeCompareModal" class="btn-close">&times;</button>
         </div>
         <div class="modal-body">
-          <VersionComparison 
+          <VersionComparison
             v-if="comparisonData"
             :comparison="comparisonData"
             @close="closeCompareModal"
@@ -227,8 +227,7 @@ const compareVersions = async () => {
     })
 
     comparisonData.value = await codeSnippetService.compareVersions(
-      props.snippetId, 
-      oldVersionId, 
+      oldVersionId,
       newVersionId
     )
     showCompareModal.value = true

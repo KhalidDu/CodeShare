@@ -43,6 +43,34 @@ export class AuthService {
   async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
     await api.post('/auth/change-password', data)
   }
+
+  /**
+   * 刷新访问令牌
+   * @param refreshToken 刷新令牌
+   * @returns 新的认证响应
+   */
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/refresh', refreshToken)
+
+    // 更新本地存储
+    localStorage.setItem('token', response.data.token)
+    localStorage.setItem('user', JSON.stringify(response.data.user))
+
+    return response.data
+  }
+
+  /**
+   * 获取当前用户信息（从服务器）
+   * @returns 当前用户信息
+   */
+  async getCurrentUserFromServer(): Promise<User> {
+    const response = await api.get<User>('/auth/me')
+
+    // 更新本地存储
+    localStorage.setItem('user', JSON.stringify(response.data))
+
+    return response.data
+  }
 }
 
 export const authService = new AuthService()

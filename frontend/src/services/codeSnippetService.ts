@@ -42,27 +42,32 @@ export class CodeSnippetService {
 
   // 版本管理相关方法
   async getVersionHistory(snippetId: string): Promise<SnippetVersion[]> {
-    const response = await api.get<SnippetVersion[]>(`/codesnippets/${snippetId}/versions`)
+    const response = await api.get<SnippetVersion[]>(`/versions/snippet/${snippetId}`)
     return response.data
   }
 
-  async getVersion(snippetId: string, versionId: string): Promise<SnippetVersion> {
-    const response = await api.get<SnippetVersion>(`/codesnippets/${snippetId}/versions/${versionId}`)
+  async getVersion(versionId: string): Promise<SnippetVersion> {
+    const response = await api.get<SnippetVersion>(`/versions/${versionId}`)
     return response.data
   }
 
-  async restoreVersion(snippetId: string, versionId: string): Promise<CodeSnippet> {
-    const response = await api.post<CodeSnippet>(`/codesnippets/${snippetId}/versions/${versionId}/restore`)
+  async restoreVersion(snippetId: string, versionId: string): Promise<void> {
+    await api.post(`/versions/snippet/${snippetId}/restore/${versionId}`)
+  }
+
+  async compareVersions(fromVersionId: string, toVersionId: string): Promise<VersionComparison> {
+    const response = await api.get<VersionComparison>(`/versions/compare/${fromVersionId}/${toVersionId}`)
     return response.data
   }
 
-  async compareVersions(snippetId: string, oldVersionId: string, newVersionId: string): Promise<VersionComparison> {
-    const response = await api.get<VersionComparison>(`/codesnippets/${snippetId}/versions/compare`, {
-      params: {
-        oldVersionId,
-        newVersionId
-      }
-    })
+  /**
+   * 创建新版本
+   * @param snippetId 代码片段ID
+   * @param request 创建版本请求
+   * @returns 创建的版本
+   */
+  async createVersion(snippetId: string, request: { changeDescription?: string }): Promise<SnippetVersion> {
+    const response = await api.post<SnippetVersion>(`/versions/snippet/${snippetId}`, request)
     return response.data
   }
 }
