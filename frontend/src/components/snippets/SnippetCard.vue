@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group relative bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50 hover:border-slate-300/60 hover:-translate-y-1"
+    class="group relative glass rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-soft-lg hover:border-slate-300/60 hover:-translate-y-1 animate-fade-in"
     :class="{
       'opacity-70 pointer-events-none': isLoading,
       'ring-2 ring-blue-400 bg-blue-50/50': isSelected
@@ -35,7 +35,7 @@
           </div>
 
           <!-- 语言标签 -->
-          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+          <span class="tag-default">
             {{ snippet.language }}
           </span>
         </div>
@@ -44,7 +44,7 @@
         <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-4">
           <button
             @click.stop="handleCopy"
-            class="w-8 h-8 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 rounded-lg transition-all duration-200 flex items-center justify-center"
+            class="btn-ghost w-8 h-8 p-0 hover:bg-blue-100 hover:text-blue-600"
             :disabled="isLoading"
             title="复制代码"
           >
@@ -56,7 +56,7 @@
           <button
             v-if="canEdit"
             @click.stop="handleEdit"
-            class="w-8 h-8 bg-slate-100 hover:bg-yellow-100 text-slate-600 hover:text-yellow-600 rounded-lg transition-all duration-200 flex items-center justify-center"
+            class="btn-ghost w-8 h-8 p-0 hover:bg-yellow-100 hover:text-yellow-600"
             :disabled="isLoading"
             title="编辑代码片段"
           >
@@ -68,7 +68,7 @@
           <button
             v-if="canDelete"
             @click.stop="handleDelete"
-            class="w-8 h-8 bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 rounded-lg transition-all duration-200 flex items-center justify-center"
+            class="btn-ghost w-8 h-8 p-0 hover:bg-red-100 hover:text-red-600"
             :disabled="isLoading"
             title="删除代码片段"
           >
@@ -89,19 +89,19 @@
 
     <!-- 代码预览 -->
     <div class="px-6 pb-4">
-      <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 relative overflow-hidden">
+      <div class="code-block relative overflow-hidden">
         <div class="absolute top-3 right-3 flex items-center gap-1">
           <div class="w-2 h-2 bg-red-400 rounded-full"></div>
           <div class="w-2 h-2 bg-yellow-400 rounded-full"></div>
           <div class="w-2 h-2 bg-green-400 rounded-full"></div>
         </div>
 
-        <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-hidden mt-4"><code>{{ codePreview }}</code></pre>
+        <pre class="text-xs leading-relaxed overflow-hidden mt-4 scrollbar-thin"><code>{{ codePreview }}</code></pre>
 
         <div v-if="isCodeTruncated" class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-800 to-transparent flex items-end justify-center pb-2">
           <button
             @click.stop="toggleCodeExpansion"
-            class="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200 bg-slate-800/80 px-2 py-1 rounded"
+            class="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200 bg-slate-800/80 px-2 py-1 rounded hover:bg-slate-700/80"
           >
             {{ isCodeExpanded ? '收起' : '展开更多' }}
           </button>
@@ -115,10 +115,10 @@
       <div class="flex flex-wrap gap-2 mb-4">
         <span
           v-if="!snippet.code?.trim()"
-          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+          class="tag-warning"
           title="无内容"
         >
-          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
           </svg>
           无内容
@@ -127,7 +127,7 @@
         <span
           v-for="tag in snippet.tags?.slice(0, 3)"
           :key="tag.id"
-          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer transition-colors duration-200"
+          class="tag-default cursor-pointer transition-colors duration-200"
           :title="tag.name"
           @click.stop="handleTagClick(tag)"
         >
@@ -136,7 +136,7 @@
 
         <span
           v-if="snippet.tags && snippet.tags.length > 3"
-          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500"
+          class="tag bg-slate-100 text-slate-500"
           :title="`还有 ${snippet.tags.length - 3} 个标签`"
         >
           +{{ snippet.tags.length - 3 }}
@@ -383,19 +383,5 @@ function handleTagClick(tag: Tag) {
 </script>
 
 <style scoped>
-/* 文本截断样式 */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* 无障碍性增强 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
-}
+/* 组件特定样式 */
 </style>
