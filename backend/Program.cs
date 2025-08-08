@@ -24,6 +24,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// 使用响应压缩
+app.UseResponseCompression();
+
+// 使用响应缓存
+app.UseResponseCaching();
+
 // 使用 CORS
 app.UseCors("AllowFrontend");
 

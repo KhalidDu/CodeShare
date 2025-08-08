@@ -151,6 +151,63 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// 注册缓存服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configuration">配置</param>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddCacheServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // 注册内存缓存
+        services.AddMemoryCache(options =>
+        {
+            options.SizeLimit = 1000; // 设置缓存项数量限制
+        });
+
+        // 注册缓存服务接口和实现
+        services.AddScoped<ICacheService, MemoryCacheService>();
+
+        // 可选：注册 Redis 缓存（如果配置了 Redis）
+        var redisConnectionString = configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrEmpty(redisConnectionString))
+        {
+            // 这里可以添加 Redis 缓存实现
+            // services.AddStackExchangeRedisCache(options =>
+            // {
+            //     options.Configuration = redisConnectionString;
+            // });
+        }
+
+        return services;
+    }
+
+    /// <summary>
+    /// 注册性能优化服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configuration">配置</param>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddPerformanceServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // 配置响应缓存
+        services.AddResponseCaching(options =>
+        {
+            options.MaximumBodySize = 1024 * 1024; // 1MB
+            options.UseCaseSensitivePaths = false;
+        });
+
+        // 配置响应压缩
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+            options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+        });
+
+        return services;
+    }
+
+    /// <summary>
     /// 添加所有应用程序服务
     /// </summary>
     /// <param name="services">服务集合</param>
@@ -163,6 +220,8 @@ public static class ServiceCollectionExtensions
             ?? "Server=localhost;Database=CodeSnippetManager;Uid=root;Pwd=password;";
 
         // 注册各层服务
+        services.AddCacheServices(configuration);
+        services.AddPerformanceServices(configuration);
         services.AddDataAccessServices(connectionString);
         services.AddBusinessServices();
         services.AddJwtAuthentication(configuration);

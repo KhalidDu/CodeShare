@@ -100,7 +100,28 @@
       </div>
 
       <!-- 代码片段网格/列表 -->
-      <div :class="['snippets-list', `view-${viewMode}`]">
+      <div v-if="useVirtualScroll && snippets.length > 50" class="virtual-scroll-container">
+        <VirtualList
+          :items="snippets"
+          :item-height="viewMode === 'grid' ? 280 : 120"
+          :container-height="600"
+          :buffer="5"
+          key-field="id"
+        >
+          <template #default="{ item: snippet }">
+            <div class="virtual-snippet-item">
+              <SnippetCard
+                :snippet="snippet"
+                :is-loading="isLoading"
+                @copy="handleSnippetCopy"
+                @delete="handleSnippetDelete"
+                @tag-click="handleTagClick"
+              />
+            </div>
+          </template>
+        </VirtualList>
+      </div>
+      <div v-else :class="['snippets-list', `view-${viewMode}`]">
         <SnippetCard
           v-for="snippet in snippets"
           :key="snippet.id"
@@ -144,11 +165,13 @@ import { useAuthStore } from '@/stores/auth'
 import { useCodeSnippetsStore } from '@/stores/codeSnippets'
 import { useUserFeedback } from '@/composables/useUserFeedback'
 import { useLoading } from '@/composables/useLoading'
+import { usePerformance } from '@/composables/usePerformance'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SearchFilter from '@/components/snippets/SearchFilter.vue'
 import SnippetCard from '@/components/snippets/SnippetCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
+import VirtualList from '@/components/common/VirtualList.vue'
 import type { CodeSnippet, Tag } from '@/types'
 import { UserRole } from '@/types'
 
@@ -158,9 +181,11 @@ const authStore = useAuthStore()
 const snippetsStore = useCodeSnippetsStore()
 const { showActionSuccess, showActionError, showConfirm } = useUserFeedback()
 const { withLoading } = useLoading('加载代码片段中...')
+const { mark, measure } = usePerformance()
 
 // 响应式状态
 const viewMode = ref<'grid' | 'list'>('grid')
+const useVirtualScroll = ref(true)
 const currentFilters = ref({
   search: '',
   language: '',
@@ -255,6 +280,8 @@ function initializeFiltersFromQuery() {
  * 加载代码片段
  */
 const loadSnippets = withLoading(async () => {
+  mark('snippets-load-start')
+
   await snippetsStore.fetchSnippets({
     page: parseInt((route.query.page as string) || '1'),
     pageSize: parseInt((route.query.pageSize as string) || '20'),
@@ -266,6 +293,10 @@ const loadSnippets = withLoading(async () => {
     showPrivate: currentFilters.value.showPrivate,
     sortBy: currentFilters.value.sortBy
   })
+
+  mark('snippets-load-end')
+  const loadTime = measure('snippets-load-time', 'snippets-load-start', 'snippets-load-end')
+  console.log(`代码片段加载时间: ${loadTime.toFixed(2)}ms`)
 })
 
 /**
@@ -628,6 +659,23 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
 
 .snippets-list.view-list {
   grid-template-columns: 1fr;
+}
+
+/* 虚拟滚动容器 */
+.virtual-scroll-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.virtual-snippet-item {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.virtual-snippet-item:last-child {
+  border-bottom: none;
 }
 
 /* 加载更多 */
