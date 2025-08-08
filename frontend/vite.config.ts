@@ -17,6 +17,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    port: 6677,
+    strictPort: true,
+    host: true
+  },
   build: {
     // 代码分割优化
     rollupOptions: {

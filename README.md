@@ -94,7 +94,7 @@ dotnet restore
 dotnet run
 ```
 
-后端将在 `http://localhost:5000` 启动，Swagger 文档在 `http://localhost:5000/swagger`
+后端将在 `http://localhost:6676` 启动，Swagger 文档在 `http://localhost:6676/swagger`
 
 ### 4. 前端设置
 
@@ -113,7 +113,7 @@ npm install
 npm run dev
 ```
 
-前端将在 `http://localhost:5173` 启动
+前端将在 `http://localhost:6677` 启动
 
 ### 5. 默认账户
 
@@ -159,7 +159,7 @@ npm run dev
 
 ## API 文档
 
-启动后端后，访问 `http://localhost:5000/swagger` 查看完整的 API 文档。
+启动后端后，访问 `http://localhost:6676/swagger` 查看完整的 API 文档。
 
 ## 许可证
 

@@ -1,4 +1,4 @@
-@CodeSnippetManager.Api_HostAddress = http://localhost:5000
+@CodeSnippetManager.Api_HostAddress = http://localhost:6676
 @token = your_jwt_token_here
 
 ### 用户认证

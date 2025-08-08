@@ -3,7 +3,7 @@ import type { ApiErrorResponse } from '@/types/error'
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:6676/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'

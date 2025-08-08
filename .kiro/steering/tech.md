@@ -113,12 +113,12 @@ mysql -u root -p CodeSnippetManager < database/init.sql
 ```
 
 ## 开发端口
-- **后端 API**：http://localhost:5000
-- **Swagger UI**：http://localhost:5000/swagger
-- **前端开发**：http://localhost:5173
+- **后端 API**：http://localhost:6676
+- **Swagger UI**：http://localhost:6676/swagger
+- **前端开发**：http://localhost:6677
 - **MySQL**：localhost:3306
 
 ## 环境配置
 - **后端**：appsettings.json / appsettings.Development.json
 - **前端**：通过 Vite 的环境变量
-- **CORS**：配置为允许 localhost:5173 和 localhost:3000
+- **CORS**：配置为允许 localhost:6677 和 localhost:3000
