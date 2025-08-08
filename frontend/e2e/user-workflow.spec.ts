@@ -118,7 +118,7 @@ export function useApi(url) {
 
       // Clear filters
       await page.click('button:has-text("清除筛选")')
-      await expect(page.locator('.snippet-card').count()).toBeGreaterThan(1)
+      expect(page.locator('.snippet-card').count()).toBeGreaterThan(1)
     })
 
     test('snippet editing workflow', async ({ page }) => {
@@ -177,7 +177,7 @@ export function useApi(url) {
       await expect(page).toHaveURL('/snippets')
 
       // Snippet should no longer exist
-      await expect(page.locator('text=Updated React Hook Example')).not.toBeVisible()
+      await expect(page.locator('text=Updated React Hook Example')).toBeHidden()
     })
   })
 
@@ -218,7 +218,7 @@ export function useApi(url) {
       await page.click('button:has-text("确认删除")')
 
       // Tag should be removed
-      await expect(page.locator('.tag-item:has-text("frontend-dev")')).not.toBeVisible()
+      await expect(page.locator('.tag-item:has-text("frontend-dev")')).toBeHidden()
     })
   })
 

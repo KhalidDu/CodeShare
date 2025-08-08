@@ -45,8 +45,8 @@ test.describe('Security Features E2E Tests', () => {
       await page.blur('input[placeholder="用户名"]')
 
       // Should be trimmed
-      const usernameValue = await page.inputValue('input[placeholder="用户名"]')
-      expect(usernameValue).toBe('testuser')
+      const usernameValue = page
+      await expect(usernameValue).toHaveValue('input[placeholder="用户名"]', 'testuser')
     })
 
     test('implements rate limiting', async ({ page }) => {
@@ -202,8 +202,8 @@ test.describe('Security Features E2E Tests', () => {
       await page.blur('input[placeholder="代码片段标题"]')
 
       // HTML tags should be removed
-      const titleValue = await page.inputValue('input[placeholder="代码片段标题"]')
-      expect(titleValue).toBe('Bold Title')
+      const titleValue = page
+      await expect(titleValue).toHaveValue('input[placeholder="代码片段标题"]', 'Bold Title')
     })
 
     test('preserves code content integrity', async ({ page }) => {
@@ -224,8 +224,8 @@ test.describe('Security Features E2E Tests', () => {
       await codeEditor.fill(htmlCode)
 
       // Code content should remain unchanged
-      const codeValue = await codeEditor.inputValue()
-      expect(codeValue).toBe(htmlCode)
+      const codeValue = codeEditor
+      await expect(codeValue).toHaveValue(htmlCode)
     })
   })
 

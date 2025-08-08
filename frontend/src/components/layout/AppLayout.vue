@@ -1,45 +1,58 @@
 <template>
-  <div class="app-layout" :class="{ 'sidebar-collapsed': isSidebarCollapsed }">
+  <div
+    class="h-screen flex flex-col bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-slate-800 dark:text-slate-200 relative"
+    :class="{ 'sidebar-collapsed': isSidebarCollapsed }"
+  >
     <!-- 应用头部 -->
-    <AppHeader />
+    <AppHeader @toggle-mobile-menu="isMobileMenuOpen = !isMobileMenuOpen" />
 
     <!-- 主要内容区域 -->
-    <div class="layout-main">
+    <div class="flex-1 flex overflow-hidden">
       <!-- 侧边栏 -->
       <AppSidebar
         v-if="showSidebar"
-        :class="{ show: isMobileMenuOpen }"
+        :class="{
+          'show': isMobileMenuOpen,
+          'collapsed': isSidebarCollapsed
+        }"
         @toggle-collapse="handleSidebarToggle"
       />
 
       <!-- 内容区域 -->
-      <div class="layout-content" :class="{ 'full-width': !showSidebar }">
+      <div
+        class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
+        :class="{
+          'ml-0': !showSidebar || isMobileMenuOpen,
+          'ml-72': showSidebar && !isSidebarCollapsed && !isMobileMenuOpen,
+          'ml-16': showSidebar && isSidebarCollapsed && !isMobileMenuOpen
+        }"
+      >
         <!-- 面包屑导航 -->
-        <div class="content-header" v-if="showBreadcrumb">
-          <div class="container">
-            <Breadcrumb :items="breadcrumbItems" :show-home="showHomeBreadcrumb" />
-          </div>
+        <div
+          v-if="showBreadcrumb"
+          class="bg-white dark:bg-gray-900 backdrop-blur-xl border-b border-slate-300 dark:border-gray-700 px-6 py-3 shadow-sm"
+        >
+          <Breadcrumb :items="breadcrumbItems" :show-home="showHomeBreadcrumb" />
         </div>
 
         <!-- 页面内容 -->
-        <main class="main-content">
-          <div class="container">
-            <!-- 页面标题 -->
-            <PageTitle
-              v-if="pageTitle"
-              :title="pageTitle"
-              :subtitle="pageSubtitle"
-              :icon="pageIcon"
-            >
-              <template #actions v-if="$slots.pageActions">
-                <slot name="pageActions"></slot>
-              </template>
-            </PageTitle>
+        <main class="flex-1 overflow-y-auto scrollbar-thin p-6">
+          <!-- 页面标题 -->
+          <PageTitle
+            v-if="pageTitle"
+            :title="pageTitle"
+            :subtitle="pageSubtitle"
+            :icon="pageIcon"
+            class="mb-6"
+          >
+            <template #actions v-if="$slots.pageActions">
+              <slot name="pageActions"></slot>
+            </template>
+          </PageTitle>
 
-            <!-- 主要内容插槽 -->
-            <div class="page-content">
-              <slot></slot>
-            </div>
+          <!-- 主要内容插槽 -->
+          <div class="space-y-6">
+            <slot></slot>
           </div>
         </main>
       </div>
@@ -50,8 +63,8 @@
 
     <!-- 移动端遮罩层 -->
     <div
-      class="mobile-overlay"
       v-if="isMobileMenuOpen"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
       @click="closeMobileMenu"
     ></div>
   </div>
@@ -148,159 +161,28 @@ if (typeof window !== 'undefined') {
 </script>
 
 <style scoped>
-.app-layout {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  position: relative;
-}
-
-/* 主要内容区域 */
-.layout-main {
-  display: flex;
-  flex: 1;
-  position: relative;
-}
-
-/* 内容区域 */
-.layout-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin-left: 280px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: calc(100vh - 64px);
-}
-
-.layout-content.full-width {
-  margin-left: 0;
-}
-
-.app-layout.sidebar-collapsed .layout-content {
-  margin-left: 64px;
-}
-
-/* 内容头部 */
-.content-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  position: sticky;
-  top: 64px;
-  z-index: 998;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-/* 主要内容 */
-.main-content {
-  flex: 1;
-  padding: 1.5rem 0;
-  position: relative;
-}
-
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-.page-content {
-  padding-bottom: 2rem;
-  position: relative;
-}
-
-/* 移动端遮罩层 */
-.mobile-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  display: none;
-}
-
 /* 响应式设计 */
 @media (max-width: 1024px) {
-  .layout-content {
-    margin-left: 0;
-  }
-
-  .app-layout.sidebar-collapsed .layout-content {
-    margin-left: 0;
-  }
-
-  .mobile-overlay {
-    display: block;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 0.75rem;
-  }
-
-  .content-header {
-    top: 56px;
-  }
-
-  .page-content {
-    padding-bottom: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 0.5rem;
-  }
-
-  .page-content {
-    padding-bottom: 1rem;
-  }
-}
-
-/* 打印样式 */
-@media print {
-  .app-layout {
-    background-color: white;
-  }
-
-  .layout-content {
-    margin-left: 0;
-  }
-
-  .content-header {
-    position: static;
-    border-bottom: 1px solid #000;
-  }
-
-  .main-content {
-    padding: 0;
-  }
-
-  .container {
-    max-width: none;
-    padding: 0;
+  .flex-1 {
+    margin-left: 0 !important;
   }
 }
 
 /* 无障碍性增强 */
 @media (prefers-reduced-motion: reduce) {
-  .layout-content {
-    transition: none;
+  .transition-all {
+    transition: none !important;
   }
 }
 
 /* 高对比度模式支持 */
 @media (prefers-contrast: high) {
-  .app-layout {
-    background-color: white;
+  .bg-gradient-to-br {
+    background: white !important;
   }
 
-  .content-header {
-    border-bottom-width: 2px;
+  .dark .bg-gradient-to-br {
+    background: black !important;
   }
 }
 </style>

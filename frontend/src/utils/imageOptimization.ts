@@ -105,7 +105,7 @@ function calculateNewDimensions(
   maxWidth: number,
   maxHeight: number
 ): { width: number; height: number } {
-  let { width, height } = { width: originalWidth, height: originalHeight }
+  const { width, height } = { width: originalWidth, height: originalHeight }
 
   // 如果图片尺寸小于最大限制，保持原尺寸
   if (width <= maxWidth && height <= maxHeight) {

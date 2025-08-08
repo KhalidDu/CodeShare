@@ -181,7 +181,7 @@ const passwordStrength = computed(() => {
   }
 
   let score = 0
-  let feedback = []
+  const feedback = []
 
   // 长度检查
   if (password.length >= 8) score += 1

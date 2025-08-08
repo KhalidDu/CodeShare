@@ -4,6 +4,10 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+// 引入 Tailwind CSS 样式
+import '@/assets/styles/tailwind.css'
+// 引入 FontAwesome 图标
+import '@fortawesome/fontawesome-free/css/all.css'
 // 引入设计系统样式
 import '@/assets/styles/design-system.css'
 

@@ -1,101 +1,147 @@
 <template>
-  <header class="app-header">
-    <div class="header-container">
-      <!-- 品牌标识 -->
-      <div class="header-brand">
-        <router-link to="/" class="brand-link">
-          <svg class="brand-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-          </svg>
-          <span class="brand-text">代码片段管理</span>
-        </router-link>
-      </div>
-
-      <!-- 主导航菜单 -->
-      <nav class="header-nav" v-if="isAuthenticated">
-        <ul class="nav-list">
-          <li class="nav-item">
-            <router-link to="/" class="nav-link">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-              </svg>
-              首页
-            </router-link>
-          </li>
-          <li class="nav-item">
-            <router-link to="/snippets" class="nav-link">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-              </svg>
-              代码片段
-            </router-link>
-          </li>
-          <li class="nav-item" v-if="canCreateSnippet">
-            <router-link to="/snippets/create" class="nav-link">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-              </svg>
-              创建片段
-            </router-link>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- 用户信息和操作 -->
-      <div class="header-user" v-if="isAuthenticated">
-        <div class="user-info">
-          <div class="user-avatar">
-            {{ userInitials }}
-          </div>
-          <div class="user-details">
-            <span class="user-name">{{ user?.username }}</span>
-            <span class="user-role">{{ userRoleText }}</span>
-          </div>
-        </div>
-
-        <div class="user-actions">
-          <button @click="handleLogout" class="logout-btn" title="登出">
-            <svg class="logout-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- 移动端菜单按钮 -->
-      <button
-        class="mobile-menu-btn"
-        @click="toggleMobileMenu"
-        v-if="isAuthenticated"
-        :class="{ active: isMobileMenuOpen }"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+  <header class="h-14 md:h-16 bg-white dark:bg-gray-900 backdrop-blur-xl border-b border-slate-300 dark:border-gray-700 flex items-center px-4 md:px-6 gap-4 md:gap-6 shadow-sm dark:shadow-lg">
+    <!-- 品牌标识 -->
+    <div class="flex-none">
+      <router-link to="/" class="text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200">
+        <i class="fas fa-code text-xl md:text-2xl"></i>
+        <span class="hidden sm:inline">CodeSnippet</span>
+      </router-link>
     </div>
 
-    <!-- 移动端导航菜单 -->
-    <nav class="mobile-nav" v-if="isAuthenticated && isMobileMenuOpen">
-      <ul class="mobile-nav-list">
-        <li class="mobile-nav-item">
-          <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">
-            首页
+    <!-- 主导航菜单 -->
+    <nav class="flex-1 hidden lg:flex justify-center" v-if="isAuthenticated">
+      <ul class="flex items-center gap-1">
+        <li>
+          <router-link
+            to="/"
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200"
+            :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900': $route.path === '/' }"
+          >
+            <i class="fas fa-home"></i>
+            <span>首页</span>
           </router-link>
         </li>
-        <li class="mobile-nav-item">
-          <router-link to="/snippets" class="mobile-nav-link" @click="closeMobileMenu">
-            代码片段
+        <li>
+          <router-link
+            to="/snippets"
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200"
+            :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900': $route.path.startsWith('/snippets') }"
+          >
+            <i class="fas fa-file-code"></i>
+            <span>代码片段</span>
           </router-link>
         </li>
-        <li class="mobile-nav-item" v-if="canCreateSnippet">
-          <router-link to="/snippets/create" class="mobile-nav-link" @click="closeMobileMenu">
-            创建片段
+        <li v-if="canCreateSnippet">
+          <router-link
+            to="/snippets/create"
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200"
+            :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900': $route.path === '/snippets/create' }"
+          >
+            <i class="fas fa-plus"></i>
+            <span>创建片段</span>
           </router-link>
         </li>
       </ul>
     </nav>
+
+    <!-- 用户信息和操作 -->
+    <div class="flex-none flex items-center gap-3" v-if="isAuthenticated">
+      <!-- 用户头像和信息 -->
+      <div class="hidden md:flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+          {{ userInitials }}
+        </div>
+        <div class="hidden lg:block">
+          <div class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ user?.username }}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400">{{ userRoleText }}</div>
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="flex items-center gap-2">
+        <!-- 主题切换按钮 -->
+        <button
+          @click="toggleTheme"
+          class="w-9 h-9 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg transition-all duration-200 flex items-center justify-center"
+          title="切换主题"
+        >
+          <i class="fas fa-moon dark:hidden"></i>
+          <i class="fas fa-sun hidden dark:inline"></i>
+        </button>
+
+        <!-- 登出按钮 -->
+        <button
+          @click="handleLogout"
+          class="w-9 h-9 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-600 dark:text-red-400 rounded-lg transition-all duration-200 flex items-center justify-center"
+          title="登出"
+        >
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+
+      <!-- 移动端菜单按钮 -->
+      <button
+        @click="toggleMobileMenu"
+        class="lg:hidden w-9 h-9 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg transition-all duration-200 flex items-center justify-center"
+        :class="{ 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400': isMobileMenuOpen }"
+      >
+        <i class="fas fa-bars" v-if="!isMobileMenuOpen"></i>
+        <i class="fas fa-times" v-else></i>
+      </button>
+    </div>
+
+    <!-- 未登录状态的登录按钮 -->
+    <div class="flex-none" v-else>
+      <router-link
+        to="/login"
+        class="btn-primary"
+      >
+        登录
+      </router-link>
+    </div>
   </header>
+
+  <!-- 移动端导航菜单 -->
+  <nav
+    v-if="isAuthenticated && isMobileMenuOpen"
+    class="lg:hidden bg-white dark:bg-gray-900 backdrop-blur-xl border-b border-slate-300 dark:border-gray-700 shadow-lg"
+  >
+    <ul class="px-4 py-2 space-y-1">
+      <li>
+        <router-link
+          to="/"
+          @click="closeMobileMenu"
+          class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200"
+          :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900': $route.path === '/' }"
+        >
+          <i class="fas fa-home w-4"></i>
+          <span>首页</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link
+          to="/snippets"
+          @click="closeMobileMenu"
+          class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200"
+          :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900': $route.path.startsWith('/snippets') }"
+        >
+          <i class="fas fa-file-code w-4"></i>
+          <span>代码片段</span>
+        </router-link>
+      </li>
+      <li v-if="canCreateSnippet">
+        <router-link
+          to="/snippets/create"
+          @click="closeMobileMenu"
+          class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200"
+          :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900': $route.path === '/snippets/create' }"
+        >
+          <i class="fas fa-plus w-4"></i>
+          <span>创建片段</span>
+        </router-link>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script setup lang="ts">
@@ -107,6 +153,11 @@ import { UserRole } from '@/types'
 const router = useRouter()
 const authStore = useAuthStore()
 const isMobileMenuOpen = ref(false)
+
+// 定义事件
+const emit = defineEmits<{
+  'toggle-mobile-menu': []
+}>()
 
 // 计算属性
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -162,6 +213,7 @@ async function handleLogout() {
  */
 function toggleMobileMenu() {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
+  emit('toggle-mobile-menu')
 }
 
 /**
@@ -170,315 +222,38 @@ function toggleMobileMenu() {
 function closeMobileMenu() {
   isMobileMenuOpen.value = false
 }
+
+/**
+ * 切换主题
+ */
+function toggleTheme() {
+  const html = document.documentElement
+  if (html.classList.contains('dark')) {
+    html.classList.remove('dark')
+    localStorage.setItem('theme', 'light')
+  } else {
+    html.classList.add('dark')
+    localStorage.setItem('theme', 'dark')
+  }
+}
 </script>
 
 <style scoped>
-.app-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  color: #212529;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.header-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-}
-
-/* 品牌标识 */
-.header-brand {
-  flex-shrink: 0;
-}
-
-.brand-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #007bff;
-  text-decoration: none;
-  font-size: 1.375rem;
-  font-weight: 700;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: -0.025em;
-}
-
-.brand-link:hover {
-  color: #0056b3;
-  transform: translateY(-1px);
-}
-
-.brand-icon {
-  width: 28px;
-  height: 28px;
-  filter: drop-shadow(0 2px 4px rgba(0, 123, 255, 0.2));
-}
-
-.brand-text {
-  white-space: nowrap;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* 主导航 */
-.header-nav {
-  flex: 1;
-  margin: 0 2rem;
-}
-
-.nav-list {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  gap: 0.25rem;
-}
-
-.nav-item {
-  position: relative;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6c757d;
-  text-decoration: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-link::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 86, 179, 0.1) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.nav-link:hover {
-  color: #007bff;
-  background: rgba(0, 123, 255, 0.05);
-  transform: translateY(-1px);
-}
-
-.nav-link:hover::before {
-  opacity: 1;
-}
-
-.nav-link.router-link-active {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-}
-
-.nav-link.router-link-active::before {
-  opacity: 0;
-}
-
-.nav-icon {
-  width: 18px;
-  height: 18px;
-  z-index: 1;
-}
-
-/* 用户信息区域 */
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  background-color: #007bff;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.user-name {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.2;
-}
-
-.user-role {
-  font-size: 0.75rem;
-  color: #adb5bd;
-  line-height: 1.2;
-}
-
-.user-actions {
-  display: flex;
-  align-items: center;
-}
-
-.logout-btn {
-  background: none;
-  border: none;
-  color: white;
-  padding: 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logout-btn:hover {
-  background-color: #dc3545;
-  color: white;
-}
-
-.logout-icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* 移动端菜单按钮 */
-.mobile-menu-btn {
-  display: none;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 24px;
-  height: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.mobile-menu-btn span {
-  width: 100%;
-  height: 2px;
-  background-color: white;
-  transition: all 0.3s ease;
-}
-
-.mobile-menu-btn.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-menu-btn.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
-}
-
-/* 移动端导航 */
-.mobile-nav {
-  display: none;
-  background-color: #495057;
-  border-top: 1px solid #6c757d;
-}
-
-.mobile-nav-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.mobile-nav-item {
-  border-bottom: 1px solid #6c757d;
-}
-
-.mobile-nav-item:last-child {
-  border-bottom: none;
-}
-
-.mobile-nav-link {
-  display: block;
-  color: white;
-  text-decoration: none;
-  padding: 1rem;
-  transition: background-color 0.3s ease;
-}
-
-.mobile-nav-link:hover,
-.mobile-nav-link.router-link-active {
-  background-color: #007bff;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .header-nav {
-    display: none;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-  }
-
-  .mobile-nav {
-    display: block;
-  }
-
-  .user-details {
-    display: none;
-  }
-
-  .header-container {
-    padding: 0 0.75rem;
-  }
-
-  .brand-text {
-    display: none;
+/* 无障碍性增强 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
   }
 }
 
-@media (max-width: 480px) {
-  .header-container {
-    height: 56px;
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .bg-white\/95 {
+    background: white !important;
   }
 
-  .brand-link {
-    font-size: 1.125rem;
-  }
-
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
+  .dark .bg-gray-900\/95 {
+    background: black !important;
   }
 }
 </style>
