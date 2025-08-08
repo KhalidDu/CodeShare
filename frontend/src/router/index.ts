@@ -8,8 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
-      meta: { requiresAuth: true }
+      component: () => import('../views/HomeView.vue')
     },
     {
       path: '/login',
@@ -26,8 +25,7 @@ const router = createRouter({
     {
       path: '/snippets',
       name: 'snippets',
-      component: () => import('../views/SnippetsView.vue'),
-      meta: { requiresAuth: true }
+      component: () => import('../views/SnippetsView.vue')
     },
     {
       path: '/snippets/create',
@@ -41,8 +39,7 @@ const router = createRouter({
     {
       path: '/snippets/:id',
       name: 'snippet-detail',
-      component: () => import('../views/SnippetDetailView.vue'),
-      meta: { requiresAuth: true }
+      component: () => import('../views/SnippetDetailView.vue')
     },
     {
       path: '/snippets/:id/edit',
