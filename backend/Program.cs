@@ -10,6 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// 添加健康检查服务
+builder.Services.AddHealthChecks();
+
 // 使用扩展方法注册所有应用程序服务 - 遵循开闭原则和依赖倒置原则
 builder.Services.AddApplicationServices(builder.Configuration);
 
@@ -53,5 +56,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// 添加健康检查端点
+app.MapHealthChecks("/health");
 
 app.Run();

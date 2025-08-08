@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: codesnippet-config
+  namespace: codesnippet-manager
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  JWT_ISSUER: "https://your-domain.com"
+  JWT_AUDIENCE: "https://your-domain.com"
+  FRONTEND_URL: "https://your-domain.com"
+  ASPNETCORE_URLS: "http://+:5000"

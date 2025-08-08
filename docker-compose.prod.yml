@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # 生产环境 MySQL 配置
+  mysql:
+    image: mysql:8.0
+    container_name: codesnippet-mysql-prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: CodeSnippetManager
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./mysql-prod.cnf:/etc/mysql/conf.d/mysql-prod.cnf:ro
+    networks:
+      - codesnippet-prod-network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+
+  # 生产环境后端 API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codesnippet-backend-prod
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_CONNECTION_STRING=Server=mysql;Database=CodeSnippetManager;Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};CharSet=utf8mb4;SslMode=Required;
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - ASPNETCORE_URLS=http://+:5000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - codesnippet-prod-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # 生产环境前端应用
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: codesnippet-frontend-prod
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - codesnippet-prod-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: codesnippet-nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-prod.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - codesnippet-prod-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_prod_data:
+    driver: local
+
+networks:
+  codesnippet-prod-network:
+    driver: bridge
