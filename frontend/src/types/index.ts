@@ -40,6 +40,24 @@ export interface CreateSnippetRequest {
   tags: string[]
 }
 
+export interface CreateSnippetDto {
+  title: string
+  description: string
+  code: string
+  language: string
+  isPublic: boolean
+  tags: string[]
+}
+
+export interface UpdateSnippetDto {
+  title?: string
+  description?: string
+  code?: string
+  language?: string
+  isPublic?: boolean
+  tags?: string[]
+}
+
 export interface UpdateSnippetRequest {
   title?: string
   description?: string
@@ -61,6 +79,16 @@ export interface Tag {
 export interface CreateTagRequest {
   name: string
   color: string
+}
+
+export interface CreateTagDto {
+  name: string
+  color: string
+}
+
+export interface UpdateTagDto {
+  name?: string
+  color?: string
 }
 
 // 认证相关类型
