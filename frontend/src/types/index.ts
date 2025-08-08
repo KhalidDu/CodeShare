@@ -192,3 +192,6 @@ export interface ClipboardHistoryFilter {
   startDate?: string
   endDate?: string
 }
+
+// 导出错误相关类型
+export * from './error'

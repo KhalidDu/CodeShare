@@ -1,16 +1,36 @@
 <template>
   <div id="app">
-    <!-- 未认证用户显示简单布局 -->
-    <template v-if="!isAuthenticated">
-      <RouterView />
-    </template>
-
-    <!-- 已认证用户显示完整布局 -->
-    <template v-else>
-      <AppLayout>
+    <!-- 错误边界包装整个应用 -->
+    <ErrorBoundary>
+      <!-- 未认证用户显示简单布局 -->
+      <template v-if="!isAuthenticated">
         <RouterView />
-      </AppLayout>
-    </template>
+      </template>
+
+      <!-- 已认证用户显示完整布局 -->
+      <template v-else>
+        <AppLayout>
+          <RouterView />
+        </AppLayout>
+      </template>
+    </ErrorBoundary>
+
+    <!-- 全局错误通知容器 -->
+    <ErrorContainer @retry="handleErrorRetry" />
+
+    <!-- Toast 通知容器 -->
+    <ToastContainer />
+
+    <!-- 全局加载遮罩 -->
+    <LoadingOverlay
+      v-if="loadingStore.isLoading && loadingStore.primaryLoading"
+      :visible="true"
+      :message="loadingStore.primaryLoading.message"
+      :progress="loadingStore.primaryLoading.progress"
+      :show-progress="loadingStore.primaryLoading.progress !== undefined"
+      :cancellable="loadingStore.primaryLoading.cancellable"
+      @cancel="handleLoadingCancel"
+    />
   </div>
 </template>
 
@@ -18,11 +38,66 @@
 import { computed } from 'vue'
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useLoadingStore } from '@/stores/loading'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import ErrorBoundary from '@/components/common/ErrorBoundary.vue'
+import ErrorContainer from '@/components/common/ErrorContainer.vue'
+import ToastContainer from '@/components/common/ToastContainer.vue'
+import LoadingOverlay from '@/components/common/LoadingOverlay.vue'
 
 const authStore = useAuthStore()
+const loadingStore = useLoadingStore()
+const { clearError } = useErrorHandler()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+/**
+ * 处理错误重试
+ */
+function handleErrorRetry(errorId: string, error: any) {
+  console.log('Retrying error:', errorId, error)
+
+  // 根据错误类型执行不同的重试逻辑
+  switch (error.type) {
+    case 'NETWORK':
+      // 网络错误重试 - 可以重新发送请求
+      handleNetworkRetry(error)
+      break
+    case 'AUTHENTICATION':
+      // 认证错误重试 - 尝试刷新 token
+      handleAuthRetry(error)
+      break
+    default:
+      // 其他错误 - 简单清除错误
+      clearError(errorId)
+  }
+}
+
+/**
+ * 处理网络错误重试
+ */
+function handleNetworkRetry(error: any) {
+  // 这里可以实现具体的网络重试逻辑
+  // 例如重新发送失败的请求
+  console.log('Retrying network operation:', error)
+}
+
+/**
+ * 处理认证错误重试
+ */
+function handleAuthRetry(error: any) {
+  // 尝试刷新认证状态
+  authStore.initialize()
+}
+
+/**
+ * 处理加载取消
+ */
+function handleLoadingCancel() {
+  // 清除所有加载状态
+  loadingStore.clearAllLoading()
+}
 </script>
 
 <style>

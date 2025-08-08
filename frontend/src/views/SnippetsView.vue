@@ -28,15 +28,15 @@
       @search="handleSearch"
     />
 
-    <!-- 加载状态 -->
+    <!-- 加载状态 - 使用新的骨架屏组件 -->
     <div v-if="isLoading && snippets.length === 0" class="loading-state">
-      <div class="loading-spinner">
-        <svg class="spinner-icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/>
-          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-        </svg>
-      </div>
-      <p class="loading-text">正在加载代码片段...</p>
+      <SkeletonLoader
+        v-for="i in 6"
+        :key="i"
+        type="card"
+        :animated="true"
+        class="snippet-skeleton"
+      />
     </div>
 
     <!-- 空状态 -->
@@ -142,10 +142,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCodeSnippetsStore } from '@/stores/codeSnippets'
+import { useUserFeedback } from '@/composables/useUserFeedback'
+import { useLoading } from '@/composables/useLoading'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SearchFilter from '@/components/snippets/SearchFilter.vue'
 import SnippetCard from '@/components/snippets/SnippetCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
 import type { CodeSnippet, Tag } from '@/types'
 import { UserRole } from '@/types'
 
@@ -153,6 +156,8 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const snippetsStore = useCodeSnippetsStore()
+const { showActionSuccess, showActionError, showConfirm } = useUserFeedback()
+const { withLoading } = useLoading('加载代码片段中...')
 
 // 响应式状态
 const viewMode = ref<'grid' | 'list'>('grid')
@@ -249,23 +254,19 @@ function initializeFiltersFromQuery() {
 /**
  * 加载代码片段
  */
-async function loadSnippets() {
-  try {
-    await snippetsStore.fetchSnippets({
-      page: parseInt((route.query.page as string) || '1'),
-      pageSize: parseInt((route.query.pageSize as string) || '20'),
-      search: currentFilters.value.search,
-      language: currentFilters.value.language,
-      tag: currentFilters.value.tag,
-      creator: currentFilters.value.creator,
-      showPublic: currentFilters.value.showPublic,
-      showPrivate: currentFilters.value.showPrivate,
-      sortBy: currentFilters.value.sortBy
-    })
-  } catch (error) {
-    console.error('加载代码片段失败:', error)
-  }
-}
+const loadSnippets = withLoading(async () => {
+  await snippetsStore.fetchSnippets({
+    page: parseInt((route.query.page as string) || '1'),
+    pageSize: parseInt((route.query.pageSize as string) || '20'),
+    search: currentFilters.value.search,
+    language: currentFilters.value.language,
+    tag: currentFilters.value.tag,
+    creator: currentFilters.value.creator,
+    showPublic: currentFilters.value.showPublic,
+    showPrivate: currentFilters.value.showPrivate,
+    sortBy: currentFilters.value.sortBy
+  })
+})
 
 /**
  * 处理筛选器变化
@@ -304,22 +305,37 @@ async function handleSnippetCopy(snippet: CodeSnippet) {
   try {
     // 这里可以调用 API 记录复制统计
     console.log('代码片段已复制:', snippet.title)
+    showActionSuccess('复制', `"${snippet.title}" 已复制到剪贴板`)
   } catch (error) {
     console.error('记录复制统计失败:', error)
+    showActionError('复制', '复制失败，请重试')
   }
 }
 
 /**
  * 处理代码片段删除
  */
-async function handleSnippetDelete(snippet: CodeSnippet) {
-  try {
-    await snippetsStore.deleteSnippet(snippet.id)
-    // 重新加载当前页面的数据
-    loadSnippets()
-  } catch (error) {
-    console.error('删除代码片段失败:', error)
-  }
+function handleSnippetDelete(snippet: CodeSnippet) {
+  showConfirm(
+    `确定要删除代码片段 "${snippet.title}" 吗？此操作无法撤销。`,
+    async () => {
+      try {
+        await snippetsStore.deleteSnippet(snippet.id)
+        showActionSuccess('删除', `"${snippet.title}" 已删除`)
+        // 重新加载当前页面的数据
+        await loadSnippets()
+      } catch (error) {
+        console.error('删除代码片段失败:', error)
+        showActionError('删除', '删除失败，请重试')
+      }
+    },
+    undefined,
+    {
+      type: 'error',
+      confirmText: '删除',
+      cancelText: '取消'
+    }
+  )
 }
 
 /**
@@ -404,12 +420,14 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
 
 /* 加载状态 */
 .loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.snippet-skeleton {
+  height: 200px;
 }
 
 .loading-spinner {
