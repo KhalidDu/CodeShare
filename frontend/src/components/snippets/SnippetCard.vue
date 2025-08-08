@@ -1,83 +1,107 @@
 <template>
   <div
-    class="p-4 bg-white dark:bg-gray-700 backdrop-blur-sm border border-slate-200 dark:border-gray-600 rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-slate-300 dark:hover:border-gray-500 hover:shadow-sm group relative"
+    class="group relative bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50 hover:border-slate-300/60 hover:-translate-y-1"
     :class="{
       'opacity-70 pointer-events-none': isLoading,
-      'ring-2 ring-blue-400 dark:ring-blue-500 bg-blue-50 dark:bg-blue-900 border-blue-300 dark:border-blue-600': isSelected
+      'ring-2 ring-blue-400 bg-blue-50/50': isSelected
     }"
-    @click="$emit('select', snippet)"
   >
-    <!-- 标题行 -->
-    <div class="flex items-center justify-between mb-3">
-      <!-- 标题 -->
-      <h3 class="font-medium text-slate-800 dark:text-slate-200 truncate flex-1">
-        <router-link
-          :to="`/snippets/${snippet.id}`"
-          class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-          :class="{
-            'text-slate-500 dark:text-slate-400 italic': !snippet.title?.trim()
-          }"
-        >
-          {{ snippet.title?.trim() || '无标题' }}
-        </router-link>
-      </h3>
+    <!-- 卡片头部 -->
+    <div class="p-6 pb-4">
+      <div class="flex items-start justify-between mb-3">
+        <!-- 标题和语言 -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-3 mb-2">
+            <!-- 语言图标 -->
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-semibold"
+              :style="{ backgroundColor: getLanguageColor(snippet.language) }"
+            >
+              {{ snippet.language.slice(0, 2).toUpperCase() }}
+            </div>
 
-      <!-- 操作按钮 -->
-      <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button
-          @click.stop="handleCopy"
-          class="w-8 h-8 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/50 dark:hover:bg-blue-800/50 text-blue-600 dark:text-blue-400 rounded-lg transition-all duration-200 flex items-center justify-center"
-          :disabled="isLoading"
-          title="复制代码"
-        >
-          <i class="fas fa-copy text-xs"></i>
-        </button>
+            <!-- 标题 -->
+            <h3 class="font-semibold text-slate-900 truncate">
+              <router-link
+                :to="`/snippets/${snippet.id}`"
+                class="hover:text-blue-600 transition-colors duration-200"
+                :class="{
+                  'text-slate-500 italic': !snippet.title?.trim()
+                }"
+              >
+                {{ snippet.title?.trim() || '无标题' }}
+              </router-link>
+            </h3>
+          </div>
 
-        <button
-          v-if="canEdit"
-          @click.stop="handleEdit"
-          class="w-8 h-8 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/50 dark:hover:bg-yellow-800/50 text-yellow-600 dark:text-yellow-400 rounded-lg transition-all duration-200 flex items-center justify-center"
-          :disabled="isLoading"
-          title="编辑代码片段"
-        >
-          <i class="fas fa-edit text-xs"></i>
-        </button>
+          <!-- 语言标签 -->
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+            {{ snippet.language }}
+          </span>
+        </div>
 
-        <button
-          v-if="canDelete"
-          @click.stop="handleDelete"
-          class="w-8 h-8 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-800/50 text-red-600 dark:text-red-400 rounded-lg transition-all duration-200 flex items-center justify-center"
-          :disabled="isLoading"
-          title="删除代码片段"
-        >
-          <i class="fas fa-trash text-xs"></i>
-        </button>
+        <!-- 操作按钮 -->
+        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-4">
+          <button
+            @click.stop="handleCopy"
+            class="w-8 h-8 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 rounded-lg transition-all duration-200 flex items-center justify-center"
+            :disabled="isLoading"
+            title="复制代码"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+          </button>
+
+          <button
+            v-if="canEdit"
+            @click.stop="handleEdit"
+            class="w-8 h-8 bg-slate-100 hover:bg-yellow-100 text-slate-600 hover:text-yellow-600 rounded-lg transition-all duration-200 flex items-center justify-center"
+            :disabled="isLoading"
+            title="编辑代码片段"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </button>
+
+          <button
+            v-if="canDelete"
+            @click.stop="handleDelete"
+            class="w-8 h-8 bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 rounded-lg transition-all duration-200 flex items-center justify-center"
+            :disabled="isLoading"
+            title="删除代码片段"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <!-- 语言标签 -->
-      <span
-        class="text-xs px-2.5 py-1 bg-slate-200/80 dark:bg-gray-600/80 rounded-full text-slate-600 dark:text-slate-300 flex items-center gap-1 flex-shrink-0 font-medium ml-2"
-        :style="{ backgroundColor: getLanguageColor(snippet.language) + '20', color: getLanguageColor(snippet.language) }"
-      >
-        {{ snippet.language }}
-      </span>
-    </div>
-
-    <!-- 描述 -->
-    <div v-if="snippet.description" class="mb-3">
-      <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-        {{ snippet.description }}
-      </p>
+      <!-- 描述 -->
+      <div v-if="snippet.description" class="mb-4">
+        <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+          {{ snippet.description }}
+        </p>
+      </div>
     </div>
 
     <!-- 代码预览 -->
-    <div class="mb-3">
-      <div class="bg-slate-900 dark:bg-gray-800 rounded-lg p-3 relative overflow-hidden">
-        <pre class="text-xs text-slate-300 dark:text-slate-400 font-mono leading-relaxed overflow-hidden"><code>{{ codePreview }}</code></pre>
-        <div v-if="isCodeTruncated" class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-slate-900 dark:from-gray-800 to-transparent flex items-end justify-center">
+    <div class="px-6 pb-4">
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 relative overflow-hidden">
+        <div class="absolute top-3 right-3 flex items-center gap-1">
+          <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+          <div class="w-2 h-2 bg-yellow-400 rounded-full"></div>
+          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+        </div>
+
+        <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-hidden mt-4"><code>{{ codePreview }}</code></pre>
+
+        <div v-if="isCodeTruncated" class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-800 to-transparent flex items-end justify-center pb-2">
           <button
             @click.stop="toggleCodeExpansion"
-            class="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200"
+            class="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200 bg-slate-800/80 px-2 py-1 rounded"
           >
             {{ isCodeExpanded ? '收起' : '展开更多' }}
           </button>
@@ -85,24 +109,25 @@
       </div>
     </div>
 
-    <!-- 标签和时间行 -->
-    <div class="flex items-center justify-between text-xs">
-      <!-- 标签区域 -->
-      <div class="flex flex-wrap gap-1 flex-1 min-w-0 mr-3">
-        <!-- 无内容标记 -->
+    <!-- 卡片底部 -->
+    <div class="px-6 pb-6">
+      <!-- 标签 -->
+      <div class="flex flex-wrap gap-2 mb-4">
         <span
           v-if="!snippet.code?.trim()"
-          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 flex-shrink-0"
+          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
           title="无内容"
         >
-          <i class="fas fa-exclamation-triangle text-xs mr-1"></i>
+          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+          </svg>
           无内容
         </span>
 
         <span
           v-for="tag in snippet.tags?.slice(0, 3)"
           :key="tag.id"
-          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 max-w-20 truncate cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors duration-200"
+          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer transition-colors duration-200"
           :title="tag.name"
           @click.stop="handleTagClick(tag)"
         >
@@ -111,35 +136,49 @@
 
         <span
           v-if="snippet.tags && snippet.tags.length > 3"
-          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-600/50 text-gray-500 dark:text-gray-400 flex-shrink-0"
+          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500"
           :title="`还有 ${snippet.tags.length - 3} 个标签`"
         >
           +{{ snippet.tags.length - 3 }}
         </span>
       </div>
 
-      <!-- 统计和时间信息 -->
-      <div class="flex items-center gap-3 text-slate-500 dark:text-slate-400 flex-shrink-0">
-        <!-- 查看次数 -->
-        <div class="flex items-center gap-1" title="查看次数">
-          <i class="fas fa-eye text-xs"></i>
-          <span>{{ snippet.viewCount || 0 }}</span>
-        </div>
+      <!-- 统计信息 -->
+      <div class="flex items-center justify-between text-xs text-slate-500">
+        <div class="flex items-center gap-4">
+          <!-- 查看次数 -->
+          <div class="flex items-center gap-1" title="查看次数">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span>{{ snippet.viewCount || 0 }}</span>
+          </div>
 
-        <!-- 复制次数 -->
-        <div class="flex items-center gap-1" title="复制次数">
-          <i class="fas fa-copy text-xs"></i>
-          <span>{{ snippet.copyCount || 0 }}</span>
-        </div>
+          <!-- 复制次数 -->
+          <div class="flex items-center gap-1" title="复制次数">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span>{{ snippet.copyCount || 0 }}</span>
+          </div>
 
-        <!-- 可见性 -->
-        <div class="flex items-center gap-1" :title="snippet.isPublic ? '公开' : '私有'">
-          <i :class="snippet.isPublic ? 'fas fa-eye' : 'fas fa-eye-slash'" class="text-xs"></i>
+          <!-- 可见性 -->
+          <div class="flex items-center gap-1" :title="snippet.isPublic ? '公开' : '私有'">
+            <svg v-if="snippet.isPublic" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <svg v-else class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
         </div>
 
         <!-- 更新时间 -->
         <div class="flex items-center gap-1" title="更新时间">
-          <i class="fas fa-clock text-xs"></i>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
           <span>{{ formatDate(snippet.updatedAt || snippet.createdAt) }}</span>
         </div>
       </div>
@@ -166,6 +205,7 @@ import { UserRole } from '@/types'
 
 interface Props {
   snippet: CodeSnippet
+  viewMode?: 'grid' | 'list'
   isLoading?: boolean
   isSelected?: boolean
 }
@@ -178,6 +218,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  viewMode: 'grid',
   isLoading: false,
   isSelected: false
 })
@@ -355,27 +396,6 @@ function handleTagClick(tag: Tag) {
   * {
     transition: none !important;
     animation: none !important;
-  }
-}
-
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-  .bg-white\/70 {
-    background: white !important;
-  }
-
-  .dark .bg-gray-700\/70 {
-    background: black !important;
-  }
-
-  .border-slate-200\/60 {
-    border-color: black !important;
-    border-width: 2px !important;
-  }
-
-  .dark .border-gray-600\/60 {
-    border-color: white !important;
-    border-width: 2px !important;
   }
 }
 </style>

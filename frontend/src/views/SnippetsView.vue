@@ -1,110 +1,220 @@
 <template>
-  <AppLayout
-    page-title="代码片段"
-    page-subtitle="浏览和管理您的代码片段集合"
-    page-icon="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
-  >
-    <template #pageActions>
-      <router-link
-        v-if="canCreateSnippet"
-        to="/snippets/create"
-        class="create-btn"
-      >
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-        </svg>
-        创建片段
-      </router-link>
-    </template>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <!-- 页面头部 -->
+    <div class="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+              </div>
+              <div>
+                <h1 class="text-xl font-semibold text-slate-900">代码片段</h1>
+                <p class="text-sm text-slate-500">管理您的代码片段集合</p>
+              </div>
+            </div>
+          </div>
 
-    <!-- 搜索和筛选 -->
-    <SearchFilter
-      :available-languages="availableLanguages"
-      :available-tags="availableTags"
-      :available-creators="availableCreators"
-      :total-results="totalCount"
-      :initial-filters="currentFilters"
-      @filter-change="handleFilterChange"
-      @search="handleSearch"
-    />
-
-    <!-- 加载状态 - 使用新的骨架屏组件 -->
-    <div v-if="isLoading && snippets.length === 0" class="loading-state">
-      <SkeletonLoader
-        v-for="i in 6"
-        :key="i"
-        type="card"
-        :animated="true"
-        class="snippet-skeleton"
-      />
+          <div class="flex items-center space-x-3">
+            <router-link
+              v-if="canCreateSnippet"
+              to="/snippets/create"
+              class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+              </svg>
+              新建片段
+            </router-link>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-else-if="!isLoading && snippets.length === 0" class="empty-state">
-      <div class="empty-icon">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-        </svg>
+    <!-- 主要内容区域 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- 搜索和筛选区域 -->
+      <div class="mb-8">
+        <div class="bg-white/70 backdrop-blur-xl rounded-2xl border border-slate-200/60 shadow-sm">
+          <div class="p-6">
+            <!-- 搜索栏 -->
+            <div class="relative mb-6">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="搜索代码片段、标签或描述..."
+                class="block w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all duration-200"
+                @input="handleSearchInput"
+                @keyup.enter="handleSearch"
+              />
+            </div>
+
+            <!-- 筛选器 -->
+            <div class="flex flex-wrap items-center gap-4">
+              <!-- 语言筛选 -->
+              <div class="relative">
+                <select
+                  v-model="selectedLanguage"
+                  @change="handleLanguageChange"
+                  class="appearance-none bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg px-4 py-2 pr-10 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">所有语言</option>
+                  <option
+                    v-for="language in availableLanguages"
+                    :key="language.value"
+                    :value="language.value"
+                  >
+                    {{ language.label }} ({{ language.count }})
+                  </option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- 排序 -->
+              <div class="relative">
+                <select
+                  v-model="sortBy"
+                  @change="handleSortChange"
+                  class="appearance-none bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg px-4 py-2 pr-10 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="createdAt_desc">最新创建</option>
+                  <option value="updatedAt_desc">最近更新</option>
+                  <option value="viewCount_desc">最多查看</option>
+                  <option value="copyCount_desc">最多复制</option>
+                  <option value="title_asc">标题 A-Z</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- 视图切换 -->
+              <div class="flex items-center bg-slate-100 rounded-lg p-1">
+                <button
+                  @click="viewMode = 'grid'"
+                  :class="[
+                    'flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200',
+                    viewMode === 'grid'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  ]"
+                  title="网格视图"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3"/>
+                  </svg>
+                </button>
+                <button
+                  @click="viewMode = 'list'"
+                  :class="[
+                    'flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200',
+                    viewMode === 'list'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  ]"
+                  title="列表视图"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- 清除筛选 -->
+              <button
+                v-if="hasActiveFilters"
+                @click="clearAllFilters"
+                class="inline-flex items-center px-3 py-2 text-sm text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all duration-200"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                清除筛选
+              </button>
+            </div>
+
+            <!-- 结果统计 -->
+            <div class="mt-4 flex items-center justify-between text-sm text-slate-600">
+              <span>
+                共找到 <span class="font-medium text-slate-900">{{ totalCount }}</span> 个代码片段
+                <span v-if="hasActiveFilters" class="text-blue-600">（已筛选）</span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      <h3 class="empty-title">
-        {{ hasActiveFilters ? '没有找到匹配的代码片段' : '还没有代码片段' }}
-      </h3>
-      <p class="empty-description">
-        {{ hasActiveFilters ? '尝试调整筛选条件或清除筛选器' : '创建您的第一个代码片段，开始构建您的代码库' }}
-      </p>
-      <div class="empty-actions">
-        <button v-if="hasActiveFilters" @click="clearAllFilters" class="secondary-btn">
-          清除筛选器
-        </button>
-        <router-link
-          v-if="canCreateSnippet && !hasActiveFilters"
-          to="/snippets/create"
-          class="primary-btn"
-        >
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+
+      <!-- 代码片段列表 -->
+      <div v-if="isLoading && snippets.length === 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="i in 6" :key="i" class="bg-white/70 backdrop-blur-xl rounded-2xl border border-slate-200/60 p-6 animate-pulse">
+          <div class="h-4 bg-slate-200 rounded w-3/4 mb-3"></div>
+          <div class="h-3 bg-slate-200 rounded w-1/2 mb-4"></div>
+          <div class="h-20 bg-slate-200 rounded mb-4"></div>
+          <div class="flex space-x-2">
+            <div class="h-6 bg-slate-200 rounded-full w-16"></div>
+            <div class="h-6 bg-slate-200 rounded-full w-20"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else-if="!isLoading && snippets.length === 0" class="text-center py-16">
+        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+          <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
-          创建第一个片段
-        </router-link>
-      </div>
-    </div>
-
-    <!-- 代码片段列表 -->
-    <div v-else class="snippets-container">
-      <!-- 列表视图切换 -->
-      <div class="view-controls">
-        <div class="view-toggle">
-          <button
-            @click="viewMode = 'grid'"
-            :class="['view-btn', { active: viewMode === 'grid' }]"
-            title="网格视图"
-          >
-            <svg class="view-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3"/>
-            </svg>
-          </button>
-          <button
-            @click="viewMode = 'list'"
-            :class="['view-btn', { active: viewMode === 'list' }]"
-            title="列表视图"
-          >
-            <svg class="view-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4"/>
-            </svg>
-          </button>
         </div>
-
-        <div class="sort-info">
-          <span class="result-count">共 {{ totalCount }} 个片段</span>
+        <h3 class="text-xl font-semibold text-slate-900 mb-2">
+          {{ hasActiveFilters ? '没有找到匹配的代码片段' : '还没有代码片段' }}
+        </h3>
+        <p class="text-slate-600 mb-8 max-w-md mx-auto">
+          {{ hasActiveFilters ? '尝试调整筛选条件或清除筛选器' : '创建您的第一个代码片段，开始构建您的代码库' }}
+        </p>
+        <div class="flex items-center justify-center space-x-4">
+          <button
+            v-if="hasActiveFilters"
+            @click="clearAllFilters"
+            class="inline-flex items-center px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200"
+          >
+            清除筛选器
+          </button>
+          <router-link
+            v-if="canCreateSnippet && !hasActiveFilters"
+            to="/snippets/create"
+            class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+            </svg>
+            创建第一个片段
+          </router-link>
         </div>
       </div>
 
-      <!-- 代码片段网格/列表 -->
-      <div :class="['snippets-list', `view-${viewMode}`]">
+      <!-- 代码片段网格 -->
+      <div v-else :class="[
+        'grid gap-6',
+        viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+      ]">
         <SnippetCard
           v-for="snippet in snippets"
           :key="snippet.id"
           :snippet="snippet"
+          :view-mode="viewMode"
           :is-loading="isLoading"
           @copy="handleSnippetCopy"
           @delete="handleSnippetDelete"
@@ -112,41 +222,19 @@
         />
       </div>
 
-      <!-- 加载更多指示器 -->
-      <div v-if="isLoading && snippets.length > 0" class="loading-more">
-        <div class="loading-spinner small">
-          <svg class="spinner-icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/>
-            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-          </svg>
-        </div>
-        <span>加载更多...</span>
-      </div>
-
       <!-- 分页 -->
-      <Pagination
-        v-if="totalPages > 1"
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        :total-items="totalCount"
-        :page-size="pageSize"
-        @page-change="handlePageChange"
-        @size-change="handlePageSizeChange"
-      />
+      <div v-if="totalPages > 1" class="mt-12 flex justify-center">
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total-items="totalCount"
+          :page-size="pageSize"
+          @page-change="handlePageChange"
+          @size-change="handlePageSizeChange"
+        />
+      </div>
     </div>
-
-    <!-- 浮动操作按钮 -->
-    <router-link
-      v-if="canCreateSnippet"
-      to="/snippets/create"
-      class="floating-action-btn"
-      title="创建新的代码片段"
-    >
-      <svg class="fab-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-      </svg>
-    </router-link>
-  </AppLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -157,11 +245,8 @@ import { useCodeSnippetsStore } from '@/stores/codeSnippets'
 import { useUserFeedback } from '@/composables/useUserFeedback'
 import { useLoading } from '@/composables/useLoading'
 import { usePerformance } from '@/composables/usePerformance'
-import AppLayout from '@/components/layout/AppLayout.vue'
-import SearchFilter from '@/components/snippets/SearchFilter.vue'
 import SnippetCard from '@/components/snippets/SnippetCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
 
 import type { CodeSnippet, Tag } from '@/types'
 import { UserRole } from '@/types'
@@ -176,6 +261,11 @@ const { mark, measure } = usePerformance()
 
 // 响应式状态
 const viewMode = ref<'grid' | 'list'>('grid')
+const searchQuery = ref('')
+const selectedLanguage = ref('')
+const sortBy = ref('createdAt_desc')
+const searchTimeout = ref<number | null>(null)
+
 const currentFilters = ref({
   search: '',
   language: '',
@@ -288,6 +378,36 @@ const loadSnippets = withLoading(async () => {
   const loadTime = measure('snippets-load-time', 'snippets-load-start', 'snippets-load-end')
   console.log(`代码片段加载时间: ${loadTime.toFixed(2)}ms`)
 })
+
+/**
+ * 处理搜索输入
+ */
+function handleSearchInput() {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+
+  searchTimeout.value = window.setTimeout(() => {
+    currentFilters.value.search = searchQuery.value
+    updateQueryParams()
+  }, 300)
+}
+
+/**
+ * 处理语言变化
+ */
+function handleLanguageChange() {
+  currentFilters.value.language = selectedLanguage.value
+  updateQueryParams()
+}
+
+/**
+ * 处理排序变化
+ */
+function handleSortChange() {
+  currentFilters.value.sortBy = sortBy.value
+  updateQueryParams()
+}
 
 /**
  * 处理筛选器变化
@@ -413,370 +533,11 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
 </script>
 
 <style scoped>
-/* 创建按钮 */
-.create-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
-}
-
-.create-btn:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-}
-
-.btn-icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* 加载状态 */
-.loading-state {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem 0;
-}
-
-.snippet-skeleton {
-  height: 200px;
-}
-
-.loading-spinner {
-  margin-bottom: 1rem;
-}
-
-.loading-spinner.small {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-content: center;
-  padding: 1rem;
-  font-size: 0.875rem;
-  color: #6c757d;
-}
-
-.spinner-icon {
-  width: 32px;
-  height: 32px;
-  color: #007bff;
-  animation: spin 1s linear infinite;
-}
-
-.loading-spinner.small .spinner-icon {
-  width: 20px;
-  height: 20px;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.loading-text {
-  color: #6c757d;
-  font-size: 1rem;
-  margin: 0;
-}
-
-/* 空状态 */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-}
-
-.empty-icon {
-  width: 80px;
-  height: 80px;
-  color: #dee2e6;
-  margin-bottom: 1.5rem;
-}
-
-.empty-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.empty-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #495057;
-  margin: 0 0 0.5rem 0;
-}
-
-.empty-description {
-  color: #6c757d;
-  font-size: 1rem;
-  line-height: 1.5;
-  margin: 0 0 2rem 0;
-  max-width: 400px;
-}
-
-.empty-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.primary-btn,
-.secondary-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.primary-btn {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
-}
-
-.primary-btn:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-}
-
-.secondary-btn {
-  background: #f8f9fa;
-  color: #6c757d;
-  border: 1px solid #dee2e6;
-}
-
-.secondary-btn:hover {
-  background: #e9ecef;
-  color: #495057;
-  border-color: #adb5bd;
-}
-
-/* 代码片段容器 */
-.snippets-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* 视图控制 */
-.view-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-}
-
-.view-toggle {
-  display: flex;
-  gap: 0.25rem;
-  background: #f8f9fa;
-  padding: 0.375rem;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
-.view-btn {
-  padding: 0.5rem;
-  border: none;
-  background: none;
-  color: #6c757d;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.view-btn:hover {
-  color: #007bff;
-  background: rgba(0, 123, 255, 0.1);
-}
-
-.view-btn.active {
-  background: white;
-  color: #007bff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.view-icon {
-  width: 18px;
-  height: 18px;
-  z-index: 1;
-}
-
-.sort-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: #6c757d;
-}
-
-.result-count {
-  font-weight: 500;
-}
-
-/* 代码片段列表 */
-.snippets-list {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.snippets-list.view-grid {
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-}
-
-.snippets-list.view-list {
-  grid-template-columns: 1fr;
-}
-
-/* 虚拟滚动容器 */
-.virtual-scroll-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.virtual-snippet-item {
-  padding: 1rem;
-  border-bottom: 1px solid #f1f3f4;
-}
-
-.virtual-snippet-item:last-child {
-  border-bottom: none;
-}
-
-/* 加载更多 */
-.loading-more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  font-size: 0.875rem;
-  color: #6c757d;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .view-controls {
-    padding: 0.75rem 1rem;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: stretch;
-  }
-
-  .sort-info {
-    justify-content: center;
-  }
-
-  .snippets-list.view-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .empty-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .primary-btn,
-  .secondary-btn {
-    width: 100%;
-    max-width: 200px;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .empty-state {
-    padding: 2rem 1rem;
-  }
-
-  .empty-icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .empty-title {
-    font-size: 1.25rem;
-  }
-
-  .empty-description {
-    font-size: 0.875rem;
-  }
-}
-
 /* 无障碍性增强 */
 @media (prefers-reduced-motion: reduce) {
-  .create-btn,
-  .primary-btn,
-  .secondary-btn,
-  .view-btn {
-    transition: none;
+  * {
+    transition: none !important;
+    animation: none !important;
   }
-
-  .create-btn:hover,
-  .primary-btn:hover {
-    transform: none;
-  }
-
-  .spinner-icon {
-    animation: none;
-  }
-}
-
-/* 浮动操作按钮 */
-.floating-action-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 56px;
-  height: 56px;
-  background: #007bff;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  transition: all 0.3s ease;
-  z-index: 1000;
-}
-
-.floating-action-btn:hover {
-  background: #0056b3;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-}
-
-.fab-icon {
-  width: 20px;
-  height: 20px;
 }
 </style>
