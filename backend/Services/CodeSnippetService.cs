@@ -13,17 +13,20 @@ public class CodeSnippetService : ICodeSnippetService
     private readonly IPermissionService _permissionService;
     private readonly ITagRepository _tagRepository;
     private readonly IVersionManagementService _versionManagementService;
+    private readonly IInputValidationService _validationService;
 
     public CodeSnippetService(
         ICodeSnippetRepository repository,
         IPermissionService permissionService,
         ITagRepository tagRepository,
-        IVersionManagementService versionManagementService)
+        IVersionManagementService versionManagementService,
+        IInputValidationService validationService)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _tagRepository = tagRepository ?? throw new ArgumentNullException(nameof(tagRepository));
         _versionManagementService = versionManagementService ?? throw new ArgumentNullException(nameof(versionManagementService));
+        _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
     }
 
     /// <summary>
@@ -106,6 +109,41 @@ public class CodeSnippetService : ICodeSnippetService
     /// </summary>
     public async Task<CodeSnippetDto> CreateSnippetAsync(CreateSnippetDto snippet, Guid currentUserId)
     {
+        // 验证输入
+        var titleValidation = _validationService.ValidateSnippetTitle(snippet.Title);
+        if (!titleValidation.IsValid)
+        {
+            throw new ArgumentException(titleValidation.ErrorMessage);
+        }
+
+        var descriptionValidation = _validationService.ValidateSnippetDescription(snippet.Description);
+        if (!descriptionValidation.IsValid)
+        {
+            throw new ArgumentException(descriptionValidation.ErrorMessage);
+        }
+
+        var codeValidation = _validationService.ValidateCodeContent(snippet.Code);
+        if (!codeValidation.IsValid)
+        {
+            throw new ArgumentException(codeValidation.ErrorMessage);
+        }
+
+        var languageValidation = _validationService.ValidateLanguage(snippet.Language);
+        if (!languageValidation.IsValid)
+        {
+            throw new ArgumentException(languageValidation.ErrorMessage);
+        }
+
+        // 验证标签
+        foreach (var tag in snippet.Tags)
+        {
+            var tagValidation = _validationService.ValidateTagName(tag);
+            if (!tagValidation.IsValid)
+            {
+                throw new ArgumentException($"标签 '{tag}' 无效: {tagValidation.ErrorMessage}");
+            }
+        }
+
         // 检查创建权限
         var canCreate = await _permissionService.CanCreateSnippetAsync(currentUserId);
         if (!canCreate)
@@ -113,13 +151,17 @@ public class CodeSnippetService : ICodeSnippetService
             throw new UnauthorizedAccessException("用户没有创建代码片段的权限");
         }
 
+        // 清理输入
+        var sanitizedTitle = _validationService.SanitizeUserInput(snippet.Title);
+        var sanitizedDescription = _validationService.SanitizeUserInput(snippet.Description ?? string.Empty);
+
         var entity = new CodeSnippet
         {
             Id = Guid.NewGuid(),
-            Title = snippet.Title,
-            Description = snippet.Description,
-            Code = snippet.Code,
-            Language = snippet.Language,
+            Title = sanitizedTitle,
+            Description = sanitizedDescription,
+            Code = snippet.Code, // 代码内容不进行HTML清理，保持原样
+            Language = snippet.Language.ToLower(),
             CreatedBy = currentUserId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -136,7 +178,8 @@ public class CodeSnippetService : ICodeSnippetService
         // 处理标签
         if (snippet.Tags.Any())
         {
-            var tagIds = await ProcessTagsAsync(snippet.Tags, currentUserId);
+            var sanitizedTags = snippet.Tags.Select(tag => _validationService.SanitizeUserInput(tag)).ToList();
+            var tagIds = await ProcessTagsAsync(sanitizedTags, currentUserId);
             await _repository.UpdateSnippetTagsAsync(created.Id, tagIds);
             
             // 重新获取包含标签的代码片段
@@ -157,6 +200,56 @@ public class CodeSnippetService : ICodeSnippetService
             throw new ArgumentException("代码片段不存在");
         }
 
+        // 验证输入
+        if (!string.IsNullOrEmpty(snippet.Title))
+        {
+            var titleValidation = _validationService.ValidateSnippetTitle(snippet.Title);
+            if (!titleValidation.IsValid)
+            {
+                throw new ArgumentException(titleValidation.ErrorMessage);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(snippet.Description))
+        {
+            var descriptionValidation = _validationService.ValidateSnippetDescription(snippet.Description);
+            if (!descriptionValidation.IsValid)
+            {
+                throw new ArgumentException(descriptionValidation.ErrorMessage);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(snippet.Code))
+        {
+            var codeValidation = _validationService.ValidateCodeContent(snippet.Code);
+            if (!codeValidation.IsValid)
+            {
+                throw new ArgumentException(codeValidation.ErrorMessage);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(snippet.Language))
+        {
+            var languageValidation = _validationService.ValidateLanguage(snippet.Language);
+            if (!languageValidation.IsValid)
+            {
+                throw new ArgumentException(languageValidation.ErrorMessage);
+            }
+        }
+
+        // 验证标签
+        if (snippet.Tags != null)
+        {
+            foreach (var tag in snippet.Tags)
+            {
+                var tagValidation = _validationService.ValidateTagName(tag);
+                if (!tagValidation.IsValid)
+                {
+                    throw new ArgumentException($"标签 '{tag}' 无效: {tagValidation.ErrorMessage}");
+                }
+            }
+        }
+
         // 检查编辑权限
         var canEdit = await _permissionService.CanAccessSnippetAsync(
             currentUserId, id, PermissionOperation.Edit);
@@ -171,29 +264,32 @@ public class CodeSnippetService : ICodeSnippetService
 
         if (!string.IsNullOrEmpty(snippet.Title) && existing.Title != snippet.Title)
         {
-            changeDescriptions.Add($"标题从 '{existing.Title}' 更改为 '{snippet.Title}'");
-            existing.Title = snippet.Title;
+            var sanitizedTitle = _validationService.SanitizeUserInput(snippet.Title);
+            changeDescriptions.Add($"标题从 '{existing.Title}' 更改为 '{sanitizedTitle}'");
+            existing.Title = sanitizedTitle;
             hasContentChanges = true;
         }
 
         if (!string.IsNullOrEmpty(snippet.Description) && existing.Description != snippet.Description)
         {
+            var sanitizedDescription = _validationService.SanitizeUserInput(snippet.Description);
             changeDescriptions.Add("描述已更新");
-            existing.Description = snippet.Description;
+            existing.Description = sanitizedDescription;
             hasContentChanges = true;
         }
 
         if (!string.IsNullOrEmpty(snippet.Code) && existing.Code != snippet.Code)
         {
             changeDescriptions.Add("代码内容已更新");
-            existing.Code = snippet.Code;
+            existing.Code = snippet.Code; // 代码内容不进行HTML清理，保持原样
             hasContentChanges = true;
         }
 
         if (!string.IsNullOrEmpty(snippet.Language) && existing.Language != snippet.Language)
         {
-            changeDescriptions.Add($"语言从 '{existing.Language}' 更改为 '{snippet.Language}'");
-            existing.Language = snippet.Language;
+            var normalizedLanguage = snippet.Language.ToLower();
+            changeDescriptions.Add($"语言从 '{existing.Language}' 更改为 '{normalizedLanguage}'");
+            existing.Language = normalizedLanguage;
             hasContentChanges = true;
         }
 

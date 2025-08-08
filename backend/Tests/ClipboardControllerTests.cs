@@ -16,10 +16,10 @@ namespace CodeSnippetManager.Api.Tests;
 [TestClass]
 public class ClipboardControllerTests
 {
-    private Mock<IClipboardService> _mockClipboardService;
-    private Mock<ICodeSnippetService> _mockCodeSnippetService;
-    private Mock<ILogger<ClipboardController>> _mockLogger;
-    private ClipboardController _controller;
+    private Mock<IClipboardService> _mockClipboardService = null!;
+    private Mock<ICodeSnippetService> _mockCodeSnippetService = null!;
+    private Mock<ILogger<ClipboardController>> _mockLogger = null!;
+    private ClipboardController _controller = null!;
     private readonly Guid _testUserId = Guid.NewGuid();
     private readonly Guid _testSnippetId = Guid.NewGuid();
 

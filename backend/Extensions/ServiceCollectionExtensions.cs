@@ -2,6 +2,7 @@ using CodeSnippetManager.Api.Data;
 using CodeSnippetManager.Api.Interfaces;
 using CodeSnippetManager.Api.Repositories;
 using CodeSnippetManager.Api.Services;
+using CodeSnippetManager.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -52,6 +53,9 @@ public static class ServiceCollectionExtensions
         // 注册领域服务 - Scoped 生命周期
         services.AddScoped<IVersionManagementService, VersionManagementService>();
         services.AddScoped<IPermissionService, PermissionService>();
+
+        // 注册安全服务 - Scoped 生命周期
+        services.AddScoped<IInputValidationService, InputValidationService>();
 
         return services;
     }
@@ -208,6 +212,42 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// 配置安全服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configuration">配置</param>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddSecurityServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // 配置频率限制
+        services.Configure<RateLimitOptions>(options =>
+        {
+            options.DefaultLimit = configuration.GetValue<int>("Security:RateLimit:DefaultLimit", 100);
+            options.AuthEndpointLimit = configuration.GetValue<int>("Security:RateLimit:AuthEndpointLimit", 10);
+            options.WriteOperationLimit = configuration.GetValue<int>("Security:RateLimit:WriteOperationLimit", 30);
+            options.TimeWindow = TimeSpan.FromMinutes(configuration.GetValue<int>("Security:RateLimit:TimeWindowMinutes", 1));
+        });
+        
+        // 配置XSS防护
+        services.Configure<XssProtectionOptions>(options =>
+        {
+            options.Enabled = configuration.GetValue<bool>("Security:XssProtection:Enabled", true);
+            options.LogAttempts = configuration.GetValue<bool>("Security:XssProtection:LogAttempts", true);
+            options.BlockRequests = configuration.GetValue<bool>("Security:XssProtection:BlockRequests", true);
+        });
+        
+        // 配置CSRF防护
+        services.Configure<CsrfProtectionOptions>(options =>
+        {
+            options.Enabled = configuration.GetValue<bool>("Security:CsrfProtection:Enabled", true);
+            options.TokenLifetimeHours = configuration.GetValue<int>("Security:CsrfProtection:TokenLifetimeHours", 24);
+            options.LogAttempts = configuration.GetValue<bool>("Security:CsrfProtection:LogAttempts", true);
+        });
+
+        return services;
+    }
+
+    /// <summary>
     /// 添加所有应用程序服务
     /// </summary>
     /// <param name="services">服务集合</param>
@@ -222,6 +262,7 @@ public static class ServiceCollectionExtensions
         // 注册各层服务
         services.AddCacheServices(configuration);
         services.AddPerformanceServices(configuration);
+        services.AddSecurityServices(configuration);
         services.AddDataAccessServices(connectionString);
         services.AddBusinessServices();
         services.AddJwtAuthentication(configuration);

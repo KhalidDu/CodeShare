@@ -10,10 +10,12 @@ namespace CodeSnippetManager.Api.Services;
 public class TagService : ITagService
 {
     private readonly ITagRepository _repository;
+    private readonly IInputValidationService _validationService;
 
-    public TagService(ITagRepository repository)
+    public TagService(ITagRepository repository, IInputValidationService validationService)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
     }
 
     /// <summary>
@@ -39,17 +41,21 @@ public class TagService : ITagService
     /// </summary>
     public async Task<TagDto> CreateTagAsync(CreateTagDto tag)
     {
-        // 业务规则：检查标签名称是否已存在
-        var existingTag = await _repository.GetByNameAsync(tag.Name);
-        if (existingTag != null)
+        // 验证输入
+        var nameValidation = _validationService.ValidateTagName(tag.Name);
+        if (!nameValidation.IsValid)
         {
-            throw new InvalidOperationException($"标签 '{tag.Name}' 已存在");
+            throw new ArgumentException(nameValidation.ErrorMessage);
         }
 
-        // 业务规则：验证标签名称格式
-        if (string.IsNullOrWhiteSpace(tag.Name) || tag.Name.Length > 50)
+        // 清理输入
+        var sanitizedName = _validationService.SanitizeUserInput(tag.Name);
+
+        // 业务规则：检查标签名称是否已存在
+        var existingTag = await _repository.GetByNameAsync(sanitizedName);
+        if (existingTag != null)
         {
-            throw new ArgumentException("标签名称不能为空且长度不能超过50个字符");
+            throw new InvalidOperationException($"标签 '{sanitizedName}' 已存在");
         }
 
         // 业务规则：验证颜色格式
@@ -61,7 +67,7 @@ public class TagService : ITagService
         var entity = new Tag
         {
             Id = Guid.NewGuid(),
-            Name = tag.Name.Trim(),
+            Name = sanitizedName,
             Color = tag.Color,
             CreatedBy = Guid.NewGuid(), // TODO: Get from current user context
             CreatedAt = DateTime.UtcNow
@@ -83,18 +89,23 @@ public class TagService : ITagService
         // 业务规则：如果更新名称，检查是否与其他标签重复
         if (!string.IsNullOrEmpty(tag.Name) && tag.Name != existing.Name)
         {
-            var duplicateTag = await _repository.GetByNameAsync(tag.Name);
+            // 验证输入
+            var nameValidation = _validationService.ValidateTagName(tag.Name);
+            if (!nameValidation.IsValid)
+            {
+                throw new ArgumentException(nameValidation.ErrorMessage);
+            }
+
+            // 清理输入
+            var sanitizedName = _validationService.SanitizeUserInput(tag.Name);
+
+            var duplicateTag = await _repository.GetByNameAsync(sanitizedName);
             if (duplicateTag != null)
             {
-                throw new InvalidOperationException($"标签 '{tag.Name}' 已存在");
+                throw new InvalidOperationException($"标签 '{sanitizedName}' 已存在");
             }
             
-            if (tag.Name.Length > 50)
-            {
-                throw new ArgumentException("标签名称长度不能超过50个字符");
-            }
-            
-            existing.Name = tag.Name.Trim();
+            existing.Name = sanitizedName;
         }
 
         // 业务规则：验证颜色格式

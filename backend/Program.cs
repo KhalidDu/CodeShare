@@ -24,6 +24,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// 使用安全头中间件
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
+// 使用频率限制中间件
+app.UseMiddleware<RateLimitingMiddleware>();
+
+// 使用XSS防护中间件
+app.UseMiddleware<XssProtectionMiddleware>();
+
+// 使用CSRF防护中间件
+app.UseMiddleware<CsrfProtectionMiddleware>();
+
 // 使用响应压缩
 app.UseResponseCompression();
 

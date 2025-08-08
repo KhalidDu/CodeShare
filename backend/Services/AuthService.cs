@@ -15,16 +15,28 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IConfiguration _configuration;
+    private readonly IInputValidationService _validationService;
 
-    public AuthService(IUserRepository userRepository, IConfiguration configuration)
+    public AuthService(IUserRepository userRepository, IConfiguration configuration, IInputValidationService validationService)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
     {
-        var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
+        // 验证输入
+        var usernameValidation = _validationService.ValidateUsername(loginDto.Username);
+        if (!usernameValidation.IsValid)
+        {
+            throw new ArgumentException(usernameValidation.ErrorMessage);
+        }
+
+        // 清理输入
+        var sanitizedUsername = _validationService.SanitizeUserInput(loginDto.Username);
+        
+        var user = await _userRepository.GetByUsernameAsync(sanitizedUsername);
         if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
         {
             throw new UnauthorizedAccessException("Invalid username or password");
@@ -62,14 +74,37 @@ public class AuthService : IAuthService
 
     public async Task<UserDto> RegisterAsync(RegisterDto registerDto)
     {
+        // 验证输入
+        var usernameValidation = _validationService.ValidateUsername(registerDto.Username);
+        if (!usernameValidation.IsValid)
+        {
+            throw new ArgumentException(usernameValidation.ErrorMessage);
+        }
+
+        var emailValidation = _validationService.ValidateEmail(registerDto.Email);
+        if (!emailValidation.IsValid)
+        {
+            throw new ArgumentException(emailValidation.ErrorMessage);
+        }
+
+        var passwordValidation = _validationService.ValidatePassword(registerDto.Password);
+        if (!passwordValidation.IsValid)
+        {
+            throw new ArgumentException(passwordValidation.ErrorMessage);
+        }
+
+        // 清理输入
+        var sanitizedUsername = _validationService.SanitizeUserInput(registerDto.Username);
+        var sanitizedEmail = _validationService.SanitizeUserInput(registerDto.Email);
+
         // Check if user already exists
-        var existingUser = await _userRepository.GetByUsernameAsync(registerDto.Username);
+        var existingUser = await _userRepository.GetByUsernameAsync(sanitizedUsername);
         if (existingUser != null)
         {
             throw new ArgumentException("Username already exists");
         }
 
-        existingUser = await _userRepository.GetByEmailAsync(registerDto.Email);
+        existingUser = await _userRepository.GetByEmailAsync(sanitizedEmail);
         if (existingUser != null)
         {
             throw new ArgumentException("Email already exists");
@@ -78,8 +113,8 @@ public class AuthService : IAuthService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Username = registerDto.Username,
-            Email = registerDto.Email,
+            Username = sanitizedUsername,
+            Email = sanitizedEmail,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
             Role = UserRole.Viewer, // Default role
             CreatedAt = DateTime.UtcNow,
@@ -93,6 +128,13 @@ public class AuthService : IAuthService
 
     public async Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
     {
+        // 验证新密码
+        var passwordValidation = _validationService.ValidatePassword(newPassword);
+        if (!passwordValidation.IsValid)
+        {
+            throw new ArgumentException(passwordValidation.ErrorMessage);
+        }
+
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
         {

@@ -202,7 +202,7 @@ namespace CodeSnippetManager.Api.Services
         /// <summary>
         /// 获取或设置缓存
         /// </summary>
-        public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null) where T : class
+        public async Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null) where T : class
         {
             try
             {

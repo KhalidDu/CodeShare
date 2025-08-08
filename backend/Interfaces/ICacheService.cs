@@ -53,7 +53,7 @@ namespace CodeSnippetManager.Api.Interfaces
         /// <param name="factory">值工厂函数</param>
         /// <param name="expiration">过期时间</param>
         /// <returns>缓存值</returns>
-        Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null) where T : class;
+        Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null) where T : class;
 
         /// <summary>
         /// 刷新缓存过期时间
