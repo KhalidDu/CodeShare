@@ -174,17 +174,18 @@ function toggleCollapse() {
 <style scoped>
 .app-sidebar {
   width: 280px;
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   height: 100vh;
   position: fixed;
   left: 0;
   top: 64px;
   z-index: 999;
-  transition: width 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
 }
 
 .app-sidebar.collapsed {
@@ -257,34 +258,59 @@ function toggleCollapse() {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #495057;
+  color: #6c757d;
   text-decoration: none;
-  padding: 0.75rem 1rem;
-  margin: 0 0.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  padding: 0.875rem 1.25rem;
+  margin: 0 0.75rem;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.08) 0%, rgba(0, 86, 179, 0.08) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .nav-link:hover {
-  background-color: #e9ecef;
-  color: #212529;
+  background: rgba(0, 123, 255, 0.05);
+  color: #007bff;
+  transform: translateX(4px);
+}
+
+.nav-link:hover::before {
+  opacity: 1;
 }
 
 .nav-link.router-link-active {
-  background-color: #007bff;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+  transform: translateX(4px);
 }
 
 .nav-link.router-link-active::before {
+  opacity: 0;
+}
+
+.nav-link.router-link-active::after {
   content: '';
   position: absolute;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 20px;
-  background-color: white;
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
   border-radius: 0 2px 2px 0;
 }
 

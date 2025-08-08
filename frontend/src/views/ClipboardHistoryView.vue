@@ -1,967 +1,850 @@
 <template>
-  <AppLayout>
-    <div class="clipboard-history-view">
-      <!-- 页面头部 -->
-      <div class="page-header">
-        <Breadcrumb :items="breadcrumbItems" />
-        <div class="header-content">
-          <div class="header-main">
-            <h1 class="page-title">剪贴板历史</h1>
-            <p class="page-description">查看和管理您最近复制的代码片段</p>
-          </div>
-          <div class="header-actions">
-            <button
-              @click="refreshHistory"
-              :disabled="loading"
-              class="btn btn-secondary"
-            >
-              <svg viewBox="0 0 16 16" width="16" height="16">
-                <path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"></path>
-              </svg>
-              刷新
-            </button>
-            <button
-              @click="showClearConfirm = true"
-              :disabled="loading || !historyItems.length"
-              class="btn btn-danger"
-            >
-              <svg viewBox="0 0 16 16" width="16" height="16">
-                <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.748 1.748 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
-              </svg>
-              清空历史
-            </button>
-          </div>
-        </div>
+  <AppLayout
+    page-title="剪贴板历史"
+    page-subtitle="查看最近复制的代码片段"
+    page-icon="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3"
+  >
+    <!-- 筛选和搜索 -->
+    <div class="clipboard-filters">
+      <div class="filter-group">
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="search-input"
+          placeholder="搜索剪贴板内容..."
+        />
       </div>
-
-      <!-- 筛选器 -->
-      <div class="filters-section">
-        <div class="filters-row">
-          <div class="filter-group">
-            <label class="filter-label">时间范围</label>
-            <select v-model="dateFilter" @change="applyFilters" class="filter-select">
-              <option value="all">全部时间</option>
-              <option value="today">今天</option>
-              <option value="week">最近一周</option>
-              <option value="month">最近一个月</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">每页显示</label>
-            <select v-model="pageSize" @change="applyFilters" class="filter-select">
-              <option :value="10">10 条</option>
-              <option :value="20">20 条</option>
-              <option :value="50">50 条</option>
-            </select>
-          </div>
-        </div>
+      <div class="filter-group">
+        <select v-model="timeFilter" class="time-filter">
+          <option value="all">全部时间</option>
+          <option value="today">今天</option>
+          <option value="week">本周</option>
+          <option value="month">本月</option>
+        </select>
       </div>
-
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>加载中...</p>
+      <div class="filter-actions">
+        <button @click="clearHistory" class="clear-btn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+          </svg>
+          清空历史
+        </button>
       </div>
+    </div>
 
-      <!-- 错误状态 -->
-      <div v-else-if="error" class="error-container">
-        <div class="error-icon">⚠️</div>
-        <h3>加载失败</h3>
-        <p>{{ error }}</p>
-        <button @click="loadHistory" class="btn btn-primary">重试</button>
+    <!-- 加载状态 -->
+    <div v-if="isLoading" class="loading-state">
+      <SkeletonLoader
+        v-for="i in 5"
+        :key="i"
+        type="list-item"
+        :animated="true"
+        class="history-skeleton"
+      />
+    </div>
+
+    <!-- 空状态 -->
+    <div v-else-if="filteredHistory.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3"/>
+        </svg>
       </div>
+      <h3 class="empty-title">
+        {{ searchQuery ? '没有找到匹配的记录' : '剪贴板历史为空' }}
+      </h3>
+      <p class="empty-description">
+        {{ searchQuery ? '尝试调整搜索条件' : '复制代码片段后，历史记录将显示在这里' }}
+      </p>
+    </div>
 
-      <!-- 空状态 -->
-      <div v-else-if="!historyItems.length" class="empty-container">
-        <div class="empty-icon">📋</div>
-        <h3>暂无复制历史</h3>
-        <p>您还没有复制过任何代码片段</p>
-        <router-link to="/snippets" class="btn btn-primary">浏览代码片段</router-link>
-      </div>
+    <!-- 历史记录列表 -->
+    <div v-else class="history-list">
+      <div
+        v-for="item in filteredHistory"
+        :key="item.id"
+        class="history-item"
+        :class="{ selected: selectedItems.includes(item.id) }"
+      >
+        <!-- 时间标签 -->
+        <div class="time-label">{{ formatTime(item.copiedAt) }}</div>
 
-      <!-- 历史记录列表 -->
-      <div v-else class="history-content">
-        <div class="history-list">
-          <div
-            v-for="item in historyItems"
-            :key="item.id"
-            class="history-item"
-          >
-            <div class="item-header">
-              <div class="item-title">
-                <router-link
-                  :to="`/snippets/${item.snippetId}`"
-                  class="snippet-link"
-                >
-                  {{ item.snippetTitle }}
-                </router-link>
-                <span class="language-badge">{{ getLanguageLabel(item.snippetLanguage) }}</span>
-              </div>
-              <div class="item-actions">
-                <CopyButton
-                  :text="item.snippetCode"
-                  :snippet-id="item.snippetId"
-                  :show-text="false"
-                  button-class="copy-button--minimal"
-                  tooltip="重新复制"
-                  @copy-success="onReCopySuccess(item)"
-                />
-                <button
-                  @click="deleteHistoryItem(item.id)"
-                  class="btn-icon btn-danger"
-                  title="删除记录"
-                >
-                  <svg viewBox="0 0 16 16" width="14" height="14">
-                    <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.748 1.748 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div class="item-meta">
-              <span class="meta-item">
-                <svg viewBox="0 0 16 16" width="14" height="14">
-                  <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"></path>
-                </svg>
-                {{ formatDate(item.copiedAt) }}
+        <!-- 内容预览 -->
+        <div class="content-preview" @click="selectItem(item.id)">
+          <div class="snippet-info">
+            <h4 class="snippet-title">{{ item.snippetTitle }}</h4>
+            <div class="snippet-meta">
+              <span class="language-tag" :style="{ backgroundColor: getLanguageColor(item.language) }">
+                {{ item.language }}
               </span>
+              <span class="copy-time">{{ formatRelativeTime(item.copiedAt) }}</span>
             </div>
+          </div>
 
-            <div class="item-code">
-              <pre><code>{{ truncateCode(item.snippetCode) }}</code></pre>
-              <div v-if="item.snippetCode.length > 200" class="code-expand">
-                <button
-                  @click="toggleCodeExpansion(item.id)"
-                  class="btn-link"
-                >
-                  {{ expandedItems.has(item.id) ? '收起' : '展开全部' }}
-                </button>
-              </div>
-            </div>
+          <div class="code-preview">
+            <pre class="code-block"><code>{{ getCodePreview(item.content) }}</code></pre>
           </div>
         </div>
 
-        <!-- 分页 -->
-        <div v-if="totalPages > 1" class="pagination-container">
-          <div class="pagination">
-            <button
-              @click="goToPage(currentPage - 1)"
-              :disabled="currentPage <= 1"
-              class="pagination-btn"
-            >
-              上一页
-            </button>
-            
-            <div class="pagination-info">
-              第 {{ currentPage }} 页，共 {{ totalPages }} 页
-            </div>
-            
-            <button
-              @click="goToPage(currentPage + 1)"
-              :disabled="currentPage >= totalPages"
-              class="pagination-btn"
-            >
-              下一页
-            </button>
-          </div>
-          
-          <div class="pagination-summary">
-            共 {{ totalCount }} 条记录
-          </div>
-        </div>
-      </div>
+        <!-- 操作按钮 */
+        <div class="item-actions">
+          <button
+            @click="copyToClipboard(item)"
+            class="action-btn copy-btn"
+            title="重新复制"
+          >
+            <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+            </svg>
+          </button>
 
-      <!-- 清空确认对话框 -->
-      <div v-if="showClearConfirm" class="modal-overlay" @click="showClearConfirm = false">
-        <div class="modal-dialog" @click.stop>
-          <div class="modal-header">
-            <h3>确认清空</h3>
-            <button @click="showClearConfirm = false" class="modal-close">
-              <svg viewBox="0 0 16 16" width="16" height="16">
-                <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>确定要清空所有剪贴板历史记录吗？此操作不可撤销。</p>
-          </div>
-          <div class="modal-footer">
-            <button @click="showClearConfirm = false" class="btn btn-secondary">
-              取消
-            </button>
-            <button @click="clearAllHistory" class="btn btn-danger">
-              确认清空
-            </button>
-          </div>
+          <button
+            @click="viewSnippet(item.snippetId)"
+            class="action-btn view-btn"
+            title="查看原片段"
+          >
+            <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+            </svg>
+          </button>
+
+          <button
+            @click="removeItem(item.id)"
+            class="action-btn delete-btn"
+            title="删除记录"
+          >
+            <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- 批量操作 -->
+    <div v-if="selectedItems.length > 0" class="batch-actions">
+      <div class="selection-info">
+        已选择 {{ selectedItems.length }} 项
+      </div>
+      <div class="batch-buttons">
+        <button @click="clearSelection" class="batch-btn secondary">
+          取消选择
+        </button>
+        <button @click="deleteSelected" class="batch-btn danger">
+          删除选中
+        </button>
+      </div>
+    </div>
+
+    <!-- 分页 -->
+    <Pagination
+      v-if="totalPages > 1"
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      :total-items="totalCount"
+      :page-size="pageSize"
+      @page-change="handlePageChange"
+      @size-change="handlePageSizeChange"
+    />
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserFeedback } from '@/composables/useUserFeedback'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import Breadcrumb from '@/components/common/Breadcrumb.vue'
-import CopyButton from '@/components/common/CopyButton.vue'
-import { clipboardService } from '@/services/clipboardService'
-import { useToast } from '@/composables/useToast'
-import type { ClipboardHistoryItem, SupportedLanguage } from '@/types'
+import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
+import Pagination from '@/components/common/Pagination.vue'
 
-// 响应式数据
-const historyItems = ref<ClipboardHistoryItem[]>([])
-const loading = ref(false)
-const error = ref('')
+interface ClipboardHistoryItem {
+  id: string
+  snippetId: string
+  snippetTitle: string
+  content: string
+  language: string
+  copiedAt: string
+  userId: string
+}
+
+const router = useRouter()
+const { showActionSuccess, showActionError, showConfirm } = useUserFeedback()
+
+// 响应式状态
+const isLoading = ref(false)
+const searchQuery = ref('')
+const timeFilter = ref('all')
+const selectedItems = ref<string[]>([])
 const currentPage = ref(1)
 const pageSize = ref(20)
 const totalCount = ref(0)
-const totalPages = ref(0)
-const dateFilter = ref('all')
-const showClearConfirm = ref(false)
-const expandedItems = ref(new Set<string>())
 
-// Toast 消息
-const toast = useToast()
-
-// 支持的编程语言
-const supportedLanguages: SupportedLanguage[] = [
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'c', label: 'C' },
-  { value: 'html', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
-  { value: 'scss', label: 'SCSS' },
-  { value: 'json', label: 'JSON' },
-  { value: 'xml', label: 'XML' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'markdown', label: 'Markdown' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'shell', label: 'Shell' },
-  { value: 'powershell', label: 'PowerShell' },
-  { value: 'php', label: 'PHP' },
-  { value: 'ruby', label: 'Ruby' },
-  { value: 'go', label: 'Go' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'swift', label: 'Swift' },
-  { value: 'kotlin', label: 'Kotlin' },
-  { value: 'dart', label: 'Dart' }
-]
-
-// 计算属性
-const breadcrumbItems = computed(() => [
-  { title: '首页', path: '/' },
-  { title: '剪贴板历史', path: '' }
+// 模拟数据
+const historyItems = ref<ClipboardHistoryItem[]>([
+  {
+    id: '1',
+    snippetId: 'snippet-1',
+    snippetTitle: 'git stash # Stash changes',
+    content: 'git stash',
+    language: 'shell',
+    copiedAt: new Date().toISOString(),
+    userId: 'user-1'
+  },
+  {
+    id: '2',
+    snippetId: 'snippet-2',
+    snippetTitle: 'git branch -d feature',
+    content: 'git branch -d feature',
+    language: 'shell',
+    copiedAt: new Date(Date.now() - 60000).toISOString(),
+    userId: 'user-1'
+  },
+  {
+    id: '3',
+    snippetId: 'snippet-3',
+    snippetTitle: 'git remote add origin <url>',
+    content: 'git remote add origin <url>',
+    language: 'shell',
+    copiedAt: new Date(Date.now() - 120000).toISOString(),
+    userId: 'user-1'
+  },
+  {
+    id: '4',
+    snippetId: 'snippet-4',
+    snippetTitle: 'func main() { // Routes http.HandleFunc("/hello", LoggingMiddleware(HelloHandler)) // Start s...',
+    content: `func main() {
+  // Routes
+  http.HandleFunc("/hello", LoggingMiddleware(HelloHandler))
+  // Start server
+  log.Println("Server starting on :8080")
+  log.Fatal(http.ListenAndServe(":8080", nil))
+}`,
+    language: 'go',
+    copiedAt: new Date(Date.now() - 180000).toISOString(),
+    userId: 'user-1'
+  },
+  {
+    id: '5',
+    snippetId: 'snippet-5',
+    snippetTitle: '// HelloHandler handles the /hello endpoint func HelloHandler(w http.ResponseWriter, r *http.R...',
+    content: `// HelloHandler handles the /hello endpoint
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "Hello, World!")
+}`,
+    language: 'go',
+    copiedAt: new Date(Date.now() - 240000).toISOString(),
+    userId: 'user-1'
+  }
 ])
 
+// 计算属性
+const filteredHistory = computed(() => {
+  let filtered = historyItems.value
+
+  // 搜索过滤
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(item =>
+      item.snippetTitle.toLowerCase().includes(query) ||
+      item.content.toLowerCase().includes(query) ||
+      item.language.toLowerCase().includes(query)
+    )
+  }
+
+  // 时间过滤
+  if (timeFilter.value !== 'all') {
+    const now = new Date()
+    const filterDate = new Date()
+
+    switch (timeFilter.value) {
+      case 'today':
+        filterDate.setHours(0, 0, 0, 0)
+        break
+      case 'week':
+        filterDate.setDate(now.getDate() - 7)
+        break
+      case 'month':
+        filterDate.setMonth(now.getMonth() - 1)
+        break
+    }
+
+    filtered = filtered.filter(item => new Date(item.copiedAt) >= filterDate)
+  }
+
+  return filtered.sort((a, b) => new Date(b.copiedAt).getTime() - new Date(a.copiedAt).getTime())
+})
+
+const totalPages = computed(() => Math.ceil(filteredHistory.value.length / pageSize.value))
+
 /**
- * 获取语言显示标签
+ * 获取编程语言颜色
  */
-const getLanguageLabel = (language: string): string => {
-  const lang = supportedLanguages.find(l => l.value === language)
-  return lang?.label || language.toUpperCase()
+function getLanguageColor(language: string): string {
+  const colors: Record<string, string> = {
+    javascript: '#f7df1e',
+    typescript: '#3178c6',
+    python: '#3776ab',
+    java: '#ed8b00',
+    csharp: '#239120',
+    cpp: '#00599c',
+    html: '#e34f26',
+    css: '#1572b6',
+    vue: '#4fc08d',
+    react: '#61dafb',
+    go: '#00add8',
+    shell: '#89e051',
+    sql: '#336791'
+  }
+  return colors[language.toLowerCase()] || '#6c757d'
 }
 
 /**
- * 格式化日期
+ * 格式化时间
  */
-const formatDate = (dateString: string): string => {
+function formatTime(dateString: string): string {
+  const date = new Date(dateString)
+  return date.toLocaleString('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+/**
+ * 格式化相对时间
+ */
+function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-  if (diffMinutes < 1) {
+  if (diffInSeconds < 60) {
     return '刚刚'
-  } else if (diffMinutes < 60) {
-    return `${diffMinutes} 分钟前`
-  } else if (diffHours < 24) {
-    return `${diffHours} 小时前`
-  } else if (diffDays < 7) {
-    return `${diffDays} 天前`
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60)
+    return `${minutes}分钟前`
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600)
+    return `${hours}小时前`
   } else {
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    const days = Math.floor(diffInSeconds / 86400)
+    return `${days}天前`
   }
 }
 
 /**
- * 截断代码显示
+ * 获取代码预览
  */
-const truncateCode = (code: string): string => {
-  const item = historyItems.value.find(item => item.snippetCode === code)
-  if (!item || expandedItems.value.has(item.id)) {
-    return code
+function getCodePreview(content: string): string {
+  const lines = content.split('\n')
+  if (lines.length <= 3) {
+    return content
   }
-  return code.length > 200 ? code.substring(0, 200) + '...' : code
+  return lines.slice(0, 3).join('\n') + '\n...'
 }
 
 /**
- * 切换代码展开状态
+ * 选择项目
  */
-const toggleCodeExpansion = (itemId: string) => {
-  if (expandedItems.value.has(itemId)) {
-    expandedItems.value.delete(itemId)
+function selectItem(id: string) {
+  const index = selectedItems.value.indexOf(id)
+  if (index > -1) {
+    selectedItems.value.splice(index, 1)
   } else {
-    expandedItems.value.add(itemId)
+    selectedItems.value.push(id)
   }
 }
 
 /**
- * 获取日期筛选范围
+ * 复制到剪贴板
  */
-const getDateRange = () => {
-  const now = new Date()
-  let startDate: string | undefined
-  
-  switch (dateFilter.value) {
-    case 'today':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
-      break
-    case 'week':
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      startDate = weekAgo.toISOString()
-      break
-    case 'month':
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      startDate = monthAgo.toISOString()
-      break
-    default:
-      startDate = undefined
-  }
-  
-  return { startDate }
-}
-
-/**
- * 加载剪贴板历史
- */
-const loadHistory = async () => {
-  loading.value = true
-  error.value = ''
-
+async function copyToClipboard(item: ClipboardHistoryItem) {
   try {
-    const { startDate } = getDateRange()
-    const result = await clipboardService.getClipboardHistory({
-      page: currentPage.value,
-      pageSize: pageSize.value,
-      startDate
-    })
-
-    historyItems.value = result.items
-    totalCount.value = result.totalCount
-    totalPages.value = result.totalPages
-  } catch (err: any) {
-    console.error('Failed to load clipboard history:', err)
-    error.value = err.response?.data?.message || '加载剪贴板历史失败'
-  } finally {
-    loading.value = false
+    await navigator.clipboard.writeText(item.content)
+    showActionSuccess('复制', '内容已复制到剪贴板')
+  } catch (error) {
+    console.error('复制失败:', error)
+    showActionError('复制', '复制失败，请重试')
   }
 }
 
 /**
- * 刷新历史记录
+ * 查看代码片段
  */
-const refreshHistory = () => {
-  currentPage.value = 1
-  loadHistory()
+function viewSnippet(snippetId: string) {
+  router.push(`/snippets/${snippetId}`)
 }
 
 /**
- * 应用筛选器
+ * 删除单个项目
  */
-const applyFilters = () => {
-  currentPage.value = 1
-  loadHistory()
-}
-
-/**
- * 跳转到指定页面
- */
-const goToPage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    loadHistory()
-  }
-}
-
-/**
- * 删除单个历史记录
- */
-const deleteHistoryItem = async (itemId: string) => {
-  try {
-    await clipboardService.deleteClipboardHistoryItem(itemId)
-    
-    // 从本地列表中移除
-    const index = historyItems.value.findIndex(item => item.id === itemId)
-    if (index > -1) {
-      historyItems.value.splice(index, 1)
-      totalCount.value -= 1
+function removeItem(id: string) {
+  showConfirm(
+    '确定要删除这条剪贴板记录吗？',
+    () => {
+      const index = historyItems.value.findIndex(item => item.id === id)
+      if (index > -1) {
+        historyItems.value.splice(index, 1)
+        showActionSuccess('删除', '记录已删除')
+      }
     }
-    
-    toast.success('历史记录已删除')
-    
-    // 如果当前页没有数据了，跳转到上一页
-    if (historyItems.value.length === 0 && currentPage.value > 1) {
-      currentPage.value -= 1
-      loadHistory()
+  )
+}
+
+/**
+ * 清空历史
+ */
+function clearHistory() {
+  showConfirm(
+    '确定要清空所有剪贴板历史记录吗？此操作不可撤销。',
+    () => {
+      historyItems.value = []
+      selectedItems.value = []
+      showActionSuccess('清空', '剪贴板历史已清空')
+    },
+    undefined,
+    {
+      type: 'error',
+      confirmText: '清空',
+      cancelText: '取消'
     }
-  } catch (err: any) {
-    console.error('Failed to delete history item:', err)
-    toast.error('删除失败，请重试')
-  }
+  )
 }
 
 /**
- * 清空所有历史记录
+ * 清除选择
  */
-const clearAllHistory = async () => {
-  try {
-    await clipboardService.clearClipboardHistory()
-    
-    historyItems.value = []
-    totalCount.value = 0
-    totalPages.value = 0
-    currentPage.value = 1
-    showClearConfirm.value = false
-    
-    toast.success('剪贴板历史已清空')
-  } catch (err: any) {
-    console.error('Failed to clear history:', err)
-    toast.error('清空失败，请重试')
-  }
+function clearSelection() {
+  selectedItems.value = []
 }
 
 /**
- * 重新复制成功处理
+ * 删除选中项目
  */
-const onReCopySuccess = (item: ClipboardHistoryItem) => {
-  toast.success(`${item.snippetTitle} 已重新复制到剪贴板`)
+function deleteSelected() {
+  showConfirm(
+    `确定要删除选中的 ${selectedItems.value.length} 条记录吗？`,
+    () => {
+      historyItems.value = historyItems.value.filter(item => !selectedItems.value.includes(item.id))
+      selectedItems.value = []
+      showActionSuccess('删除', '选中的记录已删除')
+    }
+  )
+}
+
+/**
+ * 处理页面变化
+ */
+function handlePageChange(page: number) {
+  currentPage.value = page
+}
+
+/**
+ * 处理页面大小变化
+ */
+function handlePageSizeChange(size: number) {
+  pageSize.value = size
+  currentPage.value = 1
 }
 
 // 生命周期
 onMounted(() => {
-  loadHistory()
+  totalCount.value = historyItems.value.length
 })
 </script>
 
 <style scoped>
-.clipboard-history-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.header-content {
+/* 筛选器 */
+.clipboard-filters {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  margin-top: 16px;
-}
-
-.header-main {
-  flex: 1;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 600;
-  color: #24292f;
-  margin: 0 0 8px 0;
-  line-height: 1.2;
-}
-
-.page-description {
-  font-size: 16px;
-  color: #656d76;
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.filters-section {
-  background: #f6f8fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-
-.filters-row {
-  display: flex;
-  gap: 20px;
-  align-items: end;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  background: var(--gradient-surface);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-6);
 }
 
 .filter-group {
+  flex: 1;
+}
+
+.search-input,
+.time-filter {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-normal);
+}
+
+.search-input:focus,
+.time-filter:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background: rgba(255, 255, 255, 1);
+}
+
+.filter-actions {
+  flex-shrink: 0;
+}
+
+.clear-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+}
+
+.clear-btn:hover {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* 加载状态 */
+.loading-state {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-4);
 }
 
-.filter-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #656d76;
-  text-transform: uppercase;
+.history-skeleton {
+  height: 120px;
 }
 
-.filter-select {
-  padding: 6px 12px;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 14px;
-  color: #24292f;
-}
-
-.loading-container,
-.error-container,
-.empty-container {
+/* 空状态 */
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: var(--space-16) var(--space-8);
   text-align: center;
 }
 
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e1e5e9;
-  border-top: 4px solid #0969da;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  color: var(--gray-300);
+  margin-bottom: var(--space-6);
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.empty-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
-.error-container .error-icon,
-.empty-container .empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+.empty-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--gray-700);
+  margin: 0 0 var(--space-2) 0;
 }
 
-.error-container h3,
-.empty-container h3 {
-  color: #24292f;
-  margin-bottom: 8px;
+.empty-description {
+  color: var(--gray-500);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+  max-width: 400px;
 }
 
-.error-container p,
-.empty-container p {
-  color: #656d76;
-  margin-bottom: 20px;
-}
-
-.history-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
+/* 历史记录列表 */
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .history-item {
-  background: #fff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 20px;
-  transition: all 0.2s ease;
+  background: var(--gradient-surface);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  position: relative;
 }
 
 .history-item:hover {
-  border-color: #d0d7de;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 12px;
+.history-item.selected {
+  border-color: var(--primary-500);
+  box-shadow: var(--shadow-primary);
 }
 
-.item-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
+.time-label {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+  background: rgba(255, 255, 255, 0.9);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
 }
 
-.snippet-link {
-  font-size: 16px;
-  font-weight: 600;
-  color: #0969da;
-  text-decoration: none;
+.content-preview {
+  padding: var(--space-5) var(--space-6);
+  cursor: pointer;
+}
+
+.snippet-info {
+  margin-bottom: var(--space-4);
+}
+
+.snippet-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--gray-800);
+  margin: 0 0 var(--space-2) 0;
+  line-height: var(--leading-tight);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.snippet-link:hover {
-  text-decoration: underline;
-}
-
-.language-badge {
-  display: inline-flex;
+.snippet-meta {
+  display: flex;
   align-items: center;
-  padding: 2px 8px;
-  background: #0969da;
-  color: #fff;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
+  gap: var(--space-3);
+}
+
+.language-tag {
+  color: white;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
   text-transform: uppercase;
-  flex-shrink: 0;
+}
+
+.copy-time {
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+}
+
+.code-preview {
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+.code-block {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: #d4d4d4;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .item-actions {
   display: flex;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: rgba(248, 249, 250, 0.5);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.item-meta {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  color: #656d76;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.meta-item svg {
-  fill: currentColor;
-}
-
-.item-code {
-  position: relative;
-  background: #f6f8fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  padding: 16px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-}
-
-.item-code pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.item-code code {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #24292f;
-}
-
-.code-expand {
-  margin-top: 12px;
-  text-align: right;
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  border-top: 1px solid #e1e5e9;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.pagination-btn {
-  padding: 8px 16px;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  background: #f6f8fa;
-  color: #24292f;
-  font-size: 14px;
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--gray-600);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
 }
 
-.pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #8c959f;
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-.pagination-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.copy-btn:hover {
+  background: linear-gradient(135deg, #e7f3ff 0%, #cce7ff 100%);
+  color: var(--primary-600);
 }
 
-.pagination-info {
-  font-size: 14px;
-  color: #656d76;
+.view-btn:hover {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  color: var(--info-500);
 }
 
-.pagination-summary {
-  font-size: 14px;
-  color: #656d76;
+.delete-btn:hover {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: var(--error-500);
 }
 
-.modal-overlay {
+.action-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 批量操作 */
+.batch-actions {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gradient-surface);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-4) var(--space-6);
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  gap: var(--space-4);
+  z-index: var(--z-fixed);
+  backdrop-filter: blur(20px);
 }
 
-.modal-dialog {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  max-width: 500px;
-  width: 90%;
-  max-height: 90vh;
-  overflow: hidden;
+.selection-info {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--gray-700);
 }
 
-.modal-header {
+.batch-buttons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e1e5e9;
+  gap: var(--space-2);
 }
 
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #24292f;
-}
-
-.modal-close {
-  padding: 4px;
+.batch-btn {
+  padding: var(--space-2) var(--space-4);
   border: none;
-  background: transparent;
-  color: #656d76;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 }
 
-.modal-close:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #24292f;
+.batch-btn.secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
 }
 
-.modal-close svg {
-  fill: currentColor;
+.batch-btn.secondary:hover {
+  background: var(--gray-200);
 }
 
-.modal-body {
-  padding: 20px;
+.batch-btn.danger {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
 }
 
-.modal-body p {
-  margin: 0;
-  color: #656d76;
-  line-height: 1.6;
+.batch-btn.danger:hover {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  transform: translateY(-1px);
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 20px;
-  border-top: 1px solid #e1e5e9;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: 1px solid;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #0969da;
-  color: #fff;
-  border-color: #0969da;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #0860ca;
-  border-color: #0860ca;
-}
-
-.btn-secondary {
-  background: #f6f8fa;
-  color: #24292f;
-  border-color: #d0d7de;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #8c959f;
-}
-
-.btn-danger {
-  background: #da3633;
-  color: #fff;
-  border-color: #da3633;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #b62324;
-  border-color: #b62324;
-}
-
-.btn-icon {
-  padding: 6px;
-  border: none;
-  background: transparent;
-  color: #656d76;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #24292f;
-}
-
-.btn-icon.btn-danger:hover {
-  background: rgba(218, 54, 51, 0.1);
-  color: #da3633;
-}
-
-.btn-icon svg {
-  fill: currentColor;
-}
-
-.btn-link {
-  border: none;
-  background: transparent;
-  color: #0969da;
-  font-size: 12px;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.btn-link:hover {
-  color: #0860ca;
-}
-
-.btn svg {
-  fill: currentColor;
-}
-
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .clipboard-history-view {
-    padding: 16px;
-  }
-
-  .header-content {
+  .clipboard-filters {
     flex-direction: column;
-    align-items: stretch;
+    gap: var(--space-3);
+    padding: var(--space-4);
   }
 
-  .header-actions {
-    justify-content: flex-end;
+  .filter-group {
+    width: 100%;
   }
 
-  .page-title {
-    font-size: 28px;
+  .filter-actions {
+    width: 100%;
   }
 
-  .filters-row {
-    flex-direction: column;
-    gap: 16px;
+  .clear-btn {
+    width: 100%;
+    justify-content: center;
   }
 
-  .history-item {
-    padding: 16px;
-  }
-
-  .item-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .item-title {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .content-preview {
+    padding: var(--space-4);
   }
 
   .item-actions {
-    justify-content: flex-end;
+    padding: var(--space-3) var(--space-4);
+    justify-content: center;
   }
 
-  .pagination-container {
+  .batch-actions {
+    left: var(--space-4);
+    right: var(--space-4);
+    transform: none;
     flex-direction: column;
-    gap: 12px;
-    text-align: center;
+    gap: var(--space-3);
   }
 
-  .modal-dialog {
-    margin: 20px;
+  .batch-buttons {
+    width: 100%;
+  }
+
+  .batch-btn {
+    flex: 1;
+  }
+}
+
+/* 无障碍性增强 */
+@media (prefers-reduced-motion: reduce) {
+  .history-item,
+  .action-btn,
+  .batch-btn {
+    transition: none;
+  }
+
+  .history-item:hover,
+  .action-btn:hover {
+    transform: none;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .clipboard-filters,
+  .history-item {
+    border-width: 2px;
+  }
+
+  .search-input,
+  .time-filter {
+    border-width: 2px;
   }
 }
 </style>

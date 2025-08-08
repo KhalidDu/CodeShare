@@ -4,6 +4,9 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+// 引入设计系统样式
+import '@/assets/styles/design-system.css'
+
 const app = createApp(App)
 
 // 创建 Pinia 实例

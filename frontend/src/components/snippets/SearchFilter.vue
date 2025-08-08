@@ -471,11 +471,17 @@ if (typeof window !== 'undefined') {
 
 <style scoped>
 .search-filter {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
+  background: var(--gradient-surface);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
   margin-bottom: 1.5rem;
+  transition: all var(--transition-normal);
+}
+
+.search-filter:hover {
+  box-shadow: var(--shadow-lg);
 }
 
 /* 搜索部分 */
@@ -501,17 +507,28 @@ if (typeof window !== 'undefined') {
 
 .search-input {
   width: 100%;
-  padding: 0.875rem 1rem 0.875rem 3rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
+  padding: 1rem 1.25rem 1rem 3.5rem;
+  border: 2px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-lg);
   font-size: 1rem;
-  transition: all 0.3s ease;
+  font-weight: var(--font-medium);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-normal);
+  color: var(--gray-800);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+  color: var(--gray-500);
+  font-weight: var(--font-normal);
 }
 
 .clear-search-btn {
@@ -619,19 +636,41 @@ if (typeof window !== 'undefined') {
 
 .tag-chip {
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-2xl);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   opacity: 0.7;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
+}
+
+.tag-chip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
 }
 
 .tag-chip:hover,
 .tag-chip.active {
   opacity: 1;
-  transform: scale(1.05);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.tag-chip:hover::before,
+.tag-chip.active::before {
+  opacity: 1;
 }
 
 /* 可见性筛选 */

@@ -155,6 +155,18 @@
         @size-change="handlePageSizeChange"
       />
     </div>
+
+    <!-- 浮动操作按钮 -->
+    <router-link
+      v-if="canCreateSnippet"
+      to="/snippets/create"
+      class="floating-action-btn"
+      title="创建新的代码片段"
+    >
+      <svg class="fab-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+      </svg>
+    </router-link>
   </AppLayout>
 </template>
 
@@ -592,47 +604,73 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .view-toggle {
   display: flex;
   gap: 0.25rem;
-  background: #f8f9fa;
-  padding: 0.25rem;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 0.375rem;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .view-btn {
-  padding: 0.5rem;
+  padding: 0.625rem;
   border: none;
   background: none;
   color: #6c757d;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.view-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 86, 179, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .view-btn:hover {
-  color: #495057;
-  background: #e9ecef;
+  color: #007bff;
+  transform: translateY(-1px);
+}
+
+.view-btn:hover::before {
+  opacity: 1;
 }
 
 .view-btn.active {
-  background: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   color: #007bff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.view-btn.active::before {
+  opacity: 0;
 }
 
 .view-icon {
   width: 18px;
   height: 18px;
+  z-index: 1;
 }
 
 .sort-info {
@@ -757,6 +795,58 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
   }
 }
 
+/* 浮动操作按钮 */
+.floating-action-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow: hidden;
+  position: relative;
+}
+
+.floating-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.floating-action-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 48px rgba(0, 123, 255, 0.4);
+}
+
+.floating-action-btn:hover::before {
+  opacity: 1;
+}
+
+.floating-action-btn:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.fab-icon {
+  width: 28px;
+  height: 28px;
+  z-index: 1;
+}
+
 /* 高对比度模式支持 */
 @media (prefers-contrast: high) {
   .view-controls {
@@ -770,6 +860,10 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
   .primary-btn,
   .secondary-btn {
     border-width: 2px;
+  }
+
+  .floating-action-btn {
+    border: 3px solid #fff;
   }
 }
 </style>

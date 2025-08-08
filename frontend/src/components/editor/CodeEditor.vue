@@ -282,19 +282,21 @@ defineExpose({
 
 <style scoped>
 .code-editor {
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
   overflow: hidden;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .editor-toolbar {
-  background: #f8f9fa;
-  border-bottom: 1px solid #e1e5e9;
-  padding: 8px 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  backdrop-filter: blur(10px);
 }
 
 .editor-controls {
@@ -305,39 +307,49 @@ defineExpose({
 
 .language-select,
 .theme-select {
-  padding: 4px 8px;
-  border: 1px solid #d0d7de;
-  border-radius: 4px;
-  background: #fff;
-  font-size: 12px;
-  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 140px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .language-select:focus,
 .theme-select:focus {
   outline: none;
-  border-color: #0969da;
-  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background: rgba(255, 255, 255, 1);
 }
 
 .format-btn {
-  padding: 4px 12px;
-  background: #0969da;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
 .format-btn:hover:not(:disabled) {
-  background: #0860ca;
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
 .format-btn:disabled {
-  background: #8c959f;
+  background: linear-gradient(135deg, #8c959f 0%, #6c757d 100%);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .editor-container {

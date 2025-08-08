@@ -152,7 +152,8 @@ if (typeof window !== 'undefined') {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
 }
 
 /* 主要内容区域 */
@@ -168,7 +169,8 @@ if (typeof window !== 'undefined') {
   display: flex;
   flex-direction: column;
   margin-left: 280px;
-  transition: margin-left 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: calc(100vh - 64px);
 }
 
 .layout-content.full-width {
@@ -181,27 +183,31 @@ if (typeof window !== 'undefined') {
 
 /* 内容头部 */
 .content-header {
-  background-color: white;
-  border-bottom: 1px solid #dee2e6;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 64px;
   z-index: 998;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* 主要内容 */
 .main-content {
   flex: 1;
-  padding: 0;
+  padding: 1.5rem 0;
+  position: relative;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
 }
 
 .page-content {
   padding-bottom: 2rem;
+  position: relative;
 }
 
 /* 移动端遮罩层 */

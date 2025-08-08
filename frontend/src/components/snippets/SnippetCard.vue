@@ -307,17 +307,35 @@ function handleTagClick(tag: Tag) {
 
 <style scoped>
 .snippet-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.snippet-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #007bff 0%, #0056b3 50%, #007bff 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .snippet-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(0, 123, 255, 0.15);
+  transform: translateY(-4px);
+  border-color: rgba(0, 123, 255, 0.1);
+}
+
+.snippet-card:hover::before {
+  opacity: 1;
 }
 
 .snippet-card.loading {
@@ -390,47 +408,70 @@ function handleTagClick(tag: Tag) {
 /* 操作按钮 */
 .card-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
   flex-shrink: 0;
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 8px;
-  background: #f8f9fa;
+  border-radius: 12px;
+  background: rgba(248, 249, 250, 0.8);
   color: #6c757d;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.action-btn:hover::before {
+  opacity: 1;
 }
 
 .action-btn:hover {
-  background: #e9ecef;
-  color: #495057;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .copy-btn:hover {
-  background: #e7f3ff;
+  background: linear-gradient(135deg, #e7f3ff 0%, #cce7ff 100%);
   color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
 }
 
 .edit-btn:hover {
-  background: #fff3cd;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
   color: #856404;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
 }
 
 .delete-btn:hover {
-  background: #f8d7da;
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
   color: #721c24;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
 }
 
 .action-icon {
@@ -456,17 +497,29 @@ function handleTagClick(tag: Tag) {
 }
 
 .code-block {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
   margin: 0;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: 1.6;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
+  color: #d4d4d4;
+  position: relative;
+}
+
+.code-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 123, 255, 0.3) 50%, transparent 100%);
 }
 
 .code-expand {
@@ -509,16 +562,37 @@ function handleTagClick(tag: Tag) {
 
 .tag-badge {
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tag-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .tag-badge:hover {
-  opacity: 0.8;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.tag-badge:hover::before {
+  opacity: 1;
 }
 
 /* 统计信息 */
