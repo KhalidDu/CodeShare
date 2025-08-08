@@ -100,28 +100,7 @@
       </div>
 
       <!-- 代码片段网格/列表 -->
-      <div v-if="useVirtualScroll && snippets.length > 50" class="virtual-scroll-container">
-        <VirtualList
-          :items="snippets"
-          :item-height="viewMode === 'grid' ? 280 : 120"
-          :container-height="600"
-          :buffer="5"
-          key-field="id"
-        >
-          <template #default="{ item: snippet }">
-            <div class="virtual-snippet-item">
-              <SnippetCard
-                :snippet="snippet"
-                :is-loading="isLoading"
-                @copy="handleSnippetCopy"
-                @delete="handleSnippetDelete"
-                @tag-click="handleTagClick"
-              />
-            </div>
-          </template>
-        </VirtualList>
-      </div>
-      <div v-else :class="['snippets-list', `view-${viewMode}`]">
+      <div :class="['snippets-list', `view-${viewMode}`]">
         <SnippetCard
           v-for="snippet in snippets"
           :key="snippet.id"
@@ -183,7 +162,7 @@ import SearchFilter from '@/components/snippets/SearchFilter.vue'
 import SnippetCard from '@/components/snippets/SnippetCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
-import VirtualList from '@/components/common/VirtualList.vue'
+
 import type { CodeSnippet, Tag } from '@/types'
 import { UserRole } from '@/types'
 
@@ -197,7 +176,6 @@ const { mark, measure } = usePerformance()
 
 // 响应式状态
 const viewMode = ref<'grid' | 'list'>('grid')
-const useVirtualScroll = ref(true)
 const currentFilters = ref({
   search: '',
   language: '',
@@ -604,67 +582,44 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.75rem;
-  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .view-toggle {
   display: flex;
   gap: 0.25rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #f8f9fa;
   padding: 0.375rem;
-  border-radius: 12px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .view-btn {
-  padding: 0.625rem;
+  padding: 0.5rem;
   border: none;
   background: none;
   color: #6c757d;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.view-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 86, 179, 0.1) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
 .view-btn:hover {
   color: #007bff;
-  transform: translateY(-1px);
-}
-
-.view-btn:hover::before {
-  opacity: 1;
+  background: rgba(0, 123, 255, 0.1);
 }
 
 .view-btn.active {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: white;
   color: #007bff;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
-  transform: translateY(-1px);
-}
-
-.view-btn.active::before {
-  opacity: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .view-icon {
@@ -800,70 +755,28 @@ function updateQueryParams(additionalParams: Record<string, string> = {}) {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  width: 56px;
+  height: 56px;
+  background: #007bff;
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
   z-index: 1000;
-  overflow: hidden;
-  position: relative;
-}
-
-.floating-action-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
 .floating-action-btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 12px 48px rgba(0, 123, 255, 0.4);
-}
-
-.floating-action-btn:hover::before {
-  opacity: 1;
-}
-
-.floating-action-btn:active {
-  transform: translateY(-2px) scale(1.02);
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 
 .fab-icon {
-  width: 28px;
-  height: 28px;
-  z-index: 1;
-}
-
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-  .view-controls {
-    border: 2px solid #000;
-  }
-
-  .view-btn.active {
-    border: 2px solid #007bff;
-  }
-
-  .primary-btn,
-  .secondary-btn {
-    border-width: 2px;
-  }
-
-  .floating-action-btn {
-    border: 3px solid #fff;
-  }
+  width: 20px;
+  height: 20px;
 }
 </style>
