@@ -130,7 +130,7 @@ function togglePasswordVisibility() {
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 /* 标签样式 */
@@ -165,11 +165,11 @@ function togglePasswordVisibility() {
 /* 输入框样式 */
 .field-input {
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 1rem;
   border: 2px solid #d1d5db;
   border-radius: 8px;
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.9375rem;
+  line-height: 1.4;
   color: #111827;
   background-color: #ffffff;
   transition: all 0.3s ease;

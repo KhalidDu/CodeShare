@@ -290,17 +290,17 @@ function showPrivacy() {
 <style scoped>
 /* 服务条款同意样式 */
 .terms-agreement {
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .checkbox-label {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.375rem;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #374151;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .checkbox-input {
@@ -310,8 +310,8 @@ function showPrivacy() {
 }
 
 .checkbox-custom {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: 2px solid #d1d5db;
   border-radius: 4px;
   background-color: #ffffff;
@@ -327,8 +327,8 @@ function showPrivacy() {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0);
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background-color: #3b82f6;
   border-radius: 2px;
   transition: transform 0.2s ease;

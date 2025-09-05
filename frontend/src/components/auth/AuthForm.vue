@@ -110,7 +110,7 @@ function handleSubmit() {
   padding: 1rem;
   position: relative;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  overflow: hidden;
+  overflow: auto;
 }
 
 .auth-card {
@@ -126,7 +126,7 @@ function handleSubmit() {
 
 /* 头部样式 */
 .auth-header {
-  padding: 2rem 2rem 1rem 2rem;
+  padding: 1.5rem 1.5rem 0.75rem 1.5rem;
   text-align: center;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-bottom: 1px solid #dee2e6;
@@ -167,24 +167,24 @@ function handleSubmit() {
 
 /* 表单主体 */
 .auth-body {
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 /* 提交按钮 */
 .auth-submit-btn {
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 1rem;
   background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -230,9 +230,9 @@ function handleSubmit() {
 
 /* 底部链接 */
 .auth-footer {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   text-align: center;
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid #dee2e6;
 }
 

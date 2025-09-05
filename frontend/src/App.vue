@@ -109,6 +109,7 @@ function handleLoadingCancel() {
 html {
   font-size: 16px;
   line-height: 1.5;
+  height: 100%;
 }
 
 body {
@@ -121,6 +122,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f8f9fa;
   color: #212529;
+  min-height: 100%;
 }
 
 #app {
