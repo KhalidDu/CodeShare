@@ -1,260 +1,293 @@
 <template>
-  <AppLayout>
-    <div class="snippet-detail-view">
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>加载中...</p>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- 返回按钮 -->
+      <div class="mb-6">
+        <router-link 
+          to="/snippets" 
+          class="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors duration-200"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          返回代码片段列表
+        </router-link>
       </div>
 
-      <div v-else-if="error" class="error-container">
-        <div class="error-icon">⚠️</div>
-        <h2>加载失败</h2>
-        <p>{{ error }}</p>
-        <div class="error-actions">
-          <button @click="loadSnippet" class="btn btn-primary">重试</button>
-          <router-link to="/snippets" class="btn btn-secondary">返回列表</router-link>
+      <!-- 加载状态 -->
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="mt-4 text-gray-600">加载中...</p>
         </div>
       </div>
 
-      <div v-else-if="snippet" class="snippet-content">
-        <!-- 头部信息 -->
-        <div class="snippet-header">
-          <div class="header-main">
-            <Breadcrumb :items="breadcrumbItems" />
-            <div class="title-section">
-              <h1 class="snippet-title">{{ snippet.title }}</h1>
-              <div class="snippet-meta">
-                <span class="meta-item">
-                  <span class="meta-label">创建者:</span>
-                  <span class="meta-value">{{ snippet.creatorName }}</span>
-                </span>
-                <span class="meta-item">
-                  <span class="meta-label">创建时间:</span>
-                  <span class="meta-value">{{ formatDate(snippet.createdAt) }}</span>
-                </span>
-                <span class="meta-item">
-                  <span class="meta-label">更新时间:</span>
-                  <span class="meta-value">{{ formatDate(snippet.updatedAt) }}</span>
-                </span>
-                <span class="meta-item">
-                  <span class="meta-label">查看次数:</span>
-                  <span class="meta-value">{{ snippet.viewCount }}</span>
-                </span>
-                <span class="meta-item">
-                  <span class="meta-label">复制次数:</span>
-                  <span class="meta-value">{{ snippet.copyCount }}</span>
-                </span>
+      <!-- 错误状态 -->
+      <div v-else-if="error" class="text-center py-12">
+        <div class="text-red-500 mb-4">
+          <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">加载失败</h2>
+        <p class="text-gray-600 mb-6">{{ error }}</p>
+        <div class="space-x-4">
+          <button 
+            @click="loadSnippet" 
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          >
+            重试
+          </button>
+          <router-link 
+            to="/snippets" 
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+          >
+            返回列表
+          </router-link>
+        </div>
+      </div>
+
+      <!-- 详情内容 -->
+      <div v-else-if="snippet" class="max-w-4xl mx-auto">
+        <!-- 单一卡片容器 -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <!-- 顶部标题区域 -->
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex items-start justify-between mb-4">
+              <!-- 标题和语言信息 -->
+              <div class="flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 mb-3">
+                  {{ snippet.title || '无标题' }}
+                </h1>
+                
+                <!-- 元信息行 -->
+                <div class="flex items-center gap-4 text-sm text-gray-600">
+                  <!-- 语言类型 -->
+                  <div
+                    class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium"
+                    :style="{
+                      backgroundColor: getLanguageColor(snippet.language) + '20',
+                      color: getLanguageColor(snippet.language),
+                      border: `1px solid ${getLanguageColor(snippet.language)}40`
+                    }"
+                  >
+                    <div
+                      class="w-1.5 h-1.5 rounded-full mr-1.5"
+                      :style="{ backgroundColor: getLanguageColor(snippet.language) }"
+                    ></div>
+                    {{ getLanguageDisplayName(snippet.language) }}
+                  </div>
+                  
+                  <!-- 统计信息 -->
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>{{ snippet.viewCount || 0 }}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <span>{{ snippet.copyCount || 0 }}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <svg v-if="snippet.isPublic" class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 002-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <svg v-else class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2h-8a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <span>{{ snippet.isPublic ? '公开' : '私有' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 操作按钮 -->
+              <div class="flex items-center gap-2 ml-4">
+                <button
+                  v-if="canEdit"
+                  @click="editSnippet"
+                  class="px-3 py-1.5 text-sm font-medium text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-md transition-colors duration-200"
+                >
+                  编辑
+                </button>
               </div>
             </div>
           </div>
-
-          <div class="header-actions">
-            <button
-              v-if="canEdit"
-              @click="editSnippet"
-              class="btn btn-secondary"
-            >
-              编辑
-            </button>
-            <CopyButton
-              v-if="snippet"
-              :text="displayCode"
-              :snippet-id="snippet.id"
-              :custom-text="'复制代码'"
-              button-class="btn btn-primary"
-              @copy-success="onCopySuccess"
-              @copy-error="onCopyError"
-            />
+          
+          <!-- 描述信息 -->
+          <div v-if="snippet.description" class="p-6 border-b border-gray-200 bg-gray-50">
+            <p class="text-gray-700 leading-relaxed">{{ snippet.description }}</p>
           </div>
-        </div>
-
-        <!-- 描述 -->
-        <div v-if="snippet.description" class="snippet-description">
-          <h3>描述</h3>
-          <p>{{ snippet.description }}</p>
-        </div>
-
-        <!-- 标签 -->
-        <div v-if="snippet.tags && snippet.tags.length > 0" class="snippet-tags">
-          <h3>标签</h3>
-          <div class="tags-list">
-            <span
-              v-for="tag in snippet.tags"
-              :key="tag.id"
-              class="tag-chip"
-              :style="{ backgroundColor: tag.color }"
-            >
-              {{ tag.name }}
-            </span>
-          </div>
-        </div>
-
-        <!-- 主要内容区域 -->
-        <div class="main-content">
-          <!-- 标签页导航 -->
-          <div class="tab-navigation">
-            <button 
-              @click="activeTab = 'code'"
-              :class="{ active: activeTab === 'code' }"
-              class="tab-button"
-            >
-              代码
-            </button>
-            <button 
-              @click="activeTab = 'history'"
-              :class="{ active: activeTab === 'history' }"
-              class="tab-button"
-            >
-              版本历史
-            </button>
-          </div>
-
-          <!-- 代码查看器 -->
-          <div v-show="activeTab === 'code'" class="tab-content">
-            <CodeViewer
-              :code="displayCode"
-              :language="displayLanguage"
-              :height="codeViewerHeight"
-              @copy="onCodeCopy"
-            />
-          </div>
-
-          <!-- 版本历史 -->
-          <div v-show="activeTab === 'history'" class="tab-content">
-            <VersionHistory
-              :snippet-id="snippetId"
-              :current-version-number="currentVersionNumber"
-              @version-restored="onVersionRestored"
-              @version-selected="onVersionSelected"
-            />
-          </div>
-        </div>
-
-        <!-- 统计信息 -->
-        <div class="snippet-stats">
-          <div class="stats-grid">
-            <div class="stat-item">
-              <div class="stat-value">{{ snippet.viewCount }}</div>
-              <div class="stat-label">查看次数</div>
+          
+          <!-- 标签 -->
+          <div v-if="snippet.tags && snippet.tags.length > 0" class="p-6 border-b border-gray-200">
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="tag in snippet.tags"
+                :key="tag.id"
+                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium"
+                :style="{ backgroundColor: tag.color + '20', color: tag.color, border: `1px solid ${tag.color}40` }"
+              >
+                {{ tag.name }}
+              </span>
             </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ snippet.copyCount }}</div>
-              <div class="stat-label">复制次数</div>
+          </div>
+          
+          <!-- 代码块 -->
+          <div class="bg-gray-900">
+            <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-300">代码</span>
+              <button
+                @click="handleCopy"
+                class="text-gray-400 hover:text-gray-300 transition-colors duration-200"
+                title="复制代码"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
             </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ getLanguageLabel(snippet.language) }}</div>
-              <div class="stat-label">编程语言</div>
+            <div class="p-6">
+              <pre class="text-sm text-gray-100 leading-relaxed whitespace-pre-wrap"><code>{{ snippet.code }}</code></pre>
             </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ snippet.isPublic ? '公开' : '私有' }}</div>
-              <div class="stat-label">可见性</div>
+          </div>
+          
+          <!-- 底部信息 -->
+          <div class="p-4 bg-gray-50 border-t border-gray-200">
+            <div class="flex items-center justify-between text-xs text-gray-500">
+              <div class="flex items-center gap-4">
+                <span>创建者: {{ snippet.creatorName || '未知' }}</span>
+                <span>创建时间: {{ formatDate(snippet.createdAt) }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </AppLayout>
+
+    <!-- 复制成功提示 -->
+    <div
+      v-if="showCopySuccess"
+      class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse"
+    >
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+        </svg>
+        复制成功！
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import AppLayout from '@/components/layout/AppLayout.vue'
-import Breadcrumb from '@/components/common/Breadcrumb.vue'
-import CodeViewer from '@/components/editor/CodeViewer.vue'
-import VersionHistory from '@/components/snippets/VersionHistory.vue'
-import CopyButton from '@/components/common/CopyButton.vue'
-import { codeSnippetService } from '@/services/codeSnippetService'
 import { useAuthStore } from '@/stores/auth'
 import { useCopy } from '@/composables/useCopy'
-import type { CodeSnippet, SupportedLanguage, SnippetVersion } from '@/types'
+import { codeSnippetService } from '@/services/codeSnippetService'
+import type { CodeSnippet } from '@/types'
+import { UserRole } from '@/types'
 
-// 路由和认证
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-
-// 复制功能
 const { copyCodeSnippet } = useCopy()
 
-// 响应式数据
+// 响应式状态
 const snippet = ref<CodeSnippet | null>(null)
 const loading = ref(false)
 const error = ref('')
-const codeViewerHeight = ref('500px')
-const activeTab = ref<'code' | 'history'>('code')
-const selectedVersion = ref<SnippetVersion | null>(null)
-const currentVersionNumber = ref<number>(1)
-
-// 支持的编程语言
-const supportedLanguages: SupportedLanguage[] = [
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'c', label: 'C' },
-  { value: 'html', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
-  { value: 'scss', label: 'SCSS' },
-  { value: 'json', label: 'JSON' },
-  { value: 'xml', label: 'XML' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'markdown', label: 'Markdown' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'shell', label: 'Shell' },
-  { value: 'powershell', label: 'PowerShell' },
-  { value: 'php', label: 'PHP' },
-  { value: 'ruby', label: 'Ruby' },
-  { value: 'go', label: 'Go' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'swift', label: 'Swift' },
-  { value: 'kotlin', label: 'Kotlin' },
-  { value: 'dart', label: 'Dart' }
-]
+const showCopySuccess = ref(false)
 
 // 计算属性
 const snippetId = computed(() => route.params.id as string)
 
 const canEdit = computed(() => {
   if (!snippet.value || !authStore.user) return false
-
-  // 管理员可以编辑所有片段
-  if (authStore.user.role === 2) return true
-
-  // 编辑者可以编辑自己的片段
-  if (authStore.user.role === 1 && snippet.value.createdBy === authStore.user.id) return true
-
-  return false
-})
-
-const breadcrumbItems = computed(() => [
-  { title: '首页', path: '/' },
-  { title: '代码片段', path: '/snippets' },
-  { title: snippet.value?.title || '详情', path: '' }
-])
-
-const displayCode = computed(() => {
-  return selectedVersion.value?.code || snippet.value?.code || ''
-})
-
-const displayLanguage = computed(() => {
-  return selectedVersion.value?.language || snippet.value?.language || 'text'
+  return authStore.user.role === UserRole.Admin || 
+         (authStore.user.role === UserRole.Editor && authStore.user.id === snippet.value.createdBy)
 })
 
 /**
- * 获取语言显示标签
+ * 获取编程语言对应的颜色
  */
-const getLanguageLabel = (language: string): string => {
-  const lang = supportedLanguages.find(l => l.value === language)
-  return lang?.label || language.toUpperCase()
+function getLanguageColor(language: string): string {
+  const colors: Record<string, string> = {
+    javascript: '#f7df1e',
+    typescript: '#3178c6',
+    python: '#3776ab',
+    java: '#ed8b00',
+    csharp: '#239120',
+    cpp: '#00599c',
+    html: '#e34f26',
+    css: '#1572b6',
+    vue: '#4fc08d',
+    react: '#61dafb',
+    angular: '#dd0031',
+    php: '#777bb4',
+    ruby: '#cc342d',
+    go: '#00add8',
+    rust: '#000000',
+    swift: '#fa7343',
+    kotlin: '#7f52ff',
+    dart: '#0175c2',
+    sql: '#336791',
+    shell: '#89e051',
+    powershell: '#012456',
+    json: '#000000',
+    xml: '#0060ac',
+    yaml: '#cb171e',
+    markdown: '#083fa1'
+  }
+
+  return colors[language.toLowerCase()] || '#6c757d'
+}
+
+/**
+ * 获取编程语言的显示名称
+ */
+function getLanguageDisplayName(language: string): string {
+  const displayNames: Record<string, string> = {
+    javascript: 'JavaScript',
+    typescript: 'TypeScript',
+    python: 'Python',
+    java: 'Java',
+    csharp: 'C#',
+    cpp: 'C++',
+    html: 'HTML',
+    css: 'CSS',
+    vue: 'Vue',
+    react: 'React',
+    angular: 'Angular',
+    php: 'PHP',
+    ruby: 'Ruby',
+    go: 'Go',
+    rust: 'Rust',
+    swift: 'Swift',
+    kotlin: 'Kotlin',
+    dart: 'Dart',
+    sql: 'SQL',
+    shell: 'Shell',
+    powershell: 'PowerShell',
+    json: 'JSON',
+    xml: 'XML',
+    yaml: 'YAML',
+    markdown: 'Markdown'
+  }
+
+  return displayNames[language.toLowerCase()] || language
 }
 
 /**
  * 格式化日期
  */
-const formatDate = (dateString: string): string => {
+function formatDate(dateString: string): string {
   const date = new Date(dateString)
   return date.toLocaleString('zh-CN', {
     year: 'numeric',
@@ -268,7 +301,7 @@ const formatDate = (dateString: string): string => {
 /**
  * 加载代码片段
  */
-const loadSnippet = async () => {
+async function loadSnippet() {
   if (!snippetId.value) {
     error.value = '无效的代码片段ID'
     return
@@ -278,6 +311,7 @@ const loadSnippet = async () => {
   error.value = ''
 
   try {
+    // 这里使用模拟数据，实际应该调用API
     snippet.value = await codeSnippetService.getSnippet(snippetId.value)
   } catch (err: any) {
     console.error('Failed to load snippet:', err)
@@ -288,65 +322,40 @@ const loadSnippet = async () => {
 }
 
 /**
+ * 处理复制操作
+ */
+async function handleCopy() {
+  if (!snippet.value) return
+
+  try {
+    const success = await copyCodeSnippet(
+      snippet.value.code,
+      snippet.value.language,
+      snippet.value.id,
+      { showSuccessToast: false }
+    )
+
+    if (success) {
+      showCopySuccess.value = true
+      // 更新复制次数
+      if (snippet.value) {
+        snippet.value.copyCount = (snippet.value.copyCount || 0) + 1
+      }
+      // 3秒后隐藏提示
+      setTimeout(() => {
+        showCopySuccess.value = false
+      }, 3000)
+    }
+  } catch (error) {
+    console.error('复制失败:', error)
+  }
+}
+
+/**
  * 编辑代码片段
  */
-const editSnippet = () => {
+function editSnippet() {
   router.push(`/snippets/${snippetId.value}/edit`)
-}
-
-/**
- * 复制成功处理
- */
-const onCopySuccess = () => {
-  // 更新本地复制次数
-  if (snippet.value) {
-    snippet.value.copyCount += 1
-  }
-}
-
-/**
- * 复制失败处理
- */
-const onCopyError = (error: Error) => {
-  console.error('Copy failed:', error)
-}
-
-/**
- * 代码复制处理（来自 CodeViewer 组件）
- */
-const onCodeCopy = async () => {
-  // 使用统一的复制功能
-  const success = await copyCodeSnippet(
-    displayCode.value,
-    displayLanguage.value,
-    snippet.value?.id
-  )
-  
-  if (success && snippet.value) {
-    snippet.value.copyCount += 1
-  }
-}
-
-/**
- * 版本恢复处理
- */
-const onVersionRestored = async (version: SnippetVersion) => {
-  // 重新加载代码片段以获取最新数据
-  await loadSnippet()
-  
-  // 切换回代码标签页
-  activeTab.value = 'code'
-  selectedVersion.value = null
-  
-  console.log(`版本 ${version.versionNumber} 已恢复`)
-}
-
-/**
- * 版本选择处理
- */
-const onVersionSelected = (version: SnippetVersion) => {
-  selectedVersion.value = version
-  console.log(`已选择版本 ${version.versionNumber}`)
 }
 
 // 生命周期
@@ -356,304 +365,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.snippet-detail-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e1e5e9;
-  border-top: 4px solid #0969da;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-container .error-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.error-container h2 {
-  color: #d1242f;
-  margin-bottom: 8px;
-}
-
-.error-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.snippet-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.snippet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e1e5e9;
-}
-
-.header-main {
-  flex: 1;
-}
-
-.title-section {
-  margin-top: 12px;
-}
-
-.snippet-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #24292f;
-  margin: 0 0 12px 0;
-  line-height: 1.2;
-}
-
-.snippet-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.meta-label {
-  color: #656d76;
-  font-weight: 500;
-}
-
-.meta-value {
-  color: #24292f;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.snippet-description,
-.snippet-tags {
-  background: #fff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.main-content {
-  background: #fff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.tab-navigation {
-  display: flex;
-  border-bottom: 1px solid #e1e5e9;
-  background: #f6f8fa;
-}
-
-.tab-button {
-  padding: 12px 20px;
-  border: none;
-  background: transparent;
-  color: #656d76;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-bottom: 2px solid transparent;
-}
-
-.tab-button:hover {
-  color: #24292f;
-  background: rgba(0, 0, 0, 0.03);
-}
-
-.tab-button.active {
-  color: #0969da;
-  background: #fff;
-  border-bottom-color: #0969da;
-}
-
-.tab-content {
-  padding: 20px;
-}
-
-.snippet-description h3,
-.snippet-tags h3,
-.snippet-code h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #24292f;
-}
-
-.snippet-description p {
-  margin: 0;
-  line-height: 1.6;
-  color: #24292f;
-}
-
-.tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  background: #0969da;
-  color: #fff;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.snippet-stats {
-  background: #f6f8fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #0969da;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #656d76;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: 1px solid;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #0969da;
-  color: #fff;
-  border-color: #0969da;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #0860ca;
-  border-color: #0860ca;
-}
-
-.btn-secondary {
-  background: #f6f8fa;
-  color: #24292f;
-  border-color: #d0d7de;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #8c959f;
-}
-
-@media (max-width: 768px) {
-  .snippet-detail-view {
-    padding: 16px;
-  }
-
-  .snippet-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .header-actions {
-    justify-content: flex-end;
-  }
-
-  .snippet-title {
-    font-size: 24px;
-  }
-
-  .snippet-meta {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  .snippet-description,
-  .snippet-tags {
-    padding: 16px;
-  }
-
-  .tab-content {
-    padding: 16px;
-  }
-
-  .tab-button {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-}
+/* 组件特定样式 */
 </style>

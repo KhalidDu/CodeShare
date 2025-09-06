@@ -15,16 +15,22 @@ namespace CodeSnippetManager.Api.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册数据访问层服务
+    /// 注册数据访问层服务 - 自动检测并使用可用的数据库
     /// </summary>
     /// <param name="services">服务集合</param>
-    /// <param name="connectionString">数据库连接字符串</param>
+    /// <param name="configuration">配置</param>
     /// <returns>服务集合</returns>
-    public static IServiceCollection AddDataAccessServices(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddDataAccessServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // 注册数据库连接工厂 - 单例服务，整个应用程序生命周期内只有一个实例
+        // 注册数据库连接检测器
+        services.AddSingleton<DatabaseConnectionDetector>();
+        
+        // 注册数据库连接工厂 - 自动检测可用的数据库
         services.AddSingleton<IDbConnectionFactory>(provider => 
-            new MySqlConnectionFactory(connectionString));
+        {
+            var detector = provider.GetRequiredService<DatabaseConnectionDetector>();
+            return detector.CreateAvailableConnectionFactory();
+        });
 
         // 注册仓储接口和实现 - Scoped 生命周期，每个HTTP请求一个实例
         services.AddScoped<IUserRepository, UserRepository>();
@@ -255,18 +261,17 @@ public static class ServiceCollectionExtensions
     /// <returns>服务集合</returns>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // 获取数据库连接字符串
-        var connectionString = configuration.GetConnectionString("DefaultConnection") 
-            ?? "Server=localhost;Database=CodeSnippetManager;Uid=root;Pwd=password;";
-
         // 注册各层服务
         services.AddCacheServices(configuration);
         services.AddPerformanceServices(configuration);
         services.AddSecurityServices(configuration);
-        services.AddDataAccessServices(connectionString);
+        services.AddDataAccessServices(configuration);
         services.AddBusinessServices();
         services.AddJwtAuthentication(configuration);
         services.AddCorsPolicy();
+
+        // 初始化SQLite数据库（如果使用SQLite）
+        InitializeDatabaseIfNeeded(services, configuration);
 
         // 在开发环境中验证配置
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
@@ -275,5 +280,42 @@ public static class ServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    /// <summary>
+    /// 初始化数据库（如果需要）
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configuration">配置</param>
+    private static void InitializeDatabaseIfNeeded(IServiceCollection services, IConfiguration configuration)
+    {
+        try
+        {
+            // 检查是否可能使用SQLite
+            var mySqlConnectionString = configuration.GetConnectionString("DefaultConnection") ?? 
+                                      configuration.GetConnectionString("MySQLConnection") ??
+                                      "Server=localhost;Database=CodeSnippetManager;Uid=root;Pwd=root;CharSet=utf8mb4;";
+
+            // 简单检测MySQL是否可用
+            using var mySqlConnection = new MySql.Data.MySqlClient.MySqlConnection(mySqlConnectionString);
+            try
+            {
+                mySqlConnection.Open();
+                Console.WriteLine("✅ MySQL 数据库连接正常");
+            }
+            catch
+            {
+                Console.WriteLine("⚠️ MySQL 不可用，将使用 SQLite 数据库");
+                
+                // 初始化SQLite数据库
+                var sqliteConnectionString = configuration.GetConnectionString("SQLiteConnection") ??
+                                           "Data Source=CodeSnippetManager.db;";
+                DatabaseConnectionDetector.EnsureSqliteDatabase(sqliteConnectionString);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ 数据库初始化检查失败: {ex.Message}");
+        }
     }
 }
