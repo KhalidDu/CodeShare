@@ -149,7 +149,7 @@ export function useErrorHandler() {
     delay: number = 1000
   ) {
     return async (...args: T): Promise<R> => {
-      let lastError: Error
+      let lastError: Error = new Error('Unknown error')
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -183,7 +183,7 @@ export function useErrorHandler() {
     const status = error.response.status
 
     // 5xx 服务器错误可重试
-    if (status >= 500) {
+    if (status && status >= 500) {
       return true
     }
 

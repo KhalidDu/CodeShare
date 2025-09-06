@@ -384,7 +384,7 @@ const loadSnippets = withLoading(async () => {
     page: parseInt((route.query.page as string) || '1'),
     pageSize: parseInt((route.query.pageSize as string) || '20'),
     search: currentFilters.value.search,
-    languages: currentFilters.value.languages,
+    language: currentFilters.value.languages.join(','),
     tag: currentFilters.value.tag,
     creator: currentFilters.value.creator,
     showPublic: currentFilters.value.showPublic,

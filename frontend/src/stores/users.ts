@@ -42,7 +42,7 @@ export const useUsersStore = defineStore('users', () => {
     try {
       users.value = await userService.getAllUsers()
     } catch (err: unknown) {
-      const error = err instanceof Error ? err : new Error('未知错误')
+      const errorObj = err instanceof Error ? err : new Error('未知错误')
       const axiosError = err as { response?: { data?: { message?: string } } }
       error.value = axiosError.response?.data?.message || '获取用户列表失败'
       console.error('获取用户列表失败:', err)

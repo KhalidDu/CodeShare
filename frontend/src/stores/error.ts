@@ -112,7 +112,7 @@ export const useErrorStore = defineStore('error', () => {
   // API 错误处理
   function handleApiError(error: Error & { response?: { data?: unknown; status?: number } }, context?: Record<string, unknown>): string {
     const status = error.response?.status
-    const data = error.response?.data
+    const data = error.response?.data as { message?: string; details?: unknown } | null
 
     let type: ErrorType = ErrorType.SERVER
     let title = '服务器错误'
@@ -171,9 +171,9 @@ export const useErrorStore = defineStore('error', () => {
 
     return addError(type, title, message, {
       severity,
-      details: data?.details,
+      details: data?.details as string | undefined,
       context: { ...context, status, response: data },
-      retryable: status >= 500,
+      retryable: status ? status >= 500 : false,
       autoHide: severity === ErrorSeverity.LOW
     })
   }

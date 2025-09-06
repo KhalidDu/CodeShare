@@ -66,8 +66,8 @@ export const useSnippetStore = defineStore('snippets', () => {
       currentPage.value = result.page
       pageSize.value = result.pageSize
 
-    } catch (error) {
-      handleApiError(error, { operation: '获取代码片段列表' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '获取代码片段列表' })
     } finally {
       isLoading.value = false
       stopGlobalLoading()
@@ -83,8 +83,8 @@ export const useSnippetStore = defineStore('snippets', () => {
       const snippet = await codeSnippetService.getSnippet(id)
       currentSnippet.value = snippet
       return snippet
-    } catch (error) {
-      handleApiError(error, { operation: '获取代码片段详情' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '获取代码片段详情' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -106,8 +106,8 @@ export const useSnippetStore = defineStore('snippets', () => {
       }
 
       return newSnippet
-    } catch (error) {
-      handleApiError(error, { operation: '创建代码片段' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '创建代码片段' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -134,8 +134,8 @@ export const useSnippetStore = defineStore('snippets', () => {
       }
 
       return updatedSnippet
-    } catch (error) {
-      handleApiError(error, { operation: '更新代码片段' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '更新代码片段' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -159,8 +159,8 @@ export const useSnippetStore = defineStore('snippets', () => {
         currentSnippet.value = null
       }
 
-    } catch (error) {
-      handleApiError(error, { operation: '删除代码片段' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '删除代码片段' })
       throw error
     } finally {
       stopGlobalLoading()

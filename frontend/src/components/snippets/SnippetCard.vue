@@ -385,9 +385,7 @@ async function handleCopy() {
     const success = await copyCodeSnippet(
       props.snippet.code,
       props.snippet.language,
-      props.snippet.id,
-      // 禁用内置的toast提示，使用卡片内的视觉提示
-      { showSuccessToast: false }
+      props.snippet.id
     )
 
     if (success) {

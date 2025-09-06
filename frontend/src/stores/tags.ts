@@ -57,8 +57,8 @@ export const useTagStore = defineStore('tags', () => {
       lastFetchTime.value = Date.now()
 
       return result
-    } catch (error) {
-      handleApiError(error, { operation: '获取标签列表' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '获取标签列表' })
       throw error
     } finally {
       isLoading.value = false
@@ -77,8 +77,8 @@ export const useTagStore = defineStore('tags', () => {
       // 简单按名称排序作为热门标签的临时实现
       popularTags.value = allTags.slice(0, limit)
       return popularTags.value
-    } catch (error) {
-      handleApiError(error, { operation: '获取热门标签' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '获取热门标签' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -101,8 +101,8 @@ export const useTagStore = defineStore('tags', () => {
       ).slice(0, limit)
 
       return filtered
-    } catch (error) {
-      handleApiError(error, { operation: '搜索标签' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '搜索标签' })
       return []
     }
   }
@@ -123,8 +123,8 @@ export const useTagStore = defineStore('tags', () => {
       }
 
       return result
-    } catch (error) {
-      handleApiError(error, { operation: '获取标签详情' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '获取标签详情' })
       throw error
     }
   }
@@ -141,8 +141,8 @@ export const useTagStore = defineStore('tags', () => {
       tags.value.push(newTag)
 
       return newTag
-    } catch (error) {
-      handleApiError(error, { operation: '创建标签' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '创建标签' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -164,8 +164,8 @@ export const useTagStore = defineStore('tags', () => {
       }
 
       return updatedTag
-    } catch (error) {
-      handleApiError(error, { operation: '更新标签' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '更新标签' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -184,8 +184,8 @@ export const useTagStore = defineStore('tags', () => {
       tags.value = tags.value.filter(t => t.id !== id)
       popularTags.value = popularTags.value.filter(t => t.id !== id)
 
-    } catch (error) {
-      handleApiError(error, { operation: '删除标签' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '删除标签' })
       throw error
     } finally {
       stopGlobalLoading()
@@ -232,8 +232,8 @@ export const useTagStore = defineStore('tags', () => {
         usageCount: 0,
         snippetCount: 0
       }
-    } catch (error) {
-      handleApiError(error, { operation: '获取标签统计' })
+    } catch (error: unknown) {
+      handleApiError(error as Error & { apiError?: boolean; response?: { data?: unknown; status?: number } }, { operation: '获取标签统计' })
       throw error
     }
   }

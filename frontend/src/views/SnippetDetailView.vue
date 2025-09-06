@@ -332,8 +332,7 @@ async function handleCopy() {
     const success = await copyCodeSnippet(
       snippet.value.code,
       snippet.value.language,
-      snippet.value.id,
-      { showSuccessToast: false }
+      snippet.value.id
     )
 
     if (success) {

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Git\\CodeShare\\backend/**)",
+      "Read(/C:\\Git\\CodeShare\\backend/**)",
+      "Read(/C:\\Git\\CodeShare\\frontend/**)",
+      "Read(/C:\\Git\\CodeShare\\frontend/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
