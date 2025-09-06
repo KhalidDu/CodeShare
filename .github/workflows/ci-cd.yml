@@ -36,6 +36,9 @@ jobs:
     - name: Build backend
       run: dotnet build backend/CodeSnippetManager.Api.csproj --no-restore --configuration Release
 
+    - name: Build test project
+      run: dotnet build backend/Tests/Tests.csproj --no-restore --configuration Release
+
     - name: Run backend tests
       run: dotnet test backend/Tests/ --no-build --configuration Release --verbosity normal
 
