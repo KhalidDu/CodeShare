@@ -71,9 +71,11 @@
           <p>&copy; {{ currentYear }} 代码片段管理工具. 保留所有权利.</p>
         </div>
         <div class="footer-meta">
-          <span class="version">版本 {{ version }}</span>
+          <span class="powered-by">Powered by KD</span>
           <span class="separator">|</span>
-          <span class="build-info">构建时间: {{ buildTime }}</span>
+          <span class="license">MIT</span>
+          <span class="separator">|</span>
+          <span class="version">版本 v0.11</span>
         </div>
       </div>
     </div>
@@ -123,7 +125,7 @@ const currentYear = computed(() => {
  * 获取应用版本
  */
 const version = computed(() => {
-  return import.meta.env.VITE_APP_VERSION || '1.0.0'
+  return 'v0.11'
 })
 
 /**

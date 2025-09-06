@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User, UserRole } from '@/types'
+import type { User } from '@/types'
 import { userService, type CreateUserRequest, type UpdateUserRequest } from '@/services/userService'
 
 /**
@@ -41,8 +41,10 @@ export const useUsersStore = defineStore('users', () => {
     
     try {
       users.value = await userService.getAllUsers()
-    } catch (err: any) {
-      error.value = err.response?.data?.message || '获取用户列表失败'
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error('未知错误')
+      const axiosError = err as { response?: { data?: { message?: string } } }
+      error.value = axiosError.response?.data?.message || '获取用户列表失败'
       console.error('获取用户列表失败:', err)
     } finally {
       loading.value = false
@@ -67,8 +69,9 @@ export const useUsersStore = defineStore('users', () => {
       const newUser = await userService.createUser(userData)
       users.value.push(newUser)
       return newUser
-    } catch (err: any) {
-      error.value = err.response?.data?.message || '创建用户失败'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } }
+      error.value = axiosError.response?.data?.message || '创建用户失败'
       console.error('创建用户失败:', err)
       return null
     } finally {
@@ -90,8 +93,9 @@ export const useUsersStore = defineStore('users', () => {
         users.value[index] = updatedUser
       }
       return updatedUser
-    } catch (err: any) {
-      error.value = err.response?.data?.message || '更新用户失败'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } }
+      error.value = axiosError.response?.data?.message || '更新用户失败'
       console.error('更新用户失败:', err)
       return null
     } finally {
@@ -110,8 +114,9 @@ export const useUsersStore = defineStore('users', () => {
       await userService.deleteUser(id)
       users.value = users.value.filter(user => user.id !== id)
       return true
-    } catch (err: any) {
-      error.value = err.response?.data?.message || '删除用户失败'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } }
+      error.value = axiosError.response?.data?.message || '删除用户失败'
       console.error('删除用户失败:', err)
       return false
     } finally {
@@ -133,8 +138,9 @@ export const useUsersStore = defineStore('users', () => {
         users.value[index] = updatedUser
       }
       return true
-    } catch (err: any) {
-      error.value = err.response?.data?.message || '切换用户状态失败'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } }
+      error.value = axiosError.response?.data?.message || '切换用户状态失败'
       console.error('切换用户状态失败:', err)
       return false
     } finally {
@@ -152,8 +158,9 @@ export const useUsersStore = defineStore('users', () => {
     try {
       await userService.resetPassword(id, newPassword)
       return true
-    } catch (err: any) {
-      error.value = err.response?.data?.message || '重置密码失败'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } }
+      error.value = axiosError.response?.data?.message || '重置密码失败'
       console.error('重置密码失败:', err)
       return false
     } finally {

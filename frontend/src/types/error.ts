@@ -31,7 +31,7 @@ export interface AppError {
   message: string
   details?: string
   timestamp: Date
-  context?: Record<string, any>
+  context?: Record<string, unknown>
   retryable?: boolean
   dismissible?: boolean
 }

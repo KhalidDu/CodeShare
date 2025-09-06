@@ -3,14 +3,11 @@
  * 提供统一的用户反馈接口
  */
 import { useToastStore } from '@/stores/toast'
-import { useErrorStore } from '@/stores/error'
 import { useLoadingStore } from '@/stores/loading'
 import type { ToastOptions } from '@/stores/toast'
-import type { ErrorHandlingOptions } from '@/types/error'
 
 export function useUserFeedback() {
   const toastStore = useToastStore()
-  const errorStore = useErrorStore()
   const loadingStore = useLoadingStore()
 
   /**
@@ -209,13 +206,9 @@ export function useUserFeedback() {
    * 显示表单验证错误
    */
   function showValidationErrors(
-    errors: Record<string, string[]>,
+    _errors: Record<string, string[]>,
     options?: Omit<ToastOptions, 'type'>
   ): string {
-    const errorMessages = Object.entries(errors)
-      .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-      .join('\n')
-
     return showError('表单验证失败', {
       title: '请检查以下字段',
       duration: 8000,
@@ -296,12 +289,12 @@ export function useUserFeedback() {
   /**
    * 包装异步操作，自动显示反馈
    */
-  function withFeedback<T extends any[], R>(
+  function withFeedback<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
     options: {
       loadingMessage?: string
       successMessage?: string | ((result: R) => string)
-      errorMessage?: string | ((error: any) => string)
+      errorMessage?: string | ((error: Error) => string)
       showLoading?: boolean
       showSuccess?: boolean
       showError?: boolean
@@ -331,14 +324,15 @@ export function useUserFeedback() {
         }
 
         return result
-      } catch (error: any) {
+      } catch (error: unknown) {
         // 显示错误反馈
         if (options.showError !== false) {
+          const errorMessage = error instanceof Error ? error : new Error('未知错误')
           const message = options.errorMessage
             ? typeof options.errorMessage === 'function'
-              ? options.errorMessage(error)
+              ? options.errorMessage(errorMessage)
               : options.errorMessage
-            : error.message || '操作失败'
+            : errorMessage.message || '操作失败'
           showError(message)
         }
 

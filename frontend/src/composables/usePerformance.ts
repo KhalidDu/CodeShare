@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 /**
  * 性能监控 Composable
@@ -58,7 +58,7 @@ export function usePerformance() {
     // 观察 LCP (Largest Contentful Paint)
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries()
-      const lastEntry = entries[entries.length - 1] as any
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime: number }
       metrics.value.lcp = lastEntry.startTime
     })
     lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
@@ -77,7 +77,7 @@ export function usePerformance() {
     // 观察 CLS (Cumulative Layout Shift)
     let clsValue = 0
     const clsObserver = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as any[]) {
+      for (const entry of list.getEntries() as Array<PerformanceEntry & { hadRecentInput: boolean; value: number }>) {
         if (!entry.hadRecentInput) {
           clsValue += entry.value
           metrics.value.cls = clsValue
@@ -88,7 +88,7 @@ export function usePerformance() {
 
     // 观察 FID (First Input Delay)
     const fidObserver = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as any[]) {
+      for (const entry of list.getEntries() as Array<PerformanceEntry & { processingStart: number; startTime: number }>) {
         metrics.value.fid = entry.processingStart - entry.startTime
       }
     })
@@ -269,7 +269,7 @@ export function usePerformance() {
 /**
  * 防抖函数 - 性能优化工具
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -286,7 +286,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * 节流函数 - 性能优化工具
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {

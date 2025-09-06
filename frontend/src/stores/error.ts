@@ -84,7 +84,7 @@ export const useErrorStore = defineStore('error', () => {
   }
 
   // 网络错误处理
-  function handleNetworkError(error: any, context?: Record<string, any>): string {
+  function handleNetworkError(error: Error & { code?: string; response?: { data?: unknown; status?: number } }, context?: Record<string, unknown>): string {
     let title = '网络错误'
     let message = '请检查网络连接'
     let severity: ErrorSeverity = ErrorSeverity.MEDIUM
@@ -110,7 +110,7 @@ export const useErrorStore = defineStore('error', () => {
   }
 
   // API 错误处理
-  function handleApiError(error: any, context?: Record<string, any>): string {
+  function handleApiError(error: Error & { response?: { data?: unknown; status?: number } }, context?: Record<string, unknown>): string {
     const status = error.response?.status
     const data = error.response?.data
 
@@ -181,7 +181,7 @@ export const useErrorStore = defineStore('error', () => {
   // 验证错误处理
   function handleValidationError(
     errors: Record<string, string[]>,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): string {
     const errorMessages = Object.entries(errors)
       .map(([field, messages]) => `${field}: ${messages.join(', ')}`)

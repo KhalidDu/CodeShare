@@ -4,7 +4,18 @@
     <ErrorBoundary>
       <!-- 未认证用户显示简单布局 -->
       <template v-if="!isAuthenticated">
-        <RouterView />
+        <div class="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-slate-800 dark:text-slate-200">
+          <!-- 应用头部 -->
+          <AppHeader />
+          
+          <!-- 主要内容区域 -->
+          <main class="flex-1">
+            <RouterView />
+          </main>
+          
+          <!-- 应用底部 -->
+          <AppFooter />
+        </div>
       </template>
 
       <!-- 已认证用户显示完整布局 -->
@@ -41,6 +52,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useLoadingStore } from '@/stores/loading'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import AppFooter from '@/components/layout/AppFooter.vue'
 import ErrorBoundary from '@/components/common/ErrorBoundary.vue'
 import ErrorContainer from '@/components/common/ErrorContainer.vue'
 import ToastContainer from '@/components/common/ToastContainer.vue'
@@ -55,7 +68,7 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 /**
  * 处理错误重试
  */
-function handleErrorRetry(errorId: string, error: any) {
+function handleErrorRetry(errorId: string, error: { type?: string; message?: string }) {
   console.log('Retrying error:', errorId, error)
 
   // 根据错误类型执行不同的重试逻辑
@@ -77,7 +90,7 @@ function handleErrorRetry(errorId: string, error: any) {
 /**
  * 处理网络错误重试
  */
-function handleNetworkRetry(error: any) {
+function handleNetworkRetry(error: { message?: string }) {
   // 这里可以实现具体的网络重试逻辑
   // 例如重新发送失败的请求
   console.log('Retrying network operation:', error)
@@ -86,7 +99,7 @@ function handleNetworkRetry(error: any) {
 /**
  * 处理认证错误重试
  */
-function handleAuthRetry(error: any) {
+function handleAuthRetry(_error: { message?: string }) {
   // 尝试刷新认证状态
   authStore.initialize()
 }

@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { } from 'vue'
 import { useToastStore } from '@/stores/toast'
 import ToastNotification from './ToastNotification.vue'
 import type { ToastPosition } from './ToastNotification.vue'
@@ -68,7 +68,7 @@ function removeToast(id: string) {
 /**
  * 处理 Toast 操作
  */
-function handleToastAction(toastId: string, action: any) {
+function handleToastAction(_toastId: string, _action: { handler: () => void }) {
   // 执行操作后可以选择关闭 Toast
   // removeToast(toastId)
 }

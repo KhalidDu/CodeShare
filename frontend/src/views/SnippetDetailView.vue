@@ -313,9 +313,10 @@ async function loadSnippet() {
   try {
     // 这里使用模拟数据，实际应该调用API
     snippet.value = await codeSnippetService.getSnippet(snippetId.value)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to load snippet:', err)
-    error.value = err.response?.data?.message || '加载代码片段失败'
+    const axiosError = err as { response?: { data?: { message?: string } } }
+    error.value = axiosError.response?.data?.message || '加载代码片段失败'
   } finally {
     loading.value = false
   }

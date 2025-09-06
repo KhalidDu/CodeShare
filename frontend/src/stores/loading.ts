@@ -101,7 +101,7 @@ export const useLoadingStore = defineStore('loading', () => {
   /**
    * 包装异步函数，自动管理加载状态
    */
-  function withLoading<T extends any[], R>(
+  function withLoading<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
     message?: string,
     options: {

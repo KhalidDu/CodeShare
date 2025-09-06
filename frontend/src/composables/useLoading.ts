@@ -89,7 +89,7 @@ export function useLoading(initialMessage?: string) {
   /**
    * 包装异步函数，自动管理加载状态
    */
-  function withLoading<T extends any[], R>(
+  function withLoading<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
     options?: {
       message?: string
@@ -124,7 +124,7 @@ export function useLoading(initialMessage?: string) {
 
           // 将进度更新函数传递给异步函数（如果支持）
           if (fn.length > args.length) {
-            return await (fn as any)(...args, updateProgressFn)
+            return await (fn as ((...args: T) => Promise<R>) & ((...args: T | [(progress: number) => void]) => Promise<R>))(...args, updateProgressFn)
           }
         }
 
