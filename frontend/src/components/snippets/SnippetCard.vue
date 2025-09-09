@@ -73,6 +73,18 @@
           </button>
 
           <button
+            v-if="canShare"
+            @click="handleShare"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+            :disabled="isLoading"
+            title="分享代码片段"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.062 18 14.518 18 14c0-.482.114-.938.316-1.342m0 2.684a3 3 0 110-2.684M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </button>
+
+          <button
             v-if="canDelete"
             @click="handleDelete"
             class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -175,6 +187,14 @@
             <span class="font-medium">{{ snippet.copyCount || 0 }}</span>
           </div>
 
+          <!-- 分享次数 -->
+          <div v-if="snippet.shareCount > 0" class="flex items-center gap-1 text-gray-500" title="分享次数">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.062 18 14.518 18 14c0-.482.114-.938.316-1.342m0 2.684a3 3 0 110-2.684M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span class="font-medium">{{ snippet.shareCount }}</span>
+          </div>
+
           <!-- 可见性 -->
           <div class="flex items-center gap-1" :title="snippet.isPublic ? '公开' : '私有'">
             <svg v-if="snippet.isPublic" class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,6 +224,15 @@
       <i class="fas fa-check"></i>
       复制成功！
     </div>
+
+    <!-- 分享对话框 -->
+    <ShareDialog
+      :snippet-id="snippet.id"
+      :snippet-title="snippet.title"
+      :visible="isShareDialogOpen"
+      @cancel="isShareDialogOpen = false"
+      @share-created="handleShareSuccess"
+    />
   </div>
 </template>
 
@@ -211,9 +240,13 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useShareStore } from '@/stores/share'
 import { useCopy } from '@/composables/useCopy'
+import ShareButton from '@/components/sharing/ShareButton.vue'
+import ShareDialog from '@/components/sharing/ShareDialog.vue'
 import type { CodeSnippet, Tag } from '@/types'
 import { UserRole } from '@/types'
+import { SharePermission } from '@/types/share'
 
 interface Props {
   snippet: CodeSnippet
@@ -227,6 +260,7 @@ interface Emits {
   (e: 'delete', snippet: CodeSnippet): void
   (e: 'tag-click', tag: Tag): void
   (e: 'select', snippet: CodeSnippet): void
+  (e: 'share', snippet: CodeSnippet): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -239,11 +273,13 @@ const emit = defineEmits<Emits>()
 
 const router = useRouter()
 const authStore = useAuthStore()
+const shareStore = useShareStore()
 const { copyCodeSnippet } = useCopy()
 
 // 响应式状态
 const isCodeExpanded = ref(false)
 const showCopySuccess = ref(false)
+const isShareDialogOpen = ref(false)
 
 // 计算属性
 const canEdit = computed(() => {
@@ -258,6 +294,14 @@ const canDelete = computed(() => {
   const user = authStore.user
   if (!user) return false
 
+  return user.role === UserRole.Admin || user.id === props.snippet.createdBy
+})
+
+const canShare = computed(() => {
+  const user = authStore.user
+  if (!user) return false
+
+  // 只有创建者和管理员可以分享
   return user.role === UserRole.Admin || user.id === props.snippet.createdBy
 })
 
@@ -433,6 +477,27 @@ function handleCardClick() {
  */
 function handleTagClick(tag: Tag) {
   emit('tag-click', tag)
+}
+
+/**
+ * 处理分享操作
+ */
+function handleShare() {
+  isShareDialogOpen.value = true
+}
+
+/**
+ * 处理分享成功
+ */
+function handleShareSuccess(shareToken: any) {
+  isShareDialogOpen.value = false
+  showCopySuccess.value = true
+  emit('share', props.snippet)
+  
+  // 3秒后隐藏成功提示
+  setTimeout(() => {
+    showCopySuccess.value = false
+  }, 3000)
 }
 </script>
 

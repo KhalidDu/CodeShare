@@ -255,6 +255,96 @@ public class InputValidationService : IInputValidationService
     }
 
     /// <summary>
+    /// 验证分享令牌描述
+    /// </summary>
+    /// <param name="description">分享描述</param>
+    /// <returns>验证结果</returns>
+    public ValidationResult ValidateShareDescription(string? description)
+    {
+        if (description == null)
+        {
+            return ValidationResult.Success(); // 描述可以为空
+        }
+
+        if (description.Length > 500)
+        {
+            return ValidationResult.Failure("分享描述长度不能超过500个字符");
+        }
+
+        if (ContainsDangerousContent(description))
+        {
+            return ValidationResult.Failure("分享描述包含不安全的内容");
+        }
+
+        return ValidationResult.Success();
+    }
+
+    /// <summary>
+    /// 验证分享密码
+    /// </summary>
+    /// <param name="password">分享密码</param>
+    /// <returns>验证结果</returns>
+    public ValidationResult ValidateSharePassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return ValidationResult.Failure("分享密码不能为空");
+        }
+
+        if (password.Length < 6 || password.Length > 64)
+        {
+            return ValidationResult.Failure("分享密码长度必须在6-64个字符之间");
+        }
+
+        if (ContainsDangerousContent(password))
+        {
+            return ValidationResult.Failure("分享密码包含不安全的内容");
+        }
+
+        return ValidationResult.Success();
+    }
+
+    /// <summary>
+    /// 验证分享有效期（小时）
+    /// </summary>
+    /// <param name="hours">有效期小时数</param>
+    /// <returns>验证结果</returns>
+    public ValidationResult ValidateShareExpiryHours(int hours)
+    {
+        if (hours < 0)
+        {
+            return ValidationResult.Failure("有效期不能为负数");
+        }
+
+        if (hours > 8760) // 365天 * 24小时
+        {
+            return ValidationResult.Failure("有效期不能超过365天（8760小时）");
+        }
+
+        return ValidationResult.Success();
+    }
+
+    /// <summary>
+    /// 验证分享访问次数限制
+    /// </summary>
+    /// <param name="maxAccessCount">最大访问次数</param>
+    /// <returns>验证结果</returns>
+    public ValidationResult ValidateShareMaxAccessCount(int maxAccessCount)
+    {
+        if (maxAccessCount < 0)
+        {
+            return ValidationResult.Failure("访问次数限制不能为负数");
+        }
+
+        if (maxAccessCount > 10000)
+        {
+            return ValidationResult.Failure("访问次数限制不能超过10000次");
+        }
+
+        return ValidationResult.Success();
+    }
+
+    /// <summary>
     /// 清理HTML内容
     /// </summary>
     /// <param name="input">输入内容</param>

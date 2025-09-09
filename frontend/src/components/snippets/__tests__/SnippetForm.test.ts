@@ -62,7 +62,8 @@ describe('SnippetForm', () => {
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
       viewCount: 0,
-      copyCount: 0
+      copyCount: 0,
+      shareCount: 0
     }
 
     it('应该能够在编辑模式下挂载', () => {

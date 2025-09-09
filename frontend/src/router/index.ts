@@ -87,6 +87,24 @@ const router = createRouter({
       path: '/style-test',
       name: 'style-test',
       component: () => import('../views/StyleTestView.vue')
+    },
+    {
+      path: '/share/:token',
+      name: 'share-view',
+      component: () => import('../views/ShareView.vue'),
+      meta: {
+        title: '分享链接访问',
+        public: true
+      }
+    },
+    {
+      path: '/shares',
+      name: 'share-management',
+      component: () => import('../views/ShareManagementView.vue'),
+      meta: {
+        requiresAuth: true,
+        title: '分享管理'
+      }
     }
   ]
 })

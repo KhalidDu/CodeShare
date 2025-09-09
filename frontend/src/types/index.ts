@@ -28,6 +28,10 @@ export interface CodeSnippet {
   isPublic: boolean
   viewCount: number
   copyCount: number
+  shareCount: number
+  shareAccessCount?: number
+  activeShareCount?: number
+  lastSharedAt?: string
   tags: Tag[]
 }
 
@@ -223,3 +227,6 @@ export interface ClipboardHistoryFilter {
 
 // 导出错误相关类型
 export * from './error'
+
+// 导出分享相关类型
+export * from './share'

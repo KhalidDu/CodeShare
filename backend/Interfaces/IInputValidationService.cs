@@ -64,6 +64,34 @@ public interface IInputValidationService
     ValidationResult ValidateTagName(string tagName);
 
     /// <summary>
+    /// 验证分享令牌描述
+    /// </summary>
+    /// <param name="description">分享描述</param>
+    /// <returns>验证结果</returns>
+    ValidationResult ValidateShareDescription(string? description);
+
+    /// <summary>
+    /// 验证分享密码
+    /// </summary>
+    /// <param name="password">分享密码</param>
+    /// <returns>验证结果</returns>
+    ValidationResult ValidateSharePassword(string password);
+
+    /// <summary>
+    /// 验证分享有效期（小时）
+    /// </summary>
+    /// <param name="hours">有效期小时数</param>
+    /// <returns>验证结果</returns>
+    ValidationResult ValidateShareExpiryHours(int hours);
+
+    /// <summary>
+    /// 验证分享访问次数限制
+    /// </summary>
+    /// <param name="maxAccessCount">最大访问次数</param>
+    /// <returns>验证结果</returns>
+    ValidationResult ValidateShareMaxAccessCount(int maxAccessCount);
+
+    /// <summary>
     /// 清理HTML内容
     /// </summary>
     /// <param name="input">输入内容</param>

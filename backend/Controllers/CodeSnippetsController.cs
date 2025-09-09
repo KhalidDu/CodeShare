@@ -16,15 +16,18 @@ public class CodeSnippetsController : ControllerBase
 {
     private readonly ICodeSnippetService _codeSnippetService;
     private readonly IVersionManagementService _versionManagementService;
+    private readonly IShareService _shareService;
     private readonly ILogger<CodeSnippetsController> _logger;
 
     public CodeSnippetsController(
         ICodeSnippetService codeSnippetService,
         IVersionManagementService versionManagementService,
+        IShareService shareService,
         ILogger<CodeSnippetsController> logger)
     {
         _codeSnippetService = codeSnippetService ?? throw new ArgumentNullException(nameof(codeSnippetService));
         _versionManagementService = versionManagementService ?? throw new ArgumentNullException(nameof(versionManagementService));
+        _shareService = shareService ?? throw new ArgumentNullException(nameof(shareService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -405,6 +408,293 @@ public class CodeSnippetsController : ControllerBase
         {
             _logger.LogError(ex, "获取代码片段版本历史时发生错误，ID: {SnippetId}", id);
             return StatusCode(500, new { message = "获取版本历史时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 创建分享令牌 - 为代码片段生成分享链接
+    /// </summary>
+    /// <param name="id">代码片段ID</param>
+    /// <param name="createShareDto">创建分享请求</param>
+    /// <returns>创建的分享令牌信息</returns>
+    [HttpPost("{id:guid}/share")]
+    [Authorize]
+    public async Task<ActionResult<ShareTokenDto>> CreateShareToken(Guid id, [FromBody] CreateShareDto createShareDto)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "代码片段ID不能为空" });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // 验证代码片段ID是否匹配
+            if (createShareDto.CodeSnippetId != id)
+            {
+                return BadRequest(new { message = "代码片段ID不匹配" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized(new { message = "用户未登录" });
+            }
+
+            // 检查用户是否有权限分享该代码片段
+            var snippet = await _codeSnippetService.GetSnippetAsync(id, currentUserId);
+            if (snippet == null)
+            {
+                return NotFound(new { message = "代码片段不存在或无权限访问" });
+            }
+
+            var shareToken = await _shareService.CreateShareTokenAsync(createShareDto, currentUserId.Value);
+
+            _logger.LogInformation("用户 {UserId} 为代码片段 {SnippetId} 创建分享令牌成功，分享令牌ID: {ShareTokenId}", 
+                currentUserId.Value, id, shareToken.Id);
+
+            return CreatedAtAction(nameof(GetShareToken), new { id = shareToken.Id }, shareToken);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户 {UserId} 无权限分享代码片段 {SnippetId}: {Message}", 
+                GetCurrentUserId(), id, ex.Message);
+            return Forbid();
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("创建分享令牌参数错误: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "创建分享令牌时发生错误，代码片段ID: {SnippetId}", id);
+            return StatusCode(500, new { message = "创建分享令牌时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 获取分享令牌详情
+    /// </summary>
+    /// <param name="id">分享令牌ID</param>
+    /// <returns>分享令牌详情</returns>
+    [HttpGet("share/{id:guid}")]
+    public async Task<ActionResult<ShareTokenDto>> GetShareToken(Guid id)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "分享令牌ID不能为空" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            var shareToken = await _shareService.GetShareTokenByIdAsync(id, currentUserId);
+
+            if (shareToken == null)
+            {
+                return NotFound(new { message = "分享令牌不存在或无权限访问" });
+            }
+
+            _logger.LogInformation("获取分享令牌详情成功，ID: {ShareTokenId}", id);
+            return Ok(shareToken);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户无权限访问分享令牌 {ShareTokenId}: {Message}", id, ex.Message);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "获取分享令牌详情时发生错误，ID: {ShareTokenId}", id);
+            return StatusCode(500, new { message = "获取分享令牌详情时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 获取代码片段的所有分享记录
+    /// </summary>
+    /// <param name="id">代码片段ID</param>
+    /// <returns>代码片段的分享令牌列表</returns>
+    [HttpGet("{id:guid}/shares")]
+    public async Task<ActionResult<IEnumerable<ShareTokenDto>>> GetSnippetShares(Guid id)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "代码片段ID不能为空" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            var shares = await _shareService.GetSnippetSharesAsync(id, currentUserId);
+
+            _logger.LogInformation("获取代码片段 {SnippetId} 的分享记录成功", id);
+            return Ok(shares);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户无权限访问代码片段 {SnippetId} 的分享记录: {Message}", id, ex.Message);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "获取代码片段分享记录时发生错误，ID: {SnippetId}", id);
+            return StatusCode(500, new { message = "获取分享记录时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 撤销分享令牌（禁用）
+    /// </summary>
+    /// <param name="id">分享令牌ID</param>
+    /// <returns>撤销结果</returns>
+    [HttpDelete("share/{id:guid}")]
+    [Authorize]
+    public async Task<ActionResult> RevokeShareToken(Guid id)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "分享令牌ID不能为空" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized(new { message = "用户未登录" });
+            }
+
+            var result = await _shareService.RevokeShareTokenAsync(id, currentUserId.Value);
+
+            if (!result)
+            {
+                return NotFound(new { message = "分享令牌不存在或无权限操作" });
+            }
+
+            _logger.LogInformation("用户 {UserId} 撤销分享令牌成功，ID: {ShareTokenId}", 
+                currentUserId.Value, id);
+
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户 {UserId} 无权限撤销分享令牌 {ShareTokenId}: {Message}", 
+                GetCurrentUserId(), id, ex.Message);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "撤销分享令牌时发生错误，ID: {ShareTokenId}", id);
+            return StatusCode(500, new { message = "撤销分享令牌时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 获取分享统计信息
+    /// </summary>
+    /// <param name="id">分享令牌ID</param>
+    /// <returns>分享统计信息</returns>
+    [HttpGet("share/{id:guid}/stats")]
+    public async Task<ActionResult<ShareStatsDto>> GetShareStats(Guid id)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "分享令牌ID不能为空" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            var stats = await _shareService.GetShareStatsAsync(id, currentUserId);
+
+            _logger.LogInformation("获取分享统计信息成功，ID: {ShareTokenId}", id);
+            return Ok(stats);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户无权限访问分享统计 {ShareTokenId}: {Message}", id, ex.Message);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "获取分享统计信息时发生错误，ID: {ShareTokenId}", id);
+            return StatusCode(500, new { message = "获取分享统计信息时发生内部错误" });
+        }
+    }
+
+    /// <summary>
+    /// 获取分享访问日志
+    /// </summary>
+    /// <param name="id">分享令牌ID</param>
+    /// <param name="page">页码</param>
+    /// <param name="pageSize">每页大小</param>
+    /// <param name="startDate">开始日期</param>
+    /// <param name="endDate">结束日期</param>
+    /// <param name="isSuccess">是否只显示成功访问</param>
+    /// <returns>分页的访问日志结果</returns>
+    [HttpGet("share/{id:guid}/logs")]
+    public async Task<ActionResult<PaginatedResult<ShareAccessLogDto>>> GetShareAccessLogs(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] bool? isSuccess = null)
+    {
+        try
+        {
+            // 输入验证
+            if (id == Guid.Empty)
+            {
+                return BadRequest(new { message = "分享令牌ID不能为空" });
+            }
+
+            if (page < 1)
+            {
+                return BadRequest(new { message = "页码必须大于0" });
+            }
+
+            if (pageSize < 1 || pageSize > 100)
+            {
+                return BadRequest(new { message = "每页大小必须在1-100之间" });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            var filter = new AccessLogFilter
+            {
+                ShareTokenId = id,
+                Page = page,
+                PageSize = pageSize,
+                StartDate = startDate,
+                EndDate = endDate,
+                IsSuccess = isSuccess
+            };
+
+            var logs = await _shareService.GetShareAccessLogsAsync(filter, currentUserId);
+
+            _logger.LogInformation("获取分享访问日志成功，ID: {ShareTokenId}", id);
+            return Ok(logs);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("用户无权限访问分享访问日志 {ShareTokenId}: {Message}", id, ex.Message);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "获取分享访问日志时发生错误，ID: {ShareTokenId}", id);
+            return StatusCode(500, new { message = "获取分享访问日志时发生内部错误" });
         }
     }
 

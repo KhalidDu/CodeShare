@@ -108,6 +108,17 @@
               
               <!-- 操作按钮 -->
               <div class="flex items-center gap-2 ml-4">
+                <ShareButton
+                  v-if="canShare"
+                  :snippet-id="snippetId"
+                  :snippet-title="snippet?.title"
+                  :button-class="'px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors duration-200'"
+                  :show-text="true"
+                  :custom-text="'分享'"
+                  @share-success="handleShareSuccess"
+                  @share-error="handleShareError"
+                  @link-copied="handleLinkCopied"
+                />
                 <button
                   v-if="canEdit"
                   @click="editSnippet"
@@ -135,6 +146,70 @@
               >
                 {{ tag.name }}
               </span>
+            </div>
+          </div>
+
+          <!-- 分享状态 -->
+          <div v-if="snippet.shareCount && snippet.shareCount > 0" class="p-6 border-b border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.062 18 14.518 18 14c0-.482.114-.938.316-1.342m0 2.684a3 3 0 110-2.684M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                分享统计
+              </h3>
+              <button
+                v-if="canManageShares"
+                @click="showShareManagement = true"
+                class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200"
+              >
+                管理分享
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600">分享次数</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ snippet.shareCount }}</p>
+                  </div>
+                  <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.062 18 14.518 18 14c0-.482.114-.938.316-1.342m0 2.684a3 3 0 110-2.684M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600">总访问次数</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ snippet.shareAccessCount || 0 }}</p>
+                  </div>
+                  <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600">活跃分享</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ snippet.activeShareCount || 0 }}</p>
+                  </div>
+                  <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -182,6 +257,26 @@
         复制成功！
       </div>
     </div>
+
+    <!-- 分享对话框 -->
+    <ShareDialog
+      v-if="showShareDialog"
+      :snippet-id="snippetId"
+      :snippet-title="snippet?.title"
+      :visible="showShareDialog"
+      @cancel="showShareDialog = false"
+      @share-created="handleShareCreated"
+    />
+
+    <!-- 分享管理对话框 -->
+    <ShareManagementDialog
+      v-if="showShareManagement"
+      :snippet-id="snippetId"
+      :snippet-title="snippet?.title"
+      :visible="showShareManagement"
+      @close="showShareManagement = false"
+      @share-updated="handleShareUpdated"
+    />
   </div>
 </template>
 
@@ -189,14 +284,22 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useShareStore } from '@/stores/share'
+import { useToastStore } from '@/stores/toast'
 import { useCopy } from '@/composables/useCopy'
 import { codeSnippetService } from '@/services/codeSnippetService'
+import ShareButton from '@/components/sharing/ShareButton.vue'
+import ShareDialog from '@/components/sharing/ShareDialog.vue'
+import ShareManagementDialog from '@/components/sharing/ShareManagementDialog.vue'
 import type { CodeSnippet } from '@/types'
+import type { ShareToken } from '@/types/share'
 import { UserRole } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const shareStore = useShareStore()
+const toastStore = useToastStore()
 const { copyCodeSnippet } = useCopy()
 
 // 响应式状态
@@ -204,6 +307,8 @@ const snippet = ref<CodeSnippet | null>(null)
 const loading = ref(false)
 const error = ref('')
 const showCopySuccess = ref(false)
+const showShareDialog = ref(false)
+const showShareManagement = ref(false)
 
 // 计算属性
 const snippetId = computed(() => route.params.id as string)
@@ -212,6 +317,20 @@ const canEdit = computed(() => {
   if (!snippet.value || !authStore.user) return false
   return authStore.user.role === UserRole.Admin || 
          (authStore.user.role === UserRole.Editor && authStore.user.id === snippet.value.createdBy)
+})
+
+const canShare = computed(() => {
+  if (!snippet.value || !authStore.user) return false
+  // 只有创建者和管理员可以分享
+  return authStore.user.role === UserRole.Admin || 
+         authStore.user.id === snippet.value.createdBy
+})
+
+const canManageShares = computed(() => {
+  if (!snippet.value || !authStore.user) return false
+  // 只有创建者和管理员可以管理分享
+  return authStore.user.role === UserRole.Admin || 
+         authStore.user.id === snippet.value.createdBy
 })
 
 /**
@@ -356,6 +475,49 @@ async function handleCopy() {
  */
 function editSnippet() {
   router.push(`/snippets/${snippetId.value}/edit`)
+}
+
+/**
+ * 处理分享成功事件
+ */
+function handleShareSuccess(shareToken: ShareToken) {
+  toastStore.success('代码片段分享成功！')
+  // 刷新代码片段数据以更新分享统计
+  loadSnippet()
+}
+
+/**
+ * 处理分享错误事件
+ */
+function handleShareError(error: Error) {
+  toastStore.error(`分享失败：${error.message}`)
+}
+
+/**
+ * 处理分享链接复制事件
+ */
+function handleLinkCopied(shareToken: ShareToken) {
+  toastStore.success('分享链接已复制到剪贴板')
+}
+
+/**
+ * 处理分享创建事件
+ */
+function handleShareCreated(shareToken: ShareToken) {
+  showShareDialog.value = false
+  toastStore.success('分享链接创建成功！')
+  // 刷新代码片段数据以更新分享统计
+  loadSnippet()
+}
+
+/**
+ * 处理分享更新事件
+ */
+function handleShareUpdated() {
+  showShareManagement.value = false
+  toastStore.success('分享管理已更新！')
+  // 刷新代码片段数据以更新分享统计
+  loadSnippet()
 }
 
 // 生命周期

@@ -38,6 +38,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<ISnippetVersionRepository, SnippetVersionRepository>();
         services.AddScoped<IClipboardHistoryRepository, ClipboardHistoryRepository>();
+        services.AddScoped<IShareTokenRepository, ShareTokenRepository>();
+        services.AddScoped<IShareAccessLogRepository, ShareAccessLogRepository>();
 
         return services;
     }
@@ -55,6 +57,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IClipboardService, ClipboardService>();
+        services.AddScoped<IShareService, ShareService>();
 
         // 注册领域服务 - Scoped 生命周期
         services.AddScoped<IVersionManagementService, VersionManagementService>();
@@ -139,11 +142,14 @@ public static class ServiceCollectionExtensions
             var userService = serviceProvider.GetRequiredService<IUserService>();
             var codeSnippetService = serviceProvider.GetRequiredService<ICodeSnippetService>();
             var authService = serviceProvider.GetRequiredService<IAuthService>();
+            var shareService = serviceProvider.GetRequiredService<IShareService>();
             
             // 验证仓储服务
             var userRepo = serviceProvider.GetRequiredService<IUserRepository>();
             var snippetRepo = serviceProvider.GetRequiredService<ICodeSnippetRepository>();
             var tagRepo = serviceProvider.GetRequiredService<ITagRepository>();
+            var shareTokenRepo = serviceProvider.GetRequiredService<IShareTokenRepository>();
+            var shareAccessLogRepo = serviceProvider.GetRequiredService<IShareAccessLogRepository>();
             
             Console.WriteLine("✅ 依赖注入配置验证成功 - 所有服务都已正确注册");
         }
