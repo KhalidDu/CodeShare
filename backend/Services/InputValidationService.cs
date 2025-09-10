@@ -17,7 +17,7 @@ public class InputValidationService : IInputValidationService
     private static readonly Regex UsernameRegex = new(@"^[a-zA-Z0-9_-]{3,30}$", 
         RegexOptions.Compiled);
     
-    private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
+    private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$", 
         RegexOptions.Compiled);
     
     private static readonly Regex HtmlTagRegex = new(@"<[^>]*>", 
@@ -107,7 +107,7 @@ public class InputValidationService : IInputValidationService
 
         if (!PasswordRegex.IsMatch(password))
         {
-            return ValidationResult.Failure("密码必须包含至少一个大写字母、一个小写字母、一个数字和一个特殊字符");
+            return ValidationResult.Failure("密码必须包含至少一个大写字母、一个小写字母、一个数字，长度至少8个字符");
         }
 
         return ValidationResult.Success();

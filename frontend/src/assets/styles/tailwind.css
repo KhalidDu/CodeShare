@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 标准间距系统 */
+@import "./standard-spacing.css";
+
 /* 自定义样式和组件 */
 @theme {
   /* 自定义颜色 */

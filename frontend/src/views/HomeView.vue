@@ -10,7 +10,7 @@
       </div>
 
       <!-- 主要内容 -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <div class="relative max-w-7xl mx-auto page-container py-2xl">
         <div class="text-center">
           <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent mb-6">
             代码片段管理工具
@@ -22,7 +22,7 @@
           <!-- 未登录用户显示的内容 -->
           <div v-if="!user" class="space-y-8">
             <!-- 功能特性 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg max-w-5xl mx-auto mb-xl">
               <div class="glass rounded-2xl p-6 text-center group hover:shadow-lg transition-all duration-300">
                 <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@
               </p>
               
               <!-- 快速操作 -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-md">
                 <router-link to="/snippets" class="glass rounded-xl p-4 hover:shadow-lg transition-all duration-300 group">
                   <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

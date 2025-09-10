@@ -337,7 +337,7 @@ onMounted(() => {
 .form-header {
   background: #f6f8fa;
   border-bottom: 1px solid #e1e5e9;
-  padding: 16px 24px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -352,11 +352,11 @@ onMounted(() => {
 
 .form-actions {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-sm);
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid;
   border-radius: 6px;
   font-size: 14px;
@@ -397,17 +397,17 @@ onMounted(() => {
 }
 
 .form-body {
-  padding: 24px;
+  padding: var(--spacing-xl);
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: var(--spacing-lg);
 }
 
 .form-label {
@@ -415,14 +415,14 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 500;
   color: #24292f;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-sm);
 }
 
 .form-input,
 .form-textarea,
 .form-select {
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid #d0d7de;
   border-radius: 6px;
   font-size: 14px;
@@ -452,8 +452,8 @@ onMounted(() => {
 
 .visibility-options {
   display: flex;
-  gap: 16px;
-  margin-top: 8px;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
 }
 
 .radio-label {
@@ -464,7 +464,7 @@ onMounted(() => {
 }
 
 .radio-input {
-  margin-right: 8px;
+  margin-right: var(--spacing-sm);
   cursor: pointer;
 }
 
@@ -476,7 +476,7 @@ onMounted(() => {
   display: block;
   color: #d1242f;
   font-size: 12px;
-  margin-top: 4px;
+  margin-top: var(--spacing-xs);
 }
 
 .code-editor {
@@ -487,7 +487,7 @@ onMounted(() => {
 @media (max-width: 768px) {
   .form-header {
     flex-direction: column;
-    gap: 12px;
+    gap: var(--spacing-sm);
     align-items: stretch;
   }
 
@@ -496,12 +496,12 @@ onMounted(() => {
   }
 
   .form-body {
-    padding: 16px;
+    padding: var(--spacing-lg);
   }
 
   .form-row {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: var(--spacing-md);
   }
 }
 

@@ -86,7 +86,7 @@ withDefaults(defineProps<Props>(), {
   isFormValid: true
 })
 
-defineEmits<Emits>()
+const emit = defineEmits<Emits>()
 
 defineSlots<{
   fields(): any
@@ -97,7 +97,8 @@ defineSlots<{
  * 处理表单提交
  */
 function handleSubmit() {
-  // 由父组件处理具体的提交逻辑
+  // 触发submit事件，由父组件处理具体的提交逻辑
+  emit('submit')
 }
 </script>
 

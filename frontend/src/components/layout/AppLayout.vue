@@ -36,14 +36,14 @@
         </div>
 
         <!-- 页面内容 -->
-        <main class="flex-1 overflow-y-auto scrollbar-thin p-6">
+        <main class="flex-1 overflow-y-auto scrollbar-thin page-container">
           <!-- 页面标题 -->
           <PageTitle
             v-if="pageTitle"
             :title="pageTitle"
             :subtitle="pageSubtitle"
             :icon="pageIcon"
-            class="mb-6"
+            class="mb-xl"
           >
             <template #actions v-if="$slots.pageActions">
               <slot name="pageActions"></slot>
@@ -51,7 +51,7 @@
           </PageTitle>
 
           <!-- 主要内容插槽 -->
-          <div class="space-y-6">
+          <div class="space-y-xl">
             <slot></slot>
           </div>
         </main>

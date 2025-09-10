@@ -1,0 +1,269 @@
+/* 标准间距系统 - Standard Spacing System
+ * 基于4px倍数的标准化间距变量
+ * 用于整个应用的一致性间距管理
+ */
+
+:root {
+  /* 基础间距单位 - 4px倍数 */
+  --spacing-xs: 4px;     /* 紧密元素间距 */
+  --spacing-sm: 8px;     /* 小组件间距 */
+  --spacing-md: 16px;    /* 标准间距 */
+  --spacing-lg: 24px;    /* 主要内容区域 */
+  --spacing-xl: 32px;    /* 页面区块间距 */
+  --spacing-2xl: 48px;   /* 大型区块间距 */
+  --spacing-3xl: 64px;   /* 超大型区块间距 */
+  --spacing-4xl: 96px;   /* 特大型区块间距 */
+
+  /* 组件间距 */
+  --spacing-component-gap: var(--spacing-lg);     /* 组件间间距 */
+  --spacing-component-padding: var(--spacing-lg); /* 组件内边距 */
+  --spacing-section-gap: var(--spacing-xl);       /* 区块间间距 */
+  --spacing-page-padding: var(--spacing-lg);      /* 页面容器内边距 */
+
+  /* 表单间距 */
+  --spacing-form-group: var(--spacing-lg);        /* 表单组间距 */
+  --spacing-form-label: var(--spacing-sm);        /* 标签间距 */
+  --spacing-form-input: var(--spacing-md);        /* 输入框内边距 */
+  --spacing-form-row: var(--spacing-lg);          /* 表单行间距 */
+
+  /* 卡片间距 */
+  --spacing-card-padding: var(--spacing-lg);      /* 卡片内边距 */
+  --spacing-card-gap: var(--spacing-md);          /* 卡片元素间距 */
+  --spacing-card-header: var(--spacing-md);       /* 卡片头部间距 */
+  --spacing-card-footer: var(--spacing-md);       /* 卡片底部间距 */
+
+  /* 列表间距 */
+  --spacing-list-item: var(--spacing-md);         /* 列表项内边距 */
+  --spacing-list-gap: var(--spacing-sm);          /* 列表项间距 */
+
+  /* 按钮间距 */
+  --spacing-button-padding: var(--spacing-md);    /* 按钮内边距 */
+  --spacing-button-gap: var(--spacing-sm);        /* 按钮间距 */
+
+  /* 网格间距 */
+  --spacing-grid-gap: var(--spacing-lg);          /* 网格间距 */
+
+  /* 响应式间距调整 */
+  --spacing-responsive-scale: 1;                 /* 响应式缩放比例 */
+}
+
+/* 深色模式间距变量 */
+.dark {
+  /* 间距变量保持一致，只调整颜色 */
+  --spacing-responsive-scale: 0.9;               /* 深色模式稍微紧凑 */
+}
+
+/* 响应式间距调整 */
+@media (max-width: 768px) {
+  :root {
+    --spacing-page-padding: var(--spacing-md);
+    --spacing-component-padding: var(--spacing-md);
+    --spacing-section-gap: var(--spacing-lg);
+    --spacing-form-group: var(--spacing-md);
+    --spacing-form-row: var(--spacing-md);
+    --spacing-card-padding: var(--spacing-md);
+    --spacing-grid-gap: var(--spacing-md);
+    --spacing-responsive-scale: 0.8;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-page-padding: var(--spacing-sm);
+    --spacing-component-padding: var(--spacing-sm);
+    --spacing-section-gap: var(--spacing-md);
+    --spacing-form-group: var(--spacing-sm);
+    --spacing-form-row: var(--spacing-sm);
+    --spacing-card-padding: var(--spacing-sm);
+    --spacing-grid-gap: var(--spacing-sm);
+    --spacing-responsive-scale: 0.7;
+  }
+}
+
+/* 标准间距工具类 */
+.spacing-xs { margin: var(--spacing-xs) !important; }
+.spacing-sm { margin: var(--spacing-sm) !important; }
+.spacing-md { margin: var(--spacing-md) !important; }
+.spacing-lg { margin: var(--spacing-lg) !important; }
+.spacing-xl { margin: var(--spacing-xl) !important; }
+.spacing-2xl { margin: var(--spacing-2xl) !important; }
+.spacing-3xl { margin: var(--spacing-3xl) !important; }
+.spacing-4xl { margin: var(--spacing-4xl) !important; }
+
+/* 内边距工具类 */
+.p-xs { padding: var(--spacing-xs) !important; }
+.p-sm { padding: var(--spacing-sm) !important; }
+.p-md { padding: var(--spacing-md) !important; }
+.p-lg { padding: var(--spacing-lg) !important; }
+.p-xl { padding: var(--spacing-xl) !important; }
+.p-2xl { padding: var(--spacing-2xl) !important; }
+.p-3xl { padding: var(--spacing-3xl) !important; }
+.p-4xl { padding: var(--spacing-4xl) !important; }
+
+/* 外边距工具类 */
+.m-xs { margin: var(--spacing-xs) !important; }
+.m-sm { margin: var(--spacing-sm) !important; }
+.m-md { margin: var(--spacing-md) !important; }
+.m-lg { margin: var(--spacing-lg) !important; }
+.m-xl { margin: var(--spacing-xl) !important; }
+.m-2xl { margin: var(--spacing-2xl) !important; }
+.m-3xl { margin: var(--spacing-3xl) !important; }
+.m-4xl { margin: var(--spacing-4xl) !important; }
+
+/* 方向性外边距 */
+.mt-xs { margin-top: var(--spacing-xs) !important; }
+.mt-sm { margin-top: var(--spacing-sm) !important; }
+.mt-md { margin-top: var(--spacing-md) !important; }
+.mt-lg { margin-top: var(--spacing-lg) !important; }
+.mt-xl { margin-top: var(--spacing-xl) !important; }
+.mt-2xl { margin-top: var(--spacing-2xl) !important; }
+
+.mb-xs { margin-bottom: var(--spacing-xs) !important; }
+.mb-sm { margin-bottom: var(--spacing-sm) !important; }
+.mb-md { margin-bottom: var(--spacing-md) !important; }
+.mb-lg { margin-bottom: var(--spacing-lg) !important; }
+.mb-xl { margin-bottom: var(--spacing-xl) !important; }
+.mb-2xl { margin-bottom: var(--spacing-2xl) !important; }
+
+.ml-xs { margin-left: var(--spacing-xs) !important; }
+.ml-sm { margin-left: var(--spacing-sm) !important; }
+.ml-md { margin-left: var(--spacing-md) !important; }
+.ml-lg { margin-left: var(--spacing-lg) !important; }
+.ml-xl { margin-left: var(--spacing-xl) !important; }
+.ml-2xl { margin-left: var(--spacing-2xl) !important; }
+
+.mr-xs { margin-right: var(--spacing-xs) !important; }
+.mr-sm { margin-right: var(--spacing-sm) !important; }
+.mr-md { margin-right: var(--spacing-md) !important; }
+.mr-lg { margin-right: var(--spacing-lg) !important; }
+.mr-xl { margin-right: var(--spacing-xl) !important; }
+.mr-2xl { margin-right: var(--spacing-2xl) !important; }
+
+/* 间隙工具类 */
+.gap-xs { gap: var(--spacing-xs) !important; }
+.gap-sm { gap: var(--spacing-sm) !important; }
+.gap-md { gap: var(--spacing-md) !important; }
+.gap-lg { gap: var(--spacing-lg) !important; }
+.gap-xl { gap: var(--spacing-xl) !important; }
+.gap-2xl { gap: var(--spacing-2xl) !important; }
+
+/* 页面容器类 */
+.page-container {
+  padding: var(--spacing-page-padding);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 组件容器类 */
+.component-container {
+  padding: var(--spacing-component-padding);
+  margin-bottom: var(--spacing-component-gap);
+}
+
+/* 区块容器类 */
+.section-container {
+  margin-bottom: var(--spacing-section-gap);
+}
+
+/* 表单容器类 */
+.form-container {
+  padding: var(--spacing-component-padding);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-form-group);
+}
+
+.form-row {
+  display: grid;
+  gap: var(--spacing-form-row);
+}
+
+/* 卡片容器类 */
+.card-container {
+  padding: var(--spacing-card-padding);
+}
+
+.card-header {
+  margin-bottom: var(--spacing-card-header);
+}
+
+.card-footer {
+  margin-top: var(--spacing-card-footer);
+}
+
+/* 列表容器类 */
+.list-container {
+  gap: var(--spacing-list-gap);
+}
+
+.list-item {
+  padding: var(--spacing-list-item);
+}
+
+/* 网格容器类 */
+.grid-container {
+  display: grid;
+  gap: var(--spacing-grid-gap);
+}
+
+/* 响应式网格 */
+.grid-responsive {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* 响应式间距类 */
+@media (max-width: 768px) {
+  .responsive-spacing {
+    --spacing-scale: 0.8;
+  }
+  
+  .page-container-mobile {
+    padding: var(--spacing-md);
+  }
+  
+  .component-container-mobile {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container-mobile {
+    padding: var(--spacing-sm);
+  }
+  
+  .component-container-mobile {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+/* 特殊间距类 */
+.no-spacing { margin: 0 !important; padding: 0 !important; }
+.no-margin { margin: 0 !important; }
+.no-padding { padding: 0 !important; }
+
+/* 紧凑间距 */
+.compact-spacing {
+  --spacing-scale: 0.7;
+}
+
+/* 宽松间距 */
+.loose-spacing {
+  --spacing-scale: 1.3;
+}
+
+/* 垂直间距 */
+.v-spacing-xs { margin-top: var(--spacing-xs); margin-bottom: var(--spacing-xs); }
+.v-spacing-sm { margin-top: var(--spacing-sm); margin-bottom: var(--spacing-sm); }
+.v-spacing-md { margin-top: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.v-spacing-lg { margin-top: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+.v-spacing-xl { margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl); }
+
+/* 水平间距 */
+.h-spacing-xs { margin-left: var(--spacing-xs); margin-right: var(--spacing-xs); }
+.h-spacing-sm { margin-left: var(--spacing-sm); margin-right: var(--spacing-sm); }
+.h-spacing-md { margin-left: var(--spacing-md); margin-right: var(--spacing-md); }
+.h-spacing-lg { margin-left: var(--spacing-lg); margin-right: var(--spacing-lg); }
+.h-spacing-xl { margin-left: var(--spacing-xl); margin-right: var(--spacing-xl); }

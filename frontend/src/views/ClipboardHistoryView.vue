@@ -5,8 +5,8 @@
     page-icon="fas fa-clipboard-list"
   >
     <!-- 筛选和搜索 -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-      <div class="flex flex-wrap gap-4 items-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-lg mb-xl">
+      <div class="flex flex-wrap gap-md items-center">
         <div class="flex-1 min-w-64">
           <input
             v-model="searchQuery"
@@ -54,15 +54,15 @@
     </div>
 
     <!-- 历史记录列表 -->
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-lg">
       <div
         v-for="item in filteredHistory"
         :key="item.id"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow duration-200"
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-lg hover:shadow-md transition-shadow duration-200"
       >
         <!-- 头部信息 -->
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3">
+        <div class="flex items-center justify-between mb-md">
+          <div class="flex items-center gap-md">
             <h4 class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.snippetTitle }}</h4>
             <span class="px-2 py-1 text-xs font-medium rounded-full text-white" :style="{ backgroundColor: getLanguageColor(item.language) }">
               {{ item.language }}
@@ -74,12 +74,12 @@
         </div>
 
         <!-- 代码预览 -->
-        <div class="bg-gray-900 dark:bg-gray-950 rounded-lg p-3 mb-3">
+        <div class="bg-gray-900 dark:bg-gray-950 rounded-lg p-md mb-md">
           <pre class="text-sm text-gray-300 font-mono overflow-x-auto"><code>{{ getCodePreview(item.content) }}</code></pre>
         </div>
 
         <!-- 操作按钮 -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-sm">
           <button
             @click="copyToClipboard(item)"
             class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors duration-200 flex items-center gap-2"

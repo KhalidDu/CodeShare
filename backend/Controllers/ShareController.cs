@@ -169,6 +169,117 @@ public class ShareController : ControllerBase
     }
 
     /// <summary>
+    /// 访问分享内容
+    /// </summary>
+    /// <param name="request">访问分享请求</param>
+    /// <returns>访问结果</returns>
+    /// <remarks>
+    /// 通过分享令牌访问代码片段内容，支持密码保护和访问限制。
+    /// 此接口会记录访问日志并更新访问统计。
+    /// 
+    /// 示例请求：
+    /// POST /api/share/access
+    /// {
+    ///   "token": "abc123def456",
+    ///   "password": "password123",
+    ///   "userAgent": "Mozilla/5.0..."
+    /// }
+    /// </remarks>
+    /// <response code="200">访问成功</response>
+    /// <response code="400">请求参数无效</response>
+    /// <response code="401">密码错误</response>
+    /// <response code="404">分享链接不存在或已失效</response>
+    /// <response code="410">分享链接已过期</response>
+    /// <response code="429">访问次数已达上限</response>
+    /// <response code="500">服务器内部错误</response>
+    [HttpPost("access")]
+    [ProducesResponseType(typeof(AccessShareResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status429TooManyRequests)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<AccessShareResponse>> AccessShare([FromBody] AccessShareRequest request)
+    {
+        try
+        {
+            // 输入验证
+            if (request == null)
+            {
+                return BadRequest(new { message = "请求参数不能为空" });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Token))
+            {
+                return BadRequest(new { message = "分享令牌不能为空" });
+            }
+
+            // 访问分享内容
+            var ipAddress = GetClientIpAddress();
+            var userAgent = request.UserAgent ?? Request.Headers["User-Agent"].ToString();
+            
+            var accessResult = await _shareService.AccessShareAsync(request.Token, request.Password, ipAddress, userAgent);
+
+            if (!accessResult.Success)
+            {
+                // 根据错误类型返回不同的状态码
+                if (accessResult.ErrorMessage?.Contains("密码") == true)
+                {
+                    return Unauthorized(new AccessShareResponse
+                    {
+                        Success = false,
+                        ErrorMessage = accessResult.ErrorMessage
+                    });
+                }
+                else if (accessResult.ErrorMessage?.Contains("过期") == true)
+                {
+                    return StatusCode(StatusCodes.Status410Gone, new AccessShareResponse
+                    {
+                        Success = false,
+                        ErrorMessage = accessResult.ErrorMessage
+                    });
+                }
+                else if (accessResult.ErrorMessage?.Contains("次数") == true)
+                {
+                    return StatusCode(StatusCodes.Status429TooManyRequests, new AccessShareResponse
+                    {
+                        Success = false,
+                        ErrorMessage = accessResult.ErrorMessage
+                    });
+                }
+                else
+                {
+                    return NotFound(new AccessShareResponse
+                    {
+                        Success = false,
+                        ErrorMessage = accessResult.ErrorMessage
+                    });
+                }
+            }
+
+            _logger.LogInformation("分享内容访问成功，令牌: {Token}, 代码片段ID: {CodeSnippetId}", 
+                request.Token, accessResult.ShareToken?.CodeSnippetId);
+
+            return Ok(accessResult);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "访问分享内容时发生错误，令牌: {Token}", request?.Token);
+            return StatusCode(500, new AccessShareResponse
+            {
+                Success = false,
+                ErrorMessage = "访问分享内容时发生内部错误"
+            });
+        }
+    }
+
+    /// <summary>
     /// 验证分享令牌是否有效
     /// </summary>
     /// <param name="token">分享令牌</param>

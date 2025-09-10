@@ -101,7 +101,17 @@ public class ShareTokenDto
     /// <summary>
     /// 关联的代码片段语言
     /// </summary>
-    public string CodeSnippetLanguage { get; set; }
+    public string CodeSnippetLanguage { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 关联的代码片段内容
+    /// </summary>
+    public string CodeSnippetCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 当前访问次数（用于实时显示）
+    /// </summary>
+    public int CurrentAccessCount { get; set; }
 
     /// <summary>
     /// 分享链接是否已过期
@@ -329,5 +339,56 @@ public class AccessSourceStatDto
     /// 占比（百分比）
     /// </summary>
     public double Percentage { get; set; }
+}
+
+/// <summary>
+/// 访问分享请求DTO - 用于通过分享令牌访问代码片段
+/// </summary>
+public class AccessShareRequest
+{
+    /// <summary>
+    /// 分享令牌
+    /// </summary>
+    [Required(ErrorMessage = "分享令牌不能为空")]
+    [StringLength(64, ErrorMessage = "分享令牌长度不能超过64个字符")]
+    public string Token { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 访问密码（如果分享链接设置了密码保护）
+    /// </summary>
+    [StringLength(64, ErrorMessage = "密码长度不能超过64个字符")]
+    public string? Password { get; set; }
+
+    /// <summary>
+    /// 用户代理信息（User-Agent）
+    /// </summary>
+    [StringLength(500, ErrorMessage = "用户代理信息长度不能超过500个字符")]
+    public string? UserAgent { get; set; }
+}
+
+/// <summary>
+/// 访问分享响应DTO - 用于返回访问结果和分享内容
+/// </summary>
+public class AccessShareResponse
+{
+    /// <summary>
+    /// 访问是否成功
+    /// </summary>
+    public bool Success { get; set; }
+
+    /// <summary>
+    /// 分享令牌信息（包含代码片段内容）
+    /// </summary>
+    public ShareTokenDto? ShareToken { get; set; }
+
+    /// <summary>
+    /// 错误消息（如果访问失败）
+    /// </summary>
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// 访问记录ID
+    /// </summary>
+    public Guid? AccessLogId { get; set; }
 }
 

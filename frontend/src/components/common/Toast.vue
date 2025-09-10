@@ -139,14 +139,14 @@ defineExpose({
 <style scoped>
 .toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
   min-width: 300px;
   max-width: 500px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: #fff;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
@@ -204,7 +204,7 @@ defineExpose({
 .toast__title {
   font-weight: 600;
   color: #24292f;
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .toast__message {
@@ -214,7 +214,7 @@ defineExpose({
 
 .toast__close {
   flex-shrink: 0;
-  padding: 4px;
+  padding: var(--spacing-xs);
   border: none;
   background: transparent;
   color: #656d76;
@@ -251,8 +251,8 @@ defineExpose({
 /* 响应式设计 */
 @media (max-width: 768px) {
   .toast {
-    left: 20px;
-    right: 20px;
+    left: var(--spacing-lg);
+    right: var(--spacing-lg);
     min-width: auto;
     max-width: none;
   }

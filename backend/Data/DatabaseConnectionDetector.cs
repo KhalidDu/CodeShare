@@ -151,6 +151,51 @@ public class DatabaseConnectionDetector
                 CREATE INDEX IF NOT EXISTS idx_versions_snippet_id ON SnippetVersions(SnippetId);
                 CREATE INDEX IF NOT EXISTS idx_clipboard_user_id ON ClipboardHistory(UserId);
                 CREATE INDEX IF NOT EXISTS idx_clipboard_copied_at ON ClipboardHistory(CopiedAt);
+
+                CREATE TABLE IF NOT EXISTS ShareTokens (
+                    Id TEXT PRIMARY KEY,
+                    Token TEXT NOT NULL UNIQUE,
+                    CodeSnippetId TEXT NOT NULL,
+                    CreatedBy TEXT NOT NULL,
+                    CreatedAt TEXT NOT NULL,
+                    UpdatedAt TEXT NOT NULL,
+                    ExpiresAt TEXT,
+                    IsActive INTEGER NOT NULL DEFAULT 1,
+                    AccessCount INTEGER NOT NULL DEFAULT 0,
+                    MaxAccessCount INTEGER NOT NULL DEFAULT 0,
+                    Permission INTEGER NOT NULL DEFAULT 1,
+                    Description TEXT,
+                    Password TEXT,
+                    AllowDownload INTEGER NOT NULL DEFAULT 1,
+                    AllowCopy INTEGER NOT NULL DEFAULT 1,
+                    LastAccessedAt TEXT,
+                    FOREIGN KEY (CodeSnippetId) REFERENCES CodeSnippets(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (CreatedBy) REFERENCES Users(Id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS ShareAccessLogs (
+                    Id TEXT PRIMARY KEY,
+                    ShareTokenId TEXT NOT NULL,
+                    AccessTime TEXT NOT NULL,
+                    IPAddress TEXT NOT NULL,
+                    UserAgent TEXT,
+                    IsSuccess INTEGER NOT NULL DEFAULT 1,
+                    FailureReason TEXT,
+                    SessionId TEXT,
+                    Referrer TEXT,
+                    SourceType TEXT,
+                    FOREIGN KEY (ShareTokenId) REFERENCES ShareTokens(Id) ON DELETE CASCADE
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_share_tokens_token ON ShareTokens(Token);
+                CREATE INDEX IF NOT EXISTS idx_share_codesnippet_id ON ShareTokens(CodeSnippetId);
+                CREATE INDEX IF NOT EXISTS idx_share_tokens_created_by ON ShareTokens(CreatedBy);
+                CREATE INDEX IF NOT EXISTS idx_share_tokens_expires_at ON ShareTokens(ExpiresAt);
+                CREATE INDEX IF NOT EXISTS idx_share_tokens_is_active ON ShareTokens(IsActive);
+                CREATE INDEX IF NOT EXISTS idx_share_tokens_permission ON ShareTokens(Permission);
+                CREATE INDEX IF NOT EXISTS idx_share_access_logs_share_token ON ShareAccessLogs(ShareTokenId);
+                CREATE INDEX IF NOT EXISTS idx_share_access_logs_access_time ON ShareAccessLogs(AccessTime);
+                CREATE INDEX IF NOT EXISTS idx_share_access_logs_ip_address ON ShareAccessLogs(IPAddress);
             ";
 
             using var command = new SqliteCommand(createTablesSql, connection);
@@ -187,7 +232,9 @@ public class DatabaseConnectionDetector
                 // 插入示例用户
                 var insertUserSql = @"
                     INSERT INTO Users (Id, Username, Email, PasswordHash, Role, CreatedAt, IsActive) 
-                    VALUES ('c5c0a9ff-59dc-4719-83a5-89c88addc6e1', 'demo', 'demo@example.com', '$2a$11$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeZeUfkZMBs9kYZP6', 2, datetime('now'), 1);
+                    VALUES 
+                        ('c5c0a9ff-59dc-4719-83a5-89c88addc6e1', 'demo', 'demo@example.com', '$2a$11$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeZeUfkZMBs9kYZP6', 2, datetime('now'), 1),
+                        ('12345678-1234-5678-9012-345678901234', 'admin', 'admin@example.com', '$2a$11$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeZeUfkZMBs9kYZP6', 0, datetime('now'), 1);
                 ";
 
                 using var command = new SqliteCommand(insertUserSql, connection);

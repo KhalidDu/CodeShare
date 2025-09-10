@@ -187,6 +187,109 @@ public class ShareService : IShareService
     }
 
     /// <summary>
+    /// 访问分享内容
+    /// </summary>
+    public async Task<AccessShareResponse> AccessShareAsync(string token, string? password, string ipAddress, string? userAgent = null)
+    {
+        try
+        {
+            _logger.LogDebug("访问分享内容: {Token}, IP: {IpAddress}", token, ipAddress);
+
+            // 验证分享令牌
+            var shareToken = await _shareTokenRepository.GetByTokenAsync(token);
+            if (shareToken == null)
+            {
+                return new AccessShareResponse
+                {
+                    Success = false,
+                    ErrorMessage = "分享链接不存在或已失效"
+                };
+            }
+
+            // 验证令牌状态
+            if (!await ValidateShareTokenStatusAsync(shareToken))
+            {
+                return new AccessShareResponse
+                {
+                    Success = false,
+                    ErrorMessage = "分享链接已过期或已被禁用"
+                };
+            }
+
+            // 验证密码
+            if (shareToken.Password != null && !await VerifySharePasswordAsync(shareToken.Id, password ?? string.Empty))
+            {
+                // 记录失败的访问尝试
+                await LogShareAccessAsync(shareToken.Id, ipAddress, userAgent, false, "密码错误");
+                
+                return new AccessShareResponse
+                {
+                    Success = false,
+                    ErrorMessage = "访问密码错误"
+                };
+            }
+
+            // 检查访问次数限制
+            if (shareToken.MaxAccessCount > 0 && shareToken.AccessCount >= shareToken.MaxAccessCount)
+            {
+                return new AccessShareResponse
+                {
+                    Success = false,
+                    ErrorMessage = "分享链接访问次数已达上限"
+                };
+            }
+
+            // 获取关联的代码片段
+            var snippet = await _codeSnippetService.GetSnippetAsync(shareToken.CodeSnippetId);
+            if (snippet == null)
+            {
+                return new AccessShareResponse
+                {
+                    Success = false,
+                    ErrorMessage = "关联的代码片段不存在"
+                };
+            }
+
+            // 增加访问次数
+            shareToken.AccessCount++;
+            shareToken.LastAccessedAt = DateTime.UtcNow;
+            await _shareTokenRepository.UpdateAsync(shareToken);
+
+            // 记录访问日志
+            var accessLogId = await LogShareAccessAsync(shareToken.Id, ipAddress, userAgent, true);
+
+            // 清除缓存
+            await ClearShareTokenCacheAsync(token);
+
+            // 构建返回的分享令牌信息
+            var shareTokenDto = MapToDto(shareToken);
+            shareTokenDto.CodeSnippetCode = snippet.Code;
+            shareTokenDto.CodeSnippetTitle = snippet.Title;
+            shareTokenDto.CodeSnippetLanguage = snippet.Language;
+            shareTokenDto.CurrentAccessCount = shareToken.AccessCount;
+
+            _logger.LogInformation("分享内容访问成功，令牌: {Token}, 代码片段ID: {CodeSnippetId}", 
+                token, shareToken.CodeSnippetId);
+
+            return new AccessShareResponse
+            {
+                Success = true,
+                ShareToken = shareTokenDto,
+                AccessLogId = accessLogId
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "访问分享内容失败: {Token}", token);
+            return new AccessShareResponse
+            {
+                Success = false,
+                ErrorMessage = "访问分享内容时发生内部错误"
+            };
+        }
+    }
+
+    /// <summary>
     /// 根据ID获取分享令牌
     /// </summary>
     public async Task<ShareTokenDto?> GetShareTokenByIdAsync(Guid id, Guid? currentUserId = null)
@@ -1237,6 +1340,8 @@ public class ShareService : IShareService
             LastAccessedAt = shareToken.LastAccessedAt,
             CodeSnippetTitle = shareToken.CodeSnippetTitle,
             CodeSnippetLanguage = shareToken.CodeSnippetLanguage,
+            CodeSnippetCode = string.Empty, // 将在AccessShareAsync中设置
+            CurrentAccessCount = shareToken.AccessCount,
             IsExpired = isExpired,
             IsAccessLimitReached = isAccessLimitReached,
             RemainingAccessCount = remainingAccessCount

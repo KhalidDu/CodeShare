@@ -359,7 +359,6 @@ onMounted(() => {
 
 <style scoped>
 .user-management {
-  padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -369,7 +368,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
+  margin-bottom: var(--spacing-2xl);
 }
 
 .title-section h1 {
@@ -394,8 +393,8 @@ onMounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .stat-card {

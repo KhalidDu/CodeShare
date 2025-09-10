@@ -24,6 +24,16 @@ public interface IShareService
     Task<ShareTokenDto?> GetShareTokenByTokenAsync(string token, string? password = null);
 
     /// <summary>
+    /// 访问分享内容
+    /// </summary>
+    /// <param name="token">分享令牌字符串</param>
+    /// <param name="password">访问密码（如果有）</param>
+    /// <param name="ipAddress">访问者IP地址</param>
+    /// <param name="userAgent">用户代理</param>
+    /// <returns>访问结果</returns>
+    Task<AccessShareResponse> AccessShareAsync(string token, string? password, string ipAddress, string? userAgent = null);
+
+    /// <summary>
     /// 根据ID获取分享令牌
     /// </summary>
     /// <param name="id">分享令牌ID</param>

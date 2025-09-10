@@ -88,6 +88,7 @@ public class CsrfProtectionMiddleware
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh",
+            "/api/share/access",
             "/swagger",
             "/health"
         };

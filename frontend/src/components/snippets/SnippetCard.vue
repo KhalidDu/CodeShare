@@ -8,11 +8,11 @@
     @click="handleCardClick"
   >
     <!-- 卡片头部 -->
-    <div class="p-6 pb-4">
-      <div class="flex items-start justify-between mb-3">
+    <div class="p-lg pb-md">
+      <div class="flex items-start justify-between mb-sm">
         <!-- 标题和语言 -->
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-3 mb-2">
+          <div class="flex items-center gap-md mb-sm">
             <!-- 语言图标 -->
             <div
               class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-semibold"
@@ -48,7 +48,7 @@
         </div>
 
         <!-- 操作按钮 -->
-        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-4" @click.stop>
+        <div class="flex items-center gap-xs opacity-0 group-hover:opacity-100 transition-all duration-200 ml-md" @click.stop>
           <button
             @click="handleCopy"
             class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
@@ -99,7 +99,7 @@
       </div>
 
       <!-- 描述 -->
-      <div v-if="snippet.description" class="mb-4">
+      <div v-if="snippet.description" class="mb-md">
         <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
           {{ snippet.description }}
         </p>
@@ -107,11 +107,11 @@
     </div>
 
     <!-- 代码预览 -->
-    <div class="px-6 pb-4">
+    <div class="px-lg pb-md">
       <div class="relative bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
         <!-- 代码窗口装饰 -->
         <div class="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-700">
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-xs">
             <div class="w-3 h-3 bg-red-500 rounded-full"></div>
             <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
             <div class="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -120,13 +120,13 @@
         </div>
 
         <!-- 代码内容 -->
-        <pre class="p-3 text-xs text-gray-100 leading-relaxed overflow-hidden max-h-32 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"><code>{{ codePreview }}</code></pre>
+        <pre class="p-md text-xs text-gray-100 leading-relaxed overflow-hidden max-h-32 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"><code>{{ codePreview }}</code></pre>
 
         <!-- 展开/收起按钮 -->
-        <div v-if="isCodeTruncated" class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-900 to-transparent flex items-end justify-center pb-2" @click.stop>
+        <div v-if="isCodeTruncated" class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-900 to-transparent flex items-end justify-center pb-sm" @click.stop>
           <button
             @click="toggleCodeExpansion"
-            class="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200 bg-gray-800/80 px-3 py-1 rounded-md hover:bg-gray-700/80 border border-gray-600"
+            class="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200 bg-gray-800/80 px-md py-xs rounded-md hover:bg-gray-700/80 border border-gray-600"
           >
             {{ isCodeExpanded ? '收起' : '展开更多' }}
           </button>
@@ -135,9 +135,9 @@
     </div>
 
     <!-- 卡片底部 -->
-    <div class="px-6 pb-6">
+    <div class="px-lg pb-lg">
       <!-- 标签 -->
-      <div v-if="snippet.tags && snippet.tags.length > 0" class="flex flex-wrap gap-2 mb-4" @click.stop>
+      <div v-if="snippet.tags && snippet.tags.length > 0" class="flex flex-wrap gap-sm mb-md" @click.stop>
         <span
           v-for="tag in snippet.tags?.slice(0, 3)"
           :key="tag.id"
@@ -158,7 +158,7 @@
       </div>
 
       <!-- 无内容提示 -->
-      <div v-if="!snippet.code?.trim()" class="mb-4">
+      <div v-if="!snippet.code?.trim()" class="mb-md">
         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
           <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
@@ -169,9 +169,9 @@
 
       <!-- 统计信息 -->
       <div class="flex items-center justify-between text-xs text-gray-500">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-md">
           <!-- 查看次数 -->
-          <div class="flex items-center gap-1 text-gray-500" title="查看次数">
+          <div class="flex items-center gap-xs text-gray-500" title="查看次数">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -180,7 +180,7 @@
           </div>
 
           <!-- 复制次数 -->
-          <div class="flex items-center gap-1 text-gray-500" title="复制次数">
+          <div class="flex items-center gap-xs text-gray-500" title="复制次数">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
             </svg>
@@ -188,7 +188,7 @@
           </div>
 
           <!-- 分享次数 -->
-          <div v-if="snippet.shareCount > 0" class="flex items-center gap-1 text-gray-500" title="分享次数">
+          <div v-if="snippet.shareCount > 0" class="flex items-center gap-xs text-gray-500" title="分享次数">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.062 18 14.518 18 14c0-.482.114-.938.316-1.342m0 2.684a3 3 0 110-2.684M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
@@ -196,7 +196,7 @@
           </div>
 
           <!-- 可见性 -->
-          <div class="flex items-center gap-1" :title="snippet.isPublic ? '公开' : '私有'">
+          <div class="flex items-center gap-xs" :title="snippet.isPublic ? '公开' : '私有'">
             <svg v-if="snippet.isPublic" class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -207,7 +207,7 @@
         </div>
 
         <!-- 更新时间 -->
-        <div class="flex items-center gap-1 text-gray-500" title="更新时间">
+        <div class="flex items-center gap-xs text-gray-500" title="更新时间">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
@@ -219,7 +219,7 @@
     <!-- 复制成功提示 -->
     <div
       v-if="showCopySuccess"
-      class="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-lg text-xs flex items-center gap-2 animate-pulse z-10"
+      class="absolute top-sm right-sm bg-green-500 text-white px-md py-xs rounded-lg text-xs flex items-center gap-sm animate-pulse z-10"
     >
       <i class="fas fa-check"></i>
       复制成功！

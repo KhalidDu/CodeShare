@@ -253,8 +253,8 @@ function handleSizeChange(event: Event) {
 .pagination {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -282,14 +282,14 @@ function handleSizeChange(event: Event) {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .pagination-btn {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.75rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid #dee2e6;
   background: white;
   color: #6c757d;
@@ -325,7 +325,7 @@ function handleSizeChange(event: Event) {
 /* 页码按钮 */
 .page-numbers {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--spacing-xs);
 }
 
 .page-btn {
@@ -371,7 +371,7 @@ function handleSizeChange(event: Event) {
 .pagination-jump {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   font-size: 0.875rem;
 }
 
@@ -382,7 +382,7 @@ function handleSizeChange(event: Event) {
 
 .jump-input {
   width: 60px;
-  padding: 0.375rem 0.5rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
   border: 1px solid #dee2e6;
   border-radius: 4px;
   text-align: center;
@@ -395,7 +395,7 @@ function handleSizeChange(event: Event) {
 }
 
 .jump-btn {
-  padding: 0.375rem 0.75rem;
+  padding: var(--spacing-xs) var(--spacing-md);
   border: 1px solid #007bff;
   background: #007bff;
   color: white;
@@ -414,7 +414,7 @@ function handleSizeChange(event: Event) {
 .pagination-size {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   font-size: 0.875rem;
 }
 
@@ -424,7 +424,7 @@ function handleSizeChange(event: Event) {
 }
 
 .size-select {
-  padding: 0.375rem 0.5rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
   border: 1px solid #dee2e6;
   border-radius: 4px;
   background: white;
@@ -440,19 +440,19 @@ function handleSizeChange(event: Event) {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .pagination {
-    padding: 1rem;
-    gap: 0.75rem;
+    padding: var(--spacing-lg);
+    gap: var(--spacing-sm);
   }
 
   .pagination-info {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--spacing-xs);
     text-align: center;
   }
 
   .pagination-controls {
     flex-wrap: wrap;
-    gap: 0.375rem;
+    gap: var(--spacing-xs);
   }
 
   .btn-text {
@@ -460,7 +460,7 @@ function handleSizeChange(event: Event) {
   }
 
   .pagination-btn {
-    padding: 0.5rem;
+    padding: var(--spacing-sm);
     min-width: 36px;
   }
 
@@ -483,7 +483,7 @@ function handleSizeChange(event: Event) {
   }
 
   .page-numbers {
-    gap: 0.125rem;
+    gap: calc(var(--spacing-xs) / 2);
   }
 
   .page-btn {
