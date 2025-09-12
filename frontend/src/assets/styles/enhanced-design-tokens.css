@@ -1,0 +1,749 @@
+/* SeekCode 增强设计令牌 - 前端样式优化 */
+
+/* 扩展的设计令牌 - 基于现有design-system.css */
+:root {
+  /* ========== 动画增强 ========== */
+  
+  /* 动画缓动函数 */
+  --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --animation-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --animation-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animation-enter: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --animation-exit: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  
+  /* 动画时长 */
+  --animation-duration-fast: 0.15s;
+  --animation-duration-normal: 0.3s;
+  --animation-duration-slow: 0.5s;
+  --animation-duration-extra-slow: 0.8s;
+  
+  /* 扩展边框半径 */
+  --radius-xs: 2px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+  
+  /* 扩展阴影系统 */
+  --shadow-glow-sm: 0 0 20px rgba(0, 123, 255, 0.15);
+  --shadow-glow-md: 0 0 40px rgba(0, 123, 255, 0.25);
+  --shadow-glow-lg: 0 0 60px rgba(0, 123, 255, 0.35);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-colored-success: 0 4px 12px rgba(40, 167, 69, 0.2);
+  --shadow-colored-warning: 0 4px 12px rgba(255, 193, 7, 0.2);
+  --shadow-colored-error: 0 4px 12px rgba(220, 53, 69, 0.2);
+  --shadow-colored-info: 0 4px 12px rgba(23, 162, 184, 0.2);
+  
+  /* 扩展渐变系统 */
+  --gradient-primary-light: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-500) 100%);
+  --gradient-primary-dark: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  --gradient-success: linear-gradient(135deg, #34ce57 0%, #28a745 100%);
+  --gradient-warning: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  --gradient-error: linear-gradient(135deg, #ff6b6b 0%, #dc3545 100%);
+  --gradient-info: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --gradient-metallic: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 50%, #9e9e9e 100%);
+  --gradient-neon: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+  --gradient-sunset: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+  --gradient-ocean: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-forest: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  
+  /* 玻璃态效果 */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-backdrop: blur(10px);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  /* 模糊效果 */
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(16px);
+  --blur-xl: blur(24px);
+  
+  /* 变换效果 */
+  --transform-scale-sm: scale(1.02);
+  --transform-scale-md: scale(1.05);
+  --transform-scale-lg: scale(1.1);
+  --transform-lift-sm: translateY(-2px);
+  --transform-lift-md: translateY(-4px);
+  --transform-lift-lg: translateY(-8px);
+  --transform-rotate-sm: rotate(2deg);
+  --transform-rotate-md: rotate(4deg);
+  
+  /* 扩展间距 */
+  --space-px: 1px;
+  --space-0: 0;
+  --space-14: 3.5rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --space-40: 10rem;
+  --space-48: 12rem;
+  --space-56: 14rem;
+  --space-64: 16rem;
+  
+  /* 扩展字体大小 */
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+  --text-8xl: 6rem;
+  --text-9xl: 8rem;
+  
+  /* 扩展字体权重 */
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-extrabold: 800;
+  --font-black: 900;
+  
+  /* 扩展行高 */
+  --leading-3: 0.75rem;
+  --leading-4: 1rem;
+  --leading-5: 1.25rem;
+  --leading-6: 1.5rem;
+  --leading-7: 1.75rem;
+  --leading-8: 2rem;
+  --leading-9: 2.25rem;
+  --leading-10: 2.5rem;
+  
+  /* 字母间距 */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  
+  /* 透明度 */
+  --opacity-0: 0;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+  
+  /* 混合模式 */
+  --mix-blend-normal: normal;
+  --mix-blend-multiply: multiply;
+  --mix-blend-screen: screen;
+  --mix-blend-overlay: overlay;
+  --mix-blend-darken: darken;
+  --mix-blend-lighten: lighten;
+  --mix-blend-color-dodge: color-dodge;
+  --mix-blend-color-burn: color-burn;
+  --mix-blend-hard-light: hard-light;
+  --mix-blend-soft-light: soft-light;
+  --mix-blend-difference: difference;
+  --mix-blend-exclusion: exclusion;
+  --mix-blend-hue: hue;
+  --mix-blend-saturation: saturation;
+  --mix-blend-color: color;
+  --mix-blend-luminosity: luminosity;
+  
+  /* Z-index 层级 */
+  --z-negative: -1;
+  --z-content: 1;
+  --z-fixed-header: 100;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-notification: 1080;
+  --z-critical: 9999;
+  
+  /* 响应式断点 */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 1920px;
+  
+  /* 网格系统 */
+  --grid-cols-1: repeat(1, minmax(0, 1fr));
+  --grid-cols-2: repeat(2, minmax(0, 1fr));
+  --grid-cols-3: repeat(3, minmax(0, 1fr));
+  --grid-cols-4: repeat(4, minmax(0, 1fr));
+  --grid-cols-5: repeat(5, minmax(0, 1fr));
+  --grid-cols-6: repeat(6, minmax(0, 1fr));
+  --grid-cols-12: repeat(12, minmax(0, 1fr));
+  
+  /* 最大宽度 */
+  --max-w-xs: 20rem;
+  --max-w-sm: 24rem;
+  --max-w-md: 28rem;
+  --max-w-lg: 32rem;
+  --max-w-xl: 36rem;
+  --max-w-2xl: 42rem;
+  --max-w-3xl: 48rem;
+  --max-w-4xl: 56rem;
+  --max-w-5xl: 64rem;
+  --max-w-6xl: 72rem;
+  --max-w-7xl: 80rem;
+  --max-w-full: 100%;
+  --max-w-screen-sm: 640px;
+  --max-w-screen-md: 768px;
+  --max-w-screen-lg: 1024px;
+  --max-w-screen-xl: 1280px;
+  --max-w-screen-2xl: 1536px;
+  
+  /* 最小高度 */
+  --min-h-screen: 100vh;
+  --min-h-full: 100%;
+  --min-h-0: 0;
+  
+  /* 最大高度 */
+  --max-h-screen: 100vh;
+  --max-h-full: 100%;
+  --max-h-0: 0;
+  
+  /* 位置 */
+  --inset-0: 0;
+  --inset-x-0: 0;
+  --inset-y-0: 0;
+  --inset-top-0: 0;
+  --inset-right-0: 0;
+  --inset-bottom-0: 0;
+  --inset-left-0: 0;
+}
+
+/* ========== 动画关键帧 ========== */
+
+/* 弹跳动画 */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* 弹性动画 */
+@keyframes elastic {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 摇摆动画 */
+@keyframes wiggle {
+  0%, 7% {
+    transform: rotateZ(0);
+  }
+  15% {
+    transform: rotateZ(-15deg);
+  }
+  20% {
+    transform: rotateZ(10deg);
+  }
+  25% {
+    transform: rotateZ(-10deg);
+  }
+  30% {
+    transform: rotateZ(6deg);
+  }
+  35% {
+    transform: rotateZ(-4deg);
+  }
+  40%, 100% {
+    transform: rotateZ(0);
+  }
+}
+
+/* 心跳动画 */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* 轻弹动画 */
+@keyframes lightBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 闪烁动画 */
+@keyframes flash {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+
+/* 缩放动画 */
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* 翻转动画 */
+@keyframes flipIn {
+  from {
+    transform: perspective(400px) rotateY(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(400px) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes flipOut {
+  from {
+    transform: perspective(400px) rotateY(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: perspective(400px) rotateY(90deg);
+    opacity: 0;
+  }
+}
+
+/* 滑动动画变体 */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 旋转动画 */
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-200deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes rotateOut {
+  from {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(200deg);
+  }
+}
+
+/* ========== 工具动画类 ========== */
+
+/* 基础动画 */
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-elastic {
+  animation: elastic 0.8s ease-out;
+}
+
+.animate-wiggle {
+  animation: wiggle 1s ease-in-out;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.3s ease-in-out infinite;
+}
+
+.animate-light-bounce {
+  animation: lightBounce 2s ease-in-out infinite;
+}
+
+.animate-flash {
+  animation: flash 1.5s ease-in-out infinite;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.3s ease-out;
+}
+
+.animate-zoom-out {
+  animation: zoomOut 0.3s ease-out;
+}
+
+.animate-flip-in {
+  animation: flipIn 0.6s ease-out;
+}
+
+.animate-flip-out {
+  animation: flipOut 0.6s ease-out;
+}
+
+/* 滑动动画 */
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-slide-in-down {
+  animation: slideInDown 0.3s ease-out;
+}
+
+/* 旋转动画 */
+.animate-rotate-in {
+  animation: rotateIn 0.3s ease-out;
+}
+
+.animate-rotate-out {
+  animation: rotateOut 0.3s ease-out;
+}
+
+/* 悬停效果 */
+.hover-lift {
+  transition: transform var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: var(--transform-lift-sm);
+}
+
+.hover-lift-md:hover {
+  transform: var(--transform-lift-md);
+}
+
+.hover-lift-lg:hover {
+  transform: var(--transform-lift-lg);
+}
+
+.hover-scale {
+  transition: transform var(--transition-normal);
+}
+
+.hover-scale:hover {
+  transform: var(--transform-scale-sm);
+}
+
+.hover-scale-md:hover {
+  transform: var(--transform-scale-md);
+}
+
+.hover-scale-lg:hover {
+  transform: var(--transform-scale-lg);
+}
+
+.hover-glow {
+  transition: box-shadow var(--transition-normal);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-glow-sm);
+}
+
+.hover-glow-md:hover {
+  box-shadow: var(--shadow-glow-md);
+}
+
+.hover-glow-lg:hover {
+  box-shadow: var(--shadow-glow-lg);
+}
+
+/* 玻璃态效果 */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* 渐变文本 */
+.gradient-text-primary {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-success {
+  background: var(--gradient-success);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-warning {
+  background: var(--gradient-warning);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-error {
+  background: var(--gradient-error);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-info {
+  background: var(--gradient-info);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 响应式工具类 */
+@media (max-width: 640px) {
+  .animate-bounce-sm,
+  .animate-elastic-sm,
+  .animate-wiggle-sm,
+  .animate-heartbeat-sm,
+  .animate-light-bounce-sm,
+  .animate-flash-sm,
+  .animate-zoom-in-sm,
+  .animate-zoom-out-sm,
+  .animate-flip-in-sm,
+  .animate-flip-out-sm,
+  .animate-slide-in-left-sm,
+  .animate-slide-in-right-sm,
+  .animate-slide-in-up-sm,
+  .animate-slide-in-down-sm,
+  .animate-rotate-in-sm,
+  .animate-rotate-out-sm {
+    animation-duration: var(--animation-duration-fast);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .animate-bounce-md,
+  .animate-elastic-md,
+  .animate-wiggle-md,
+  .animate-heartbeat-md,
+  .animate-light-bounce-md,
+  .animate-flash-md,
+  .animate-zoom-in-md,
+  .animate-zoom-out-md,
+  .animate-flip-in-md,
+  .animate-flip-out-md,
+  .animate-slide-in-left-md,
+  .animate-slide-in-right-md,
+  .animate-slide-in-up-md,
+  .animate-slide-in-down-md,
+  .animate-rotate-in-md,
+  .animate-rotate-out-md {
+    animation-duration: var(--animation-duration-normal);
+  }
+}
+
+@media (min-width: 769px) {
+  .animate-bounce-lg,
+  .animate-elastic-lg,
+  .animate-wiggle-lg,
+  .animate-heartbeat-lg,
+  .animate-light-bounce-lg,
+  .animate-flash-lg,
+  .animate-zoom-in-lg,
+  .animate-zoom-out-lg,
+  .animate-flip-in-lg,
+  .animate-flip-out-lg,
+  .animate-slide-in-left-lg,
+  .animate-slide-in-right-lg,
+  .animate-slide-in-up-lg,
+  .animate-slide-in-down-lg,
+  .animate-rotate-in-lg,
+  .animate-rotate-out-lg {
+    animation-duration: var(--animation-duration-slow);
+  }
+}
+
+/* 减少动画偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce,
+  .animate-elastic,
+  .animate-wiggle,
+  .animate-heartbeat,
+  .animate-light-bounce,
+  .animate-flash,
+  .animate-zoom-in,
+  .animate-zoom-out,
+  .animate-flip-in,
+  .animate-flip-out,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-slide-in-up,
+  .animate-slide-in-down,
+  .animate-rotate-in,
+  .animate-rotate-out,
+  .hover-lift,
+  .hover-scale,
+  .hover-glow {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .hover-glow:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .glass {
+    border-width: 2px;
+    border-color: var(--gray-300);
+  }
+  
+  .gradient-text-primary,
+  .gradient-text-success,
+  .gradient-text-warning,
+  .gradient-text-error,
+  .gradient-text-info {
+    -webkit-text-fill-color: var(--gray-800);
+    background: none;
+  }
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-bg: rgba(0, 0, 0, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    --gradient-metallic: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    --gradient-neon: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+  }
+  
+  .gradient-text-primary,
+  .gradient-text-success,
+  .gradient-text-warning,
+  .gradient-text-error,
+  .gradient-text-info {
+    -webkit-text-fill-color: var(--gray-100);
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .animate-bounce,
+  .animate-elastic,
+  .animate-wiggle,
+  .animate-heartbeat,
+  .animate-light-bounce,
+  .animate-flash,
+  .animate-zoom-in,
+  .animate-zoom-out,
+  .animate-flip-in,
+  .animate-flip-out,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-slide-in-up,
+  .animate-slide-in-down,
+  .animate-rotate-in,
+  .animate-rotate-out {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .hover-glow:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
