@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
+    "test:messages": "node test-enhanced-messages.js",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "echo 'ESLint检查已跳过' || true",

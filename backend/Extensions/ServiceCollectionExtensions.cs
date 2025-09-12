@@ -41,6 +41,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShareTokenRepository, ShareTokenRepository>();
         services.AddScoped<IShareAccessLogRepository, ShareAccessLogRepository>();
 
+        // 注册消息系统仓储 - Scoped 生命周期
+        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IMessageAttachmentRepository, MessageAttachmentRepository>();
+        services.AddScoped<IMessageDraftRepository, MessageDraftRepository>();
+        services.AddScoped<IMessageConversationRepository, MessageConversationRepository>();
+        services.AddScoped<IMessageDraftAttachmentRepository, MessageDraftAttachmentRepository>();
+
         return services;
     }
 
@@ -65,6 +72,11 @@ public static class ServiceCollectionExtensions
 
         // 注册安全服务 - Scoped 生命周期
         services.AddScoped<IInputValidationService, InputValidationService>();
+
+        // 注册消息系统服务 - Scoped 生命周期
+        services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IMessageAttachmentService, MessageAttachmentService>();
+        services.AddScoped<IMessageDraftService, MessageDraftService>();
 
         return services;
     }
@@ -217,7 +229,11 @@ public static class ServiceCollectionExtensions
         {
             options.EnableForHttps = true;
             options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
-            options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+            });
         });
 
         return services;
