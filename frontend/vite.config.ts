@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import monacoEditorPlugin from './src/utils/vite-monaco-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,6 +12,27 @@ export default defineConfig({
     vue(),
     vueJsx(),
     vueDevTools(),
+    monacoEditorPlugin({
+      enableWorker: true,
+      publicPath: '/monaco-editor',
+      enableCodeSplitting: true,
+      enableLanguagePackCompression: true,
+      languages: [
+        'javascript',
+        'typescript',
+        'python',
+        'java',
+        'csharp',
+        'html',
+        'css',
+        'json',
+        'sql',
+        'markdown',
+        'shell',
+        'xml',
+        'yaml'
+      ]
+    }),
   ],
   resolve: {
     alias: {

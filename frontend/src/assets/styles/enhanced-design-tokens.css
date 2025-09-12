@@ -1,7 +1,291 @@
-/* SeekCode 增强设计令牌 - 前端样式优化 */
+/* SeekCode 代码片段详情页面 - 增强设计令牌系统 */
 
-/* 扩展的设计令牌 - 基于现有design-system.css */
+/* 基于 design-system.css 的扩展，专门为代码片段页面优化 */
 :root {
+  /* ========== 编辑器专用颜色系统 ========== */
+  
+  /* Monaco Editor 主题色彩 */
+  --editor-bg-primary: #1e1e1e;
+  --editor-bg-secondary: #252526;
+  --editor-bg-tertiary: #2d2d2d;
+  --editor-bg-widget: #252526;
+  --editor-bg-selection: #264f78;
+  
+  --editor-text-primary: #d4d4d4;
+  --editor-text-secondary: #969696;
+  --editor-text-tertiary: #6a9955;
+  --editor-text-comment: #6a9955;
+  --editor-text-string: #ce9178;
+  --editor-text-number: #b5cea8;
+  --editor-text-keyword: #569cd6;
+  --editor-text-function: #dcdcaa;
+  --editor-text-variable: #9cdcfe;
+  --editor-text-type: #4ec9b0;
+  --editor-text-class: #4ec9b0;
+  --editor-text-interface: #4ec9b0;
+  --editor-text-enum: #4ec9b0;
+  --editor-text-constant: #dcdcaa;
+  --editor-text-operator: #d4d4d4;
+  --editor-text-punctuation: #d4d4d4;
+  --editor-text-tag: #569cd6;
+  --editor-text-attribute: #9cdcfe;
+  --editor-text-property: #9cdcfe;
+  --editor-text-method: #dcdcaa;
+  --editor-text-parameter: #9cdcfe;
+  --editor-text-decorator: #569cd6;
+  
+  --editor-border-primary: #3e3e42;
+  --editor-border-secondary: #454545;
+  --editor-border-focus: #007acc;
+  --editor-border-selection: #264f78;
+  
+  --editor-cursor: #ffffff;
+  --editor-line-number: #858585;
+  --editor-line-number-active: #c6c6c6;
+  --editor-line-highlight: #2d2d30;
+  --editor-line-highlight-border: #2d2d30;
+  
+  --editor-scrollbar: #424242;
+  --editor-scrollbar-hover: #505050;
+  --editor-scrollbar-active: #6e6e6e;
+  
+  --editor-minimap: #1e1e1e;
+  --editor-minimap-selection: #264f78;
+  --editor-minimap-shadow: rgba(0, 0, 0, 0.2);
+  
+  --editor-widget-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --editor-widget-border: #383a3e;
+  --editor-widget-hover: #2a2d2e;
+  
+  --editor-link: #4e94ce;
+  --editor-link-active: #007acc;
+  
+  --editor-error-line: #5a1d1d;
+  --editor-error-border: #be1100;
+  --editor-error-background: rgba(255, 0, 0, 0.1);
+  
+  --editor-warning-line: #352a00;
+  --editor-warning-border: #bf8803;
+  --editor-warning-background: rgba(255, 200, 0, 0.1);
+  
+  --editor-info-line: #1e3a5a;
+  --editor-info-border: #007acc;
+  --editor-info-background: rgba(0, 122, 204, 0.1);
+  
+  --editor-hint-background: #252526;
+  --editor-hint-border: #454545;
+  --editor-hint-selection: #094771;
+  
+  --editor-suggest-background: #252526;
+  --editor-suggest-border: #454545;
+  --editor-suggest-selection: #094771;
+  --editor-suggest-highlight: #ffffff;
+  
+  --editor-parameter-hint-background: #252526;
+  --editor-parameter-hint-border: #454545;
+  --editor-parameter-hint-selection: #094771;
+  
+  --editor-find-match: #515c6a;
+  --editor-find-match-highlight: #ffffff33;
+  --editor-current-find-match: #5a5d80;
+  
+  --editor-peek-view-background: #1e1e1e;
+  --editor-peek-view-border: #454545;
+  --editor-peek-view-title-background: #252526;
+  --editor-peek-view-result-background: #252526;
+  --editor-peek-view-result-selection: #264f78;
+  --editor-peek-view-result-match-highlight: #ea5c00;
+  --editor-peek-view-result-file-background: #2d2d2d;
+  --editor-peek-view-result-line-background: #252526;
+  --editor-peek-view-result-selection-background: #264f78;
+  --editor-peek-view-result-match-highlight-background: rgba(234, 92, 0, 0.3);
+  --editor-peek-view-editor-background: #1e1e1e;
+  
+  /* 代码片段页面专用色彩 */
+  --snippet-bg-primary: #ffffff;
+  --snippet-bg-secondary: #f8f9fa;
+  --snippet-bg-tertiary: #e9ecef;
+  --snippet-bg-code: #1e1e1e;
+  --snippet-bg-info: #f8f9fa;
+  --snippet-bg-toolbar: #ffffff;
+  --snippet-bg-sidebar: #f8f9fa;
+  
+  --snippet-text-primary: #212529;
+  --snippet-text-secondary: #495057;
+  --snippet-text-tertiary: #6c757d;
+  --snippet-text-code: #d4d4d4;
+  --snippet-text-link: #0066cc;
+  --snippet-text-meta: #6c757d;
+  
+  --snippet-border-primary: #dee2e6;
+  --snippet-border-secondary: #ced4da;
+  --snippet-border-tertiary: #adb5bd;
+  --snippet-border-focus: #0066cc;
+  --snippet-border-code: #3e3e42;
+  
+  --snippet-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --snippet-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --snippet-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --snippet-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  --snippet-shadow-toolbar: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --snippet-shadow-modal: 0 25px 50px rgba(0, 0, 0, 0.25);
+  
+  /* ========== 代码片段专用间距 ========== */
+  
+  --snippet-spacing-xs: 2px;
+  --snippet-spacing-sm: 4px;
+  --snippet-spacing-md: 8px;
+  --snippet-spacing-lg: 12px;
+  --snippet-spacing-xl: 16px;
+  --snippet-spacing-2xl: 20px;
+  --snippet-spacing-3xl: 24px;
+  --snippet-spacing-4xl: 32px;
+  --snippet-spacing-5xl: 40px;
+  --snippet-spacing-6xl: 48px;
+  
+  /* 代码片段组件间距 */
+  --snippet-component-padding: var(--snippet-spacing-lg);
+  --snippet-component-gap: var(--snippet-spacing-md);
+  --snippet-toolbar-height: 48px;
+  --snippet-toolbar-padding: var(--snippet-spacing-md);
+  --snippet-sidebar-width: 320px;
+  --snippet-sidebar-padding: var(--snippet-spacing-lg);
+  --snippet-info-panel-padding: var(--snippet-spacing-lg);
+  --snippet-code-editor-min-height: 400px;
+  --snippet-code-editor-max-height: 800px;
+  --snippet-status-bar-height: 32px;
+  --snippet-status-bar-padding: var(--snippet-spacing-sm);
+  
+  /* ========== 代码片段专用字体 ========== */
+  
+  --snippet-font-heading: var(--font-sans);
+  --snippet-font-body: var(--font-sans);
+  --snippet-font-code: var(--font-mono);
+  --snippet-font-meta: var(--font-sans);
+  --snippet-font-ui: var(--font-sans);
+  
+  --snippet-font-size-heading-lg: 1.875rem;
+  --snippet-font-size-heading-md: 1.5rem;
+  --snippet-font-size-heading-sm: 1.25rem;
+  --snippet-font-size-body: 1rem;
+  --snippet-font-size-body-sm: 0.875rem;
+  --snippet-font-size-body-xs: 0.75rem;
+  --snippet-font-size-code: 0.875rem;
+  --snippet-font-size-meta: 0.75rem;
+  --snippet-font-size-toolbar: 0.875rem;
+  --snippet-font-size-status: 0.75rem;
+  
+  --snippet-font-weight-heading: 600;
+  --snippet-font-weight-body: 400;
+  --snippet-font-weight-code: 400;
+  --snippet-font-weight-meta: 500;
+  --snippet-font-weight-ui: 500;
+  
+  --snippet-line-height-heading: 1.2;
+  --snippet-line-height-body: 1.5;
+  --snippet-line-height-code: 1.5;
+  --snippet-line-height-meta: 1.4;
+  --snippet-line-height-compact: 1.2;
+  
+  /* ========== 代码片段专用动画 ========== */
+  
+  --snippet-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --snippet-transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --snippet-transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --snippet-transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  --snippet-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --snippet-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --snippet-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --snippet-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* ========== 代码片段专用圆角 ========== */
+  
+  --snippet-radius-sm: 4px;
+  --snippet-radius-md: 8px;
+  --snippet-radius-lg: 12px;
+  --snippet-radius-xl: 16px;
+  --snippet-radius-2xl: 20px;
+  --snippet-radius-panel: 12px;
+  --snippet-radius-modal: 16px;
+  --snippet-radius-code-editor: 8px;
+  --snippet-radius-toolbar-button: 6px;
+  --snippet-radius-tag: 16px;
+  --snippet-radius-badge: 12px;
+  
+  /* ========== 代码片段专用阴影 ========== */
+  
+  --snippet-shadow-component: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --snippet-shadow-component-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --snippet-shadow-modal: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --snippet-shadow-toolbar: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --snippet-shadow-sidebar: 0 0 20px rgba(0, 0, 0, 0.08);
+  --snippet-shadow-code-editor: 0 0 30px rgba(0, 0, 0, 0.15);
+  --snippet-shadow-button: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --snippet-shadow-button-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
+  
+  /* ========== 代码片段专用断点 ========== */
+  
+  --snippet-breakpoint-mobile: 768px;
+  --snippet-breakpoint-tablet: 1024px;
+  --snippet-breakpoint-desktop: 1280px;
+  --snippet-breakpoint-wide: 1536px;
+  
+  /* ========== 代码片段专用Z-Index ========== */
+  
+  --snippet-z-dropdown: 1000;
+  --snippet-z-toolbar: 1010;
+  --snippet-z-sidebar: 1020;
+  --snippet-z-modal-backdrop: 1030;
+  --snippet-z-modal: 1040;
+  --snippet-z-tooltip: 1050;
+  --snippet-z-notification: 1060;
+  --snippet-z-code-editor: 50;
+  --snippet-z-code-editor-toolbar: 60;
+  --snippet-z-code-editor-status: 55;
+  
+  /* ========== 代码片段专用渐变 ========== */
+  
+  --snippet-gradient-toolbar: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  --snippet-gradient-sidebar: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  --snippet-gradient-code-header: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
+  --snippet-gradient-button-primary: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+  --snippet-gradient-button-secondary: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  --snippet-gradient-tag: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  
+  /* ========== 代码片段专用透明度 ========== */
+  
+  --snippet-opacity-disabled: 0.5;
+  --snippet-opacity-loading: 0.7;
+  --snippet-opacity-hover: 0.9;
+  --snippet-opacity-focus: 1;
+  --snippet-opacity-backdrop: 0.5;
+  --snippet-opacity-shadow: 0.1;
+  --snippet-opacity-border: 0.2;
+  
+  /* ========== 代码片段专用混合模式 ========== */
+  
+  --snippet-blend-normal: normal;
+  --snippet-blend-multiply: multiply;
+  --snippet-blend-screen: screen;
+  --snippet-blend-overlay: overlay;
+  
+  /* ========== 代码片段专用滤镜 ========== */
+  
+  --snippet-blur-sm: blur(4px);
+  --snippet-blur-md: blur(8px);
+  --snippet-blur-lg: blur(16px);
+  --snippet-blur-backdrop: blur(10px);
+  --snippet-blur-modal-backdrop: blur(8px);
+  
+  /* ========== 代码片段专用变换 ========== */
+  
+  --snippet-transform-scale-hover: scale(1.02);
+  --snippet-transform-scale-active: scale(0.98);
+  --snippet-transform-translate-y-hover: translateY(-2px);
+  --snippet-transform-translate-y-active: translateY(0);
+  --snippet-transform-rotate-hover: rotate(2deg);
+  
   /* ========== 动画增强 ========== */
   
   /* 动画缓动函数 */
@@ -706,6 +990,26 @@
     
     --gradient-metallic: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
     --gradient-neon: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+    
+    /* 代码片段暗色模式适配 */
+    --snippet-bg-primary: #1a1a1a;
+    --snippet-bg-secondary: #2d2d2d;
+    --snippet-bg-tertiary: #404040;
+    --snippet-bg-info: #2d2d2d;
+    --snippet-bg-toolbar: #252526;
+    --snippet-bg-sidebar: #2d2d2d;
+    
+    --snippet-text-primary: #ffffff;
+    --snippet-text-secondary: #e0e0e0;
+    --snippet-text-tertiary: #b0b0b0;
+    --snippet-text-meta: #a0a0a0;
+    
+    --snippet-border-primary: #404040;
+    --snippet-border-secondary: #505050;
+    --snippet-border-tertiary: #606060;
+    
+    --snippet-gradient-toolbar: linear-gradient(180deg, #252526 0%, #2d2d2d 100%);
+    --snippet-gradient-sidebar: linear-gradient(180deg, #2d2d2d 0%, #404040 100%);
   }
   
   .gradient-text-primary,
@@ -714,6 +1018,416 @@
   .gradient-text-error,
   .gradient-text-info {
     -webkit-text-fill-color: var(--gray-100);
+  }
+}
+
+/* ========== 代码片段专用工具类 ========== */
+
+/* 布局工具类 */
+.snippet-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--snippet-bg-secondary);
+}
+
+.snippet-layout-header {
+  flex-shrink: 0;
+  background: var(--snippet-bg-primary);
+  border-bottom: 1px solid var(--snippet-border-primary);
+  z-index: var(--snippet-z-toolbar);
+}
+
+.snippet-layout-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.snippet-layout-sidebar {
+  flex-shrink: 0;
+  width: var(--snippet-sidebar-width);
+  background: var(--snippet-bg-sidebar);
+  border-right: 1px solid var(--snippet-border-primary);
+  overflow-y: auto;
+  z-index: var(--snippet-z-sidebar);
+}
+
+.snippet-layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--snippet-bg-primary);
+}
+
+.snippet-layout-footer {
+  flex-shrink: 0;
+  background: var(--snippet-bg-primary);
+  border-top: 1px solid var(--snippet-border-primary);
+  z-index: var(--snippet-z-toolbar);
+}
+
+/* 代码编辑器容器 */
+.snippet-code-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: var(--snippet-bg-code);
+  border-radius: var(--snippet-radius-code-editor);
+  overflow: hidden;
+  box-shadow: var(--snippet-shadow-code-editor);
+}
+
+.snippet-code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--snippet-toolbar-padding);
+  background: var(--snippet-gradient-code-header);
+  border-bottom: 1px solid var(--editor-border-primary);
+  min-height: var(--snippet-toolbar-height);
+  z-index: var(--snippet-z-code-editor-toolbar);
+}
+
+.snippet-code-editor {
+  flex: 1;
+  position: relative;
+  min-height: var(--snippet-code-editor-min-height);
+  max-height: var(--snippet-code-editor-max-height);
+}
+
+.snippet-code-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--snippet-status-bar-padding);
+  background: var(--editor-bg-secondary);
+  border-top: 1px solid var(--editor-border-primary);
+  font-size: var(--snippet-font-size-status);
+  color: var(--editor-text-secondary);
+  font-family: var(--snippet-font-code);
+  min-height: var(--snippet-status-bar-height);
+  z-index: var(--snippet-z-code-editor-status);
+}
+
+/* 信息面板 */
+.snippet-info-panel {
+  background: var(--snippet-bg-info);
+  border-radius: var(--snippet-radius-panel);
+  padding: var(--snippet-info-panel-padding);
+  margin-bottom: var(--snippet-component-gap);
+  box-shadow: var(--snippet-shadow-component);
+  transition: all var(--snippet-transition-normal);
+}
+
+.snippet-info-panel:hover {
+  box-shadow: var(--snippet-shadow-component-hover);
+}
+
+.snippet-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--snippet-spacing-lg);
+  padding-bottom: var(--snippet-spacing-lg);
+  border-bottom: 1px solid var(--snippet-border-secondary);
+}
+
+.snippet-info-title {
+  font-family: var(--snippet-font-heading);
+  font-size: var(--snippet-font-size-heading-sm);
+  font-weight: var(--snippet-font-weight-heading);
+  color: var(--snippet-text-primary);
+  margin: 0;
+  line-height: var(--snippet-line-height-heading);
+}
+
+.snippet-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--snippet-spacing-md);
+}
+
+.snippet-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--snippet-spacing-sm);
+}
+
+.snippet-info-label {
+  font-family: var(--snippet-font-meta);
+  font-size: var(--snippet-font-size-meta);
+  font-weight: var(--snippet-font-weight-meta);
+  color: var(--snippet-text-tertiary);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.snippet-info-value {
+  font-family: var(--snippet-font-body);
+  font-size: var(--snippet-font-size-body-sm);
+  color: var(--snippet-text-secondary);
+  flex: 1;
+  word-break: break-word;
+}
+
+/* 工具栏按钮 */
+.snippet-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--snippet-spacing-sm);
+  padding: var(--snippet-spacing-sm) var(--snippet-spacing-md);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--snippet-radius-toolbar-button);
+  color: var(--snippet-text-secondary);
+  font-family: var(--snippet-font-ui);
+  font-size: var(--snippet-font-size-toolbar);
+  font-weight: var(--snippet-font-weight-ui);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--snippet-transition-normal);
+  white-space: nowrap;
+}
+
+.snippet-toolbar-btn:hover {
+  background: var(--snippet-bg-secondary);
+  color: var(--snippet-text-primary);
+  border-color: var(--snippet-border-secondary);
+  transform: var(--snippet-transform-translate-y-hover);
+}
+
+.snippet-toolbar-btn:active {
+  transform: var(--snippet-transform-translate-y-active);
+}
+
+.snippet-toolbar-btn:disabled {
+  opacity: var(--snippet-opacity-disabled);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.snippet-toolbar-btn.active {
+  background: var(--snippet-gradient-button-primary);
+  color: white;
+  border-color: transparent;
+}
+
+.snippet-toolbar-btn-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.snippet-toolbar-btn-text {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+}
+
+/* 语言标签 */
+.snippet-language-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--snippet-spacing-xs);
+  padding: var(--snippet-spacing-xs) var(--snippet-spacing-sm);
+  background: var(--snippet-gradient-tag);
+  border: 1px solid var(--snippet-border-secondary);
+  border-radius: var(--snippet-radius-tag);
+  font-family: var(--snippet-font-meta);
+  font-size: var(--snippet-font-size-meta);
+  font-weight: var(--snippet-font-weight-meta);
+  color: var(--snippet-text-tertiary);
+  text-decoration: none;
+  cursor: default;
+  transition: all var(--snippet-transition-normal);
+}
+
+.snippet-language-tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 元数据标签 */
+.snippet-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--snippet-spacing-sm);
+  padding: var(--snippet-spacing-xs) var(--snippet-spacing-sm);
+  background: var(--snippet-bg-secondary);
+  border-radius: var(--snippet-radius-sm);
+  font-family: var(--snippet-font-meta);
+  font-size: var(--snippet-font-size-meta);
+  color: var(--snippet-text-tertiary);
+  transition: all var(--snippet-transition-normal);
+}
+
+.snippet-meta-item:hover {
+  background: var(--snippet-bg-tertiary);
+  color: var(--snippet-text-secondary);
+}
+
+.snippet-meta-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  opacity: var(--snippet-opacity-hover);
+}
+
+.snippet-meta-text {
+  font-size: inherit;
+  line-height: 1;
+}
+
+/* 响应式工具类 */
+@media (max-width: var(--snippet-breakpoint-mobile)) {
+  .snippet-layout {
+    flex-direction: column;
+  }
+  
+  .snippet-layout-main {
+    flex-direction: column;
+  }
+  
+  .snippet-layout-sidebar {
+    width: 100%;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid var(--snippet-border-primary);
+  }
+  
+  .snippet-code-toolbar {
+    flex-wrap: wrap;
+    gap: var(--snippet-spacing-sm);
+    min-height: auto;
+    padding: var(--snippet-spacing-sm);
+  }
+  
+  .snippet-toolbar-btn {
+    padding: var(--snippet-spacing-xs) var(--snippet-spacing-sm);
+    font-size: var(--snippet-font-size-body-xs);
+  }
+  
+  .snippet-info-panel {
+    padding: var(--snippet-spacing-md);
+    margin-bottom: var(--snippet-spacing-sm);
+  }
+  
+  .snippet-info-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--snippet-spacing-sm);
+    margin-bottom: var(--snippet-spacing-md);
+  }
+  
+  .snippet-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--snippet-spacing-xs);
+  }
+  
+  .snippet-info-label {
+    min-width: auto;
+    font-size: var(--snippet-font-size-body-xs);
+  }
+  
+  .snippet-info-value {
+    font-size: var(--snippet-font-size-body-xs);
+  }
+}
+
+@media (min-width: var(--snippet-breakpoint-mobile)) and (max-width: var(--snippet-breakpoint-tablet)) {
+  .snippet-layout-sidebar {
+    width: 280px;
+  }
+  
+  .snippet-info-panel {
+    padding: var(--snippet-spacing-lg);
+  }
+}
+
+@media (min-width: var(--snippet-breakpoint-tablet)) and (max-width: var(--snippet-breakpoint-desktop)) {
+  .snippet-layout-sidebar {
+    width: 300px;
+  }
+}
+
+/* 无障碍支持 */
+.snippet-toolbar-btn:focus-visible {
+  outline: 2px solid var(--snippet-border-focus);
+  outline-offset: 2px;
+}
+
+.snippet-language-tag:focus-visible {
+  outline: 2px solid var(--snippet-border-focus);
+  outline-offset: 2px;
+}
+
+.snippet-meta-item:focus-visible {
+  outline: 2px solid var(--snippet-border-focus);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .snippet-code-container,
+  .snippet-info-panel,
+  .snippet-toolbar-btn {
+    border-width: 2px;
+  }
+  
+  .snippet-language-tag,
+  .snippet-meta-item {
+    border-width: 2px;
+  }
+  
+  .snippet-toolbar-btn.active {
+    border-width: 3px;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  .snippet-toolbar-btn,
+  .snippet-info-panel,
+  .snippet-language-tag,
+  .snippet-meta-item {
+    transition-duration: 0.01ms !important;
+  }
+  
+  .snippet-toolbar-btn:hover,
+  .snippet-info-panel:hover,
+  .snippet-toolbar-btn:active {
+    transform: none !important;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .snippet-layout-sidebar,
+  .snippet-toolbar-btn,
+  .snippet-code-toolbar,
+  .snippet-code-status {
+    display: none !important;
+  }
+  
+  .snippet-layout-main {
+    flex-direction: column;
+  }
+  
+  .snippet-code-container {
+    box-shadow: none;
+    border: 1px solid var(--snippet-border-primary);
+  }
+  
+  .snippet-info-panel {
+    box-shadow: none;
+    border: 1px solid var(--snippet-border-primary);
+    page-break-inside: avoid;
   }
 }
 

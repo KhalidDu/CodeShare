@@ -1,6 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { UserRole } from '@/types'
+import { 
+  snippetEnhancedRoutes, 
+  snippetEnhancedRedirects,
+  snippetEnhancedGuards 
+} from './snippet-enhanced.routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +46,8 @@ const router = createRouter({
       name: 'snippet-detail',
       component: () => import('../views/SnippetDetailView.vue')
     },
+    // 增强的代码片段路由
+    ...snippetEnhancedRoutes,
     {
       path: '/snippets/:id/edit',
       name: 'edit-snippet',
@@ -97,6 +104,17 @@ const router = createRouter({
         public: true
       }
     },
+    // 增强的分享路由
+    {
+      path: '/share/:token/enhanced',
+      name: 'share-view-enhanced',
+      component: () => import('../views/ShareViewEnhanced.vue'),
+      meta: {
+        title: '增强分享视图',
+        public: true,
+        keepAlive: true
+      }
+    },
     {
       path: '/shares',
       name: 'share-management',
@@ -105,7 +123,9 @@ const router = createRouter({
         requiresAuth: true,
         title: '分享管理'
       }
-    }
+    },
+    // 路由重定向配置
+    ...snippetEnhancedRedirects
   ]
 })
 
