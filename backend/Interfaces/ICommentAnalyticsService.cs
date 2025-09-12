@@ -415,16 +415,16 @@ public class ProjectedGrowthDto
 /// </summary>
 public class TrendAnalysisDto
 {
-    public TrendDirection Direction { get; set; }
+    public CommentTrendDirection Direction { get; set; }
     public double Strength { get; set; }
     public double Volatility { get; set; }
     public List<string> Insights { get; set; } = new();
 }
 
 /// <summary>
-/// 趋势方向枚举
+/// 评论趋势方向枚举
 /// </summary>
-public enum TrendDirection
+public enum CommentTrendDirection
 {
     Increasing = 0,
     Decreasing = 1,

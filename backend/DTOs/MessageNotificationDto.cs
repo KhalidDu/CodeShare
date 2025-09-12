@@ -15,7 +15,7 @@ public class MessageNotificationDto
     /// <summary>
     /// 通知类型
     /// </summary>
-    public NotificationType Type { get; set; }
+    public MessageNotificationType Type { get; set; }
 
     /// <summary>
     /// 通知标题
@@ -577,9 +577,9 @@ public class TypingStatusDto
 
 // 枚举定义
 /// <summary>
-/// 通知类型枚举
+/// 消息通知类型枚举
 /// </summary>
-public enum NotificationType
+public enum MessageNotificationType
 {
     /// <summary>
     /// 新消息

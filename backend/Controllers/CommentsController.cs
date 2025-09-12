@@ -38,7 +38,7 @@ public class CommentsController : ControllerBase
     private readonly ILogger<CommentsController> _logger;
 
     // 简单缓存，用于缓存热门评论
-    private static readonly ConcurrentDictionary<string, CacheEntry> _commentCache = new();
+    private static readonly ConcurrentDictionary<string, CommentCacheEntry> _commentCache = new();
 
     public CommentsController(
         ICommentService commentService,
@@ -1406,14 +1406,6 @@ public class CommentsController : ControllerBase
     #endregion
 }
 
-/// <summary>
-/// 缓存条目
-/// </summary>
-internal class CacheEntry
-{
-    public PaginatedResult<CommentDto> Data { get; set; } = null!;
-    public DateTime ExpiresAt { get; set; }
-}
 
 /// <summary>
 /// 评论审核请求DTO

@@ -330,7 +330,7 @@ public interface ICommentReportManagementService
     /// <param name="filter">导出筛选条件</param>
     /// <param name="format">导出格式</param>
     /// <returns>导出文件内容</returns>
-    Task<byte[]> ExportReportsAsync(CommentReportFilterDto filter, ExportFormat format);
+    Task<byte[]> ExportReportsAsync(CommentReportFilterDto filter, CommentReportExportFormat format);
 
     /// <summary>
     /// 生成举报报告
@@ -727,9 +727,9 @@ public enum ReportHistorySort
 }
 
 /// <summary>
-/// 导出格式枚举
+/// 评论报告导出格式枚举
 /// </summary>
-public enum ExportFormat
+public enum CommentReportExportFormat
 {
     Csv = 0,
     Json = 1,

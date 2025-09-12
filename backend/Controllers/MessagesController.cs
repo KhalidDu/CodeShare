@@ -34,7 +34,7 @@ public class MessagesController : ControllerBase
     private readonly ILogger<MessagesController> _logger;
 
     // 简单缓存，用于缓存热门消息
-    private static readonly ConcurrentDictionary<string, CacheEntry> _messageCache = new();
+    private static readonly ConcurrentDictionary<string, MessageCacheEntry> _messageCache = new();
 
     public MessagesController(
         IMessageService messageService,
@@ -2865,14 +2865,6 @@ public class MessagesController : ControllerBase
     #endregion
 }
 
-/// <summary>
-/// 缓存条目
-/// </summary>
-internal class CacheEntry
-{
-    public PaginatedResult<MessageDto> Data { get; set; } = null!;
-    public DateTime ExpiresAt { get; set; }
-}
 
 /// <summary>
 /// 消息搜索请求DTO

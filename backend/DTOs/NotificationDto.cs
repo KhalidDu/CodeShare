@@ -775,36 +775,6 @@ public class PaginatedNotificationsDto
     public NotificationFilterDto Filter { get; set; } = new();
 }
 
-/// <summary>
-/// 导出格式枚举
-/// </summary>
-public enum ExportFormat
-{
-    /// <summary>
-    /// JSON格式
-    /// </summary>
-    Json = 0,
-
-    /// <summary>
-    /// CSV格式
-    /// </summary>
-    Csv = 1,
-
-    /// <summary>
-    /// Excel格式
-    /// </summary>
-    Excel = 2,
-
-    /// <summary>
-    /// XML格式
-    /// </summary>
-    Xml = 3,
-
-    /// <summary>
-    /// PDF格式
-    /// </summary>
-    Pdf = 4
-}
 
 /// <summary>
 /// 批量通知操作请求DTO

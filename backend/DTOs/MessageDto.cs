@@ -767,31 +767,6 @@ public class MessageExportOptionsDto
     public bool IncludeReplies { get; set; } = true;
 }
 
-/// <summary>
-/// 导出格式枚举
-/// </summary>
-public enum ExportFormat
-{
-    /// <summary>
-    /// JSON格式
-    /// </summary>
-    Json = 0,
-
-    /// <summary>
-    /// CSV格式
-    /// </summary>
-    Csv = 1,
-
-    /// <summary>
-    /// Excel格式
-    /// </summary>
-    Excel = 2,
-
-    /// <summary>
-    /// PDF格式
-    /// </summary>
-    Pdf = 3
-}
 
 /// <summary>
 /// 创建会话请求DTO
