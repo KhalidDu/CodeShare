@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CodeSnippetManager.Api.Models;
 using CodeSnippetManager.Api.DTOs;
 
@@ -174,6 +175,14 @@ public interface IMessageService
     /// <param name="currentUserId">当前用户ID</param>
     /// <returns>附件文件流</returns>
     Task<Stream> DownloadAttachmentAsync(Guid attachmentId, Guid currentUserId);
+
+    /// <summary>
+    /// 获取附件信息
+    /// </summary>
+    /// <param name="attachmentId">附件ID</param>
+    /// <param name="currentUserId">当前用户ID</param>
+    /// <returns>附件信息DTO</returns>
+    Task<MessageAttachmentDto?> GetAttachmentInfoAsync(Guid attachmentId, Guid currentUserId);
 
     /// <summary>
     /// 获取消息附件列表
@@ -402,7 +411,7 @@ public interface IMessageService
     /// <param name="userIds">用户ID列表</param>
     /// <param name="currentUserId">当前用户ID</param>
     /// <returns>是否添加成功</returns>
-    Task<bool> AddConversationParticipantsAsync(Guid conversationId, IEnumerable<Guid> userIds, Guid currentUserId);
+    Task<BulkOperationResultDto> AddConversationParticipantsAsync(Guid conversationId, IEnumerable<Guid> userIds, Guid currentUserId);
 
     /// <summary>
     /// 移除会话参与者
@@ -602,49 +611,66 @@ public interface IMessageService
     /// <param name="currentUserId">当前用户ID</param>
     /// <returns>导出文件流</returns>
     Task<Stream> ExportMessageThreadAsync(Guid rootMessageId, MessageExportOptionsDto options, Guid currentUserId);
+
+    // 批量操作方法
+    /// <summary>
+    /// 批量发送消息
+    /// </summary>
+    /// <param name="requests">发送消息请求列表</param>
+    /// <param name="senderId">发送者ID</param>
+    /// <returns>批量发送结果</returns>
+    Task<BulkOperationResultDto> BulkSendMessagesAsync(IEnumerable<CreateMessageDto> requests, Guid senderId);
+
+    /// <summary>
+    /// 批量标记消息为已读
+    /// </summary>
+    /// <param name="messageIds">消息ID列表</param>
+    /// <param name="userId">用户ID</param>
+    /// <returns>批量操作结果</returns>
+    Task<BulkOperationResultDto> BulkMarkMessagesAsReadAsync(IEnumerable<Guid> messageIds, Guid userId);
+
+    /// <summary>
+    /// 批量删除消息
+    /// </summary>
+    /// <param name="messageIds">消息ID列表</param>
+    /// <param name="userId">用户ID</param>
+    /// <returns>批量操作结果</returns>
+    Task<BulkOperationResultDto> BulkDeleteMessagesAsync(IEnumerable<Guid> messageIds, Guid userId);
+
+    // 会话管理方法
+    /// <summary>
+    /// 移除会话参与者
+    /// </summary>
+    /// <param name="conversationId">会话ID</param>
+    /// <param name="participantId">参与者ID</param>
+    /// <param name="operatorId">操作人ID</param>
+    /// <returns>是否移除成功</returns>
+    Task<bool> RemoveConversationParticipantAsync(Guid conversationId, Guid participantId, Guid operatorId);
+
+    // 消息类型和优先级管理
+    /// <summary>
+    /// 获取消息类型列表
+    /// </summary>
+    /// <returns>消息类型列表</returns>
+    Task<IEnumerable<MessageTypeDto>> GetMessageTypesAsync();
+
+    /// <summary>
+    /// 获取消息优先级列表
+    /// </summary>
+    /// <returns>消息优先级列表</returns>
+    Task<IEnumerable<MessagePriorityDto>> GetMessagePrioritiesAsync();
+
+    // 草稿管理
+    /// <summary>
+    /// 安排草稿定时发送
+    /// </summary>
+    /// <param name="draftId">草稿ID</param>
+    /// <param name="scheduledTime">计划发送时间</param>
+    /// <param name="userId">用户ID</param>
+    /// <returns>是否安排成功</returns>
+    Task<bool> ScheduleDraftAsync(Guid draftId, DateTime scheduledTime, Guid userId);
 }
 
-/// <summary>
-/// 创建会话请求DTO
-/// </summary>
-public class CreateConversationDto
-{
-    /// <summary>
-    /// 会话主题
-    /// </summary>
-    [Required(ErrorMessage = "会话主题不能为空")]
-    [StringLength(200, ErrorMessage = "会话主题长度不能超过200个字符")]
-    public string Subject { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 会话描述
-    /// </summary>
-    [StringLength(1000, ErrorMessage = "会话描述长度不能超过1000个字符")]
-    public string? Description { get; set; }
-
-    /// <summary>
-    /// 参与者用户ID列表
-    /// </summary>
-    [Required(ErrorMessage = "参与者列表不能为空")]
-    [MinLength(1, ErrorMessage = "至少需要一个参与者")]
-    public List<Guid> ParticipantIds { get; set; } = new();
-
-    /// <summary>
-    /// 会话类型
-    /// </summary>
-    public ConversationType ConversationType { get; set; } = ConversationType.Group;
-
-    /// <summary>
-    /// 初始消息内容
-    /// </summary>
-    [StringLength(2000, ErrorMessage = "初始消息长度不能超过2000个字符")]
-    public string? InitialMessage { get; set; }
-
-    /// <summary>
-    /// 初始消息附件ID列表
-    /// </summary>
-    public List<Guid>? InitialMessageAttachmentIds { get; set; }
-}
 
 /// <summary>
 /// 更新会话请求DTO
@@ -809,23 +835,3 @@ public enum ConversationPermission
     Admin = 5
 }
 
-/// <summary>
-/// 会话类型枚举
-/// </summary>
-public enum ConversationType
-{
-    /// <summary>
-    /// 私聊
-    /// </summary>
-    Private = 0,
-
-    /// <summary>
-    /// 群聊
-    /// </summary>
-    Group = 1,
-
-    /// <summary>
-    /// 系统会话
-    /// </summary>
-    System = 2
-}

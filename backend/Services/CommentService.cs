@@ -332,6 +332,22 @@ public class CommentService : ICommentService
     }
 
     /// <summary>
+    /// 根据ID获取评论详情（别名方法）
+    /// </summary>
+    public async Task<CommentDto?> GetCommentByIdAsync(Guid commentId, Guid? currentUserId = null)
+    {
+        return await GetCommentAsync(commentId, currentUserId);
+    }
+
+    /// <summary>
+    /// 分页获取评论列表（别名方法）
+    /// </summary>
+    public async Task<PaginatedResult<CommentDto>> GetCommentsPaginatedAsync(CommentFilterDto filter, Guid? currentUserId = null)
+    {
+        return await GetCommentsAsync(filter, currentUserId);
+    }
+
+    /// <summary>
     /// 获取代码片段的评论树结构
     /// </summary>
     public async Task<IEnumerable<CommentDto>> GetCommentTreeAsync(Guid snippetId, Guid? currentUserId = null)

@@ -60,6 +60,14 @@ public class MessageService : IMessageService
     #region 消息发送和接收操作
 
     /// <summary>
+    /// 验证消息权限
+    /// </summary>
+    public async Task<bool> ValidateMessagePermissionAsync(Guid messageId, Guid userId, Interfaces.MessagePermission permission)
+    {
+        return await _messageRepository.ValidateMessagePermissionAsync(messageId, userId, permission);
+    }
+
+    /// <summary>
     /// 发送消息
     /// </summary>
     public async Task<MessageDto> SendMessageAsync(CreateMessageDto request, Guid senderId)
@@ -946,14 +954,7 @@ public class MessageService : IMessageService
         return messageDto;
     }
 
-    /// <summary>
-    /// 验证消息权限
-    /// </summary>
-    private async Task<bool> ValidateMessagePermissionAsync(Guid messageId, Guid userId, MessagePermission permission)
-    {
-        return await _messageRepository.ValidateMessagePermissionAsync(messageId, userId, permission);
-    }
-
+  
     #endregion
 
     #region 缓存管理
@@ -1398,7 +1399,7 @@ public class MessageService : IMessageService
         throw new NotImplementedException("删除会话功能尚未实现");
     }
 
-    public async Task<bool> AddConversationParticipantsAsync(Guid conversationId, IEnumerable<Guid> userIds, Guid currentUserId)
+    public async Task<BulkOperationResultDto> AddConversationParticipantsAsync(Guid conversationId, IEnumerable<Guid> userIds, Guid currentUserId)
     {
         throw new NotImplementedException("添加会话参与者功能尚未实现");
     }
@@ -1514,6 +1515,11 @@ public class MessageService : IMessageService
         throw new NotImplementedException("下载消息附件功能尚未实现");
     }
 
+    public async Task<MessageAttachmentDto?> GetAttachmentInfoAsync(Guid attachmentId, Guid currentUserId)
+    {
+        throw new NotImplementedException("获取附件信息功能尚未实现");
+    }
+
     public async Task<IEnumerable<MessageAttachmentDto>> GetMessageAttachmentsAsync(Guid messageId, Guid currentUserId)
     {
         throw new NotImplementedException("获取消息附件功能尚未实现");
@@ -1613,6 +1619,45 @@ public class MessageService : IMessageService
     public async Task<bool> ValidateConversationPermissionAsync(Guid conversationId, Guid userId, ConversationPermission permission)
     {
         throw new NotImplementedException("验证会话权限功能尚未实现");
+    }
+
+    // 批量操作方法实现
+    public async Task<BulkOperationResultDto> BulkSendMessagesAsync(IEnumerable<CreateMessageDto> requests, Guid senderId)
+    {
+        throw new NotImplementedException("批量发送消息功能尚未实现");
+    }
+
+    public async Task<BulkOperationResultDto> BulkMarkMessagesAsReadAsync(IEnumerable<Guid> messageIds, Guid userId)
+    {
+        throw new NotImplementedException("批量标记消息为已读功能尚未实现");
+    }
+
+    public async Task<BulkOperationResultDto> BulkDeleteMessagesAsync(IEnumerable<Guid> messageIds, Guid userId)
+    {
+        throw new NotImplementedException("批量删除消息功能尚未实现");
+    }
+
+    // 会话管理方法实现
+    public async Task<bool> RemoveConversationParticipantAsync(Guid conversationId, Guid participantId, Guid operatorId)
+    {
+        throw new NotImplementedException("移除会话参与者功能尚未实现");
+    }
+
+    // 消息类型和优先级管理方法实现
+    public async Task<IEnumerable<MessageTypeDto>> GetMessageTypesAsync()
+    {
+        throw new NotImplementedException("获取消息类型功能尚未实现");
+    }
+
+    public async Task<IEnumerable<MessagePriorityDto>> GetMessagePrioritiesAsync()
+    {
+        throw new NotImplementedException("获取消息优先级功能尚未实现");
+    }
+
+    // 草稿管理方法实现
+    public async Task<bool> ScheduleDraftAsync(Guid draftId, DateTime scheduledTime, Guid userId)
+    {
+        throw new NotImplementedException("安排草稿定时发送功能尚未实现");
     }
 
     #endregion

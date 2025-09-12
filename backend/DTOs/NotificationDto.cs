@@ -602,55 +602,6 @@ public class NotificationPermissionsDto
 /// <summary>
 /// 通知发送请求DTO
 /// </summary>
-public class NotificationSendRequestDto
-{
-    [Required(ErrorMessage = "接收用户ID不能为空")]
-    public Guid UserId { get; set; }
-
-    [Required(ErrorMessage = "通知类型不能为空")]
-    public NotificationType Type { get; set; }
-
-    [Required(ErrorMessage = "通知标题不能为空")]
-    [StringLength(200, ErrorMessage = "通知标题长度不能超过200个字符")]
-    public string Title { get; set; } = string.Empty;
-
-    [StringLength(2000, ErrorMessage = "通知内容长度不能超过2000个字符")]
-    public string? Content { get; set; }
-
-    [StringLength(500, ErrorMessage = "通知消息长度不能超过500个字符")]
-    public string? Message { get; set; }
-
-    public NotificationPriority Priority { get; set; } = NotificationPriority.Normal;
-
-    public RelatedEntityType? RelatedEntityType { get; set; }
-
-    [StringLength(36, ErrorMessage = "相关实体ID长度不能超过36个字符")]
-    public string? RelatedEntityId { get; set; }
-
-    public Guid? TriggeredByUserId { get; set; }
-
-    public NotificationAction? Action { get; set; }
-
-    public NotificationChannel Channel { get; set; } = NotificationChannel.InApp;
-
-    public DateTime? ExpiresAt { get; set; }
-
-    public DateTime? ScheduledToSendAt { get; set; }
-
-    [StringLength(1000, ErrorMessage = "数据JSON长度不能超过1000个字符")]
-    public string? DataJson { get; set; }
-
-    [StringLength(100, ErrorMessage = "标签长度不能超过100个字符")]
-    public string? Tag { get; set; }
-
-    [StringLength(50, ErrorMessage = "图标长度不能超过50个字符")]
-    public string? Icon { get; set; }
-
-    [StringLength(20, ErrorMessage = "颜色长度不能超过20个字符")]
-    public string? Color { get; set; }
-
-    public bool RequiresConfirmation { get; set; } = false;
-}
 
 /// <summary>
 /// 通知批量发送结果DTO
@@ -714,35 +665,7 @@ public class NotificationBatchOperationResultDto
     public TimeSpan ProcessingDuration { get; set; }
 }
 
-/// <summary>
-/// 通知批量操作DTO
-/// </summary>
-public class NotificationBatchOperationDto
-{
-    [Required(ErrorMessage = "通知ID列表不能为空")]
-    [MinLength(1, ErrorMessage = "至少需要选择一个通知")]
-    public List<Guid> NotificationIds { get; set; } = new();
 
-    [Required(ErrorMessage = "操作类型不能为空")]
-    public NotificationBatchOperationType OperationType { get; set; }
-
-    public DateTime? OperationTime { get; set; }
-    public string? OperationReason { get; set; }
-}
-
-/// <summary>
-/// 通知批量操作类型枚举
-/// </summary>
-public enum NotificationBatchOperationType
-{
-    MarkAsRead,
-    MarkAsUnread,
-    Archive,
-    Unarchive,
-    Delete,
-    PermanentDelete,
-    Confirm
-}
 
 /// <summary>
 /// 系统通知统计DTO
@@ -808,63 +731,7 @@ public class BulkNotificationRequest
     public Dictionary<string, object>? Metadata { get; set; }
 }
 
-/// <summary>
-/// 标记通知已读请求DTO
-/// </summary>
-public class MarkAsReadRequest
-{
-    /// <summary>
-    /// 通知ID
-    /// </summary>
-    [Required(ErrorMessage = "通知ID不能为空")]
-    public Guid NotificationId { get; set; }
 
-    /// <summary>
-    /// 阅读时间
-    /// </summary>
-    public DateTime? ReadAt { get; set; }
-
-    /// <summary>
-    /// 自定义元数据
-    /// </summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Metadata { get; set; }
-}
-
-/// <summary>
-/// 批量标记已读请求DTO
-/// </summary>
-public class BulkMarkAsReadRequest
-{
-    /// <summary>
-    /// 通知ID列表
-    /// </summary>
-    [Required(ErrorMessage = "通知ID列表不能为空")]
-    [MinLength(1, ErrorMessage = "至少需要一个通知")]
-    [MaxLength(1000, ErrorMessage = "一次最多标记1000个通知")]
-    public List<Guid> NotificationIds { get; set; } = new();
-
-    /// <summary>
-    /// 阅读时间
-    /// </summary>
-    public DateTime? ReadAt { get; set; }
-
-    /// <summary>
-    /// 标记所有未读通知
-    /// </summary>
-    public bool MarkAllUnread { get; set; } = false;
-
-    /// <summary>
-    /// 接收者ID（用于标记特定用户的所有通知）
-    /// </summary>
-    public Guid? RecipientId { get; set; }
-
-    /// <summary>
-    /// 自定义元数据
-    /// </summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Metadata { get; set; }
-}
 
 /// <summary>
 /// 标记通知已送达请求DTO
@@ -2205,31 +2072,6 @@ public enum NotificationOperation
     UnmarkAsImportant = 7
 }
 
-/// <summary>
-/// 通知订阅类型枚举
-/// </summary>
-public enum NotificationSubscriptionType
-{
-    /// <summary>
-    /// 用户订阅
-    /// </summary>
-    User = 0,
-
-    /// <summary>
-    /// 资源订阅
-    /// </summary>
-    Resource = 1,
-
-    /// <summary>
-    /// 系统订阅
-    /// </summary>
-    System = 2,
-
-    /// <summary>
-    /// 标签订阅
-    /// </summary>
-    Tag = 3
-}
 
 /// <summary>
 /// 模板变量类型枚举
@@ -2272,31 +2114,6 @@ public enum TemplateVariableType
     Array = 6
 }
 
-/// <summary>
-/// 设备类型枚举
-/// </summary>
-public enum DeviceType
-{
-    /// <summary>
-    /// iOS设备
-    /// </summary>
-    iOS = 0,
-
-    /// <summary>
-    /// Android设备
-    /// </summary>
-    Android = 1,
-
-    /// <summary>
-    /// Web设备
-    /// </summary>
-    Web = 2,
-
-    /// <summary>
-    /// 桌面设备
-    /// </summary>
-    Desktop = 3
-}
 
 /// <summary>
 /// 批量操作结果DTO
@@ -2584,36 +2401,6 @@ public class NotificationSearchRequest
     public int? MaxResults { get; set; }
 }
 
-/// <summary>
-/// 通知搜索范围枚举
-/// </summary>
-public enum NotificationSearchScope
-{
-    /// <summary>
-    /// 搜索所有内容
-    /// </summary>
-    All = 0,
-
-    /// <summary>
-    /// 仅搜索标题
-    /// </summary>
-    Title = 1,
-
-    /// <summary>
-    /// 仅搜索内容
-    /// </summary>
-    Content = 2,
-
-    /// <summary>
-    /// 仅搜索发送者
-    /// </summary>
-    Sender = 3,
-
-    /// <summary>
-    /// 搜索标题和内容
-    /// </summary>
-    TitleAndContent = 4
-}
 
 /// <summary>
 /// 通知搜索排序枚举

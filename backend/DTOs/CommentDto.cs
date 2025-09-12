@@ -332,6 +332,11 @@ public class BatchCommentOperationDto
     /// </summary>
     [StringLength(500, ErrorMessage = "操作原因长度不能超过500个字符")]
     public string? Reason { get; set; }
+
+    /// <summary>
+    /// 操作人ID
+    /// </summary>
+    public Guid OperatorId { get; set; }
 }
 
 /// <summary>
@@ -471,67 +476,7 @@ public class CommentStatsDetailDto
     public Dictionary<CommentStatus, int> StatusDistribution { get; set; } = new();
 }
 
-/// <summary>
-/// 每日评论统计DTO
-/// </summary>
-public class DailyCommentStatsDto
-{
-    /// <summary>
-    /// 日期
-    /// </summary>
-    public DateTime Date { get; set; }
-    
-    /// <summary>
-    /// 评论数量
-    /// </summary>
-    public int CommentCount { get; set; }
-    
-    /// <summary>
-    /// 点赞数量
-    /// </summary>
-    public int LikeCount { get; set; }
-    
-    /// <summary>
-    /// 新用户数
-    /// </summary>
-    public int NewUsers { get; set; }
-}
 
-/// <summary>
-/// 用户评论统计DTO
-/// </summary>
-public class UserCommentStatsDto
-{
-    /// <summary>
-    /// 用户ID
-    /// </summary>
-    public Guid UserId { get; set; }
-    
-    /// <summary>
-    /// 用户名
-    /// </summary>
-    public string UserName { get; set; } = string.Empty;
-    
-    /// <summary>
-    /// 用户头像
-    /// </summary>
-    public string? UserAvatar { get; set; }
-    
-    /// <summary>
-    /// 评论数量
-    /// </summary>
-    public int CommentCount { get; set; }
-    
-    /// <summary>
-    /// 获得点赞数
-    /// </summary>
-    public int LikesReceived { get; set; }
-    
-    /// <summary>
-    /// 最后评论时间
-    /// </summary>
-    public DateTime? LastCommentAt { get; set; }
-}
 
 /// <summary>
 /// 评论简略信息DTO - 用于列表展示

@@ -44,6 +44,28 @@ public interface IPermissionService
     /// <param name="snippetId">代码片段ID</param>
     /// <returns>是否可以删除</returns>
     Task<bool> CanDeleteSnippetAsync(Guid userId, Guid snippetId);
+
+    /// <summary>
+    /// 检查用户是否有指定权限
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <param name="permission">权限名称</param>
+    /// <returns>是否有权限</returns>
+    Task<bool> HasPermissionAsync(Guid userId, string permission);
+
+    /// <summary>
+    /// 检查用户是否可以创建评论
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <returns>是否可以创建评论</returns>
+    Task<bool> CanCreateCommentAsync(Guid userId);
+
+    /// <summary>
+    /// 检查用户是否可以举报评论
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <returns>是否可以举报评论</returns>
+    Task<bool> CanReportCommentAsync(Guid userId);
 }
 
 /// <summary>

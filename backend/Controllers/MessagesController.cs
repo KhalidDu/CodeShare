@@ -123,7 +123,7 @@ public class MessagesController : ControllerBase
             // 缓存结果
             if (ShouldUseCache(filter))
             {
-                var cacheEntry = new CacheEntry
+                var cacheEntry = new MessageCacheEntry
                 {
                     Data = result,
                     ExpiresAt = DateTime.UtcNow.AddMinutes(5)
@@ -559,7 +559,7 @@ public class MessagesController : ControllerBase
                 return Unauthorized(new { message = "用户未登录" });
             }
 
-            var success = await _messageService.MarkMessageAsReadAsync(id, currentUserId.Value);
+            var success = await _messageService.MarkAsReadAsync(id, currentUserId.Value);
 
             if (!success)
             {
@@ -651,7 +651,7 @@ public class MessagesController : ControllerBase
             _logger.LogInformation("用户 {UserId} 成功上传消息附件，消息ID: {MessageId}, 附件ID: {AttachmentId}, 文件名: {FileName}", 
                 currentUserId.Value, id, attachment.Id, file.FileName);
 
-            return CreatedAtAction(nameof(GetAttachment), new { messageId = id, attachmentId = attachment.Id }, attachment);
+            return CreatedAtAction(nameof(DownloadAttachment), new { id = attachment.Id }, attachment);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -802,8 +802,7 @@ public class MessagesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "下载消息附件时发生错误，消息ID: {MessageId}, 附件ID: {AttachmentId}", 
-                messageId, attachmentId);
+            _logger.LogError(ex, "下载消息附件时发生错误，附件ID: {AttachmentId}", id);
             return StatusCode(500, new { message = "下载消息附件时发生内部错误" });
         }
     }
@@ -1487,7 +1486,7 @@ public class MessagesController : ControllerBase
             var conversation = await _messageService.CreateConversationAsync(request, currentUserId.Value);
 
             _logger.LogInformation("用户 {UserId} 成功创建会话，会话ID: {ConversationId}, 参与者数量: {ParticipantCount}", 
-                currentUserId.Value, conversation.Id, conversation.ParticipantIds.Count);
+                currentUserId.Value, conversation.Id, conversation.Participants.Count);
 
             return CreatedAtAction(nameof(GetConversation), new { id = conversation.Id }, conversation);
         }
@@ -2066,7 +2065,7 @@ public class MessagesController : ControllerBase
                 return Unauthorized(new { message = "用户未登录" });
             }
 
-            var result = await _messageService.AddConversationParticipantsAsync(id, request, currentUserId.Value);
+            var result = await _messageService.AddConversationParticipantsAsync(id, request.ParticipantIds, currentUserId.Value);
 
             _logger.LogInformation("用户 {UserId} 成功添加会话参与者，会话ID: {ConversationId}, 添加数量: {SuccessCount}/{TotalCount}", 
                 currentUserId.Value, id, result.SuccessCount, request.ParticipantIds.Count);
@@ -2891,18 +2890,3 @@ public class MessageSearchRequestDto
     public int PageSize { get; set; } = 20;
 }
 
-/// <summary>
-/// 消息统计筛选条件DTO
-/// </summary>
-public class MessageStatsFilterDto
-{
-    /// <summary>
-    /// 开始日期
-    /// </summary>
-    public DateTime? StartDate { get; set; }
-
-    /// <summary>
-    /// 结束日期
-    /// </summary>
-    public DateTime? EndDate { get; set; }
-}

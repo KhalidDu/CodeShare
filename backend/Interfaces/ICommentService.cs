@@ -46,12 +46,28 @@ public interface ICommentService
     Task<CommentDto?> GetCommentAsync(Guid commentId, Guid? currentUserId = null);
 
     /// <summary>
+    /// 根据ID获取评论详情（别名方法）
+    /// </summary>
+    /// <param name="commentId">评论ID</param>
+    /// <param name="currentUserId">当前用户ID</param>
+    /// <returns>评论DTO</returns>
+    Task<CommentDto?> GetCommentByIdAsync(Guid commentId, Guid? currentUserId = null);
+
+    /// <summary>
     /// 分页获取评论列表
     /// </summary>
     /// <param name="filter">评论筛选条件</param>
     /// <param name="currentUserId">当前用户ID</param>
     /// <returns>分页评论列表</returns>
     Task<PaginatedResult<CommentDto>> GetCommentsAsync(CommentFilterDto filter, Guid? currentUserId = null);
+
+    /// <summary>
+    /// 分页获取评论列表（别名方法）
+    /// </summary>
+    /// <param name="filter">评论筛选条件</param>
+    /// <param name="currentUserId">当前用户ID</param>
+    /// <returns>分页评论列表</returns>
+    Task<PaginatedResult<CommentDto>> GetCommentsPaginatedAsync(CommentFilterDto filter, Guid? currentUserId = null);
 
     /// <summary>
     /// 获取代码片段的评论树结构
@@ -350,53 +366,6 @@ public interface ICommentService
     #endregion
 }
 
-/// <summary>
-/// 用户评论统计信息DTO
-/// </summary>
-public class UserCommentStatsDto
-{
-    public Guid UserId { get; set; }
-    public string UserName { get; set; } = string.Empty;
-    public int TotalComments { get; set; }
-    public int RootComments { get; set; }
-    public int ReplyComments { get; set; }
-    public int TotalLikes { get; set; }
-    public int TotalReports { get; set; }
-    public double AverageLikesPerComment { get; set; }
-    public DateTime? FirstCommentAt { get; set; }
-    public DateTime? LatestCommentAt { get; set; }
-    public int DaysActive { get; set; }
-}
-
-/// <summary>
-/// 全局评论统计信息DTO
-/// </summary>
-public class GlobalCommentStatsDto
-{
-    public int TotalComments { get; set; }
-    public int TotalLikes { get; set; }
-    public int TotalReports { get; set; }
-    public int ActiveUsers { get; set; }
-    public int CommentsThisWeek { get; set; }
-    public int CommentsThisMonth { get; set; }
-    public double AverageCommentsPerDay { get; set; }
-    public double AverageLikesPerComment { get; set; }
-    public DateTime? LatestCommentAt { get; set; }
-    public int PendingModeration { get; set; }
-    public int HiddenComments { get; set; }
-}
-
-/// <summary>
-/// 评论趋势统计DTO
-/// </summary>
-public class CommentTrendDto
-{
-    public DateTime Date { get; set; }
-    public int CommentCount { get; set; }
-    public int LikeCount { get; set; }
-    public int UserCount { get; set; }
-    public int ReportCount { get; set; }
-}
 
 /// <summary>
 /// 评论活动报告DTO

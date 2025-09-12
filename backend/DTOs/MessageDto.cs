@@ -612,9 +612,9 @@ public class MessageDraftAttachmentDto
 
 
 /// <summary>
-/// 消息统计信息DTO
+/// 简单消息统计信息DTO
 /// </summary>
-public class MessageStatsDto
+public class SimpleMessageStatsDto
 {
     /// <summary>
     /// 总消息数

@@ -125,13 +125,28 @@ public class CommentsController : ControllerBase
                 }
             }
 
+            // 转换Filter类型
+            var filterDto = new CommentFilterDto
+            {
+                SnippetId = filter.SnippetId,
+                UserId = filter.UserId,
+                Status = filter.Status,
+                ParentId = filter.ParentId,
+                Search = filter.Search,
+                StartDate = filter.StartDate,
+                EndDate = filter.EndDate,
+                SortBy = filter.SortBy,
+                Page = filter.Page,
+                PageSize = filter.PageSize
+            };
+            
             // 从服务获取数据
-            var result = await _commentService.GetCommentsPaginatedAsync(filter);
+            var result = await _commentService.GetCommentsPaginatedAsync(filterDto);
 
             // 缓存结果
             if (ShouldUseCache(filter))
             {
-                var cacheEntry = new CacheEntry
+                var cacheEntry = new CommentCacheEntry
                 {
                     Data = result,
                     ExpiresAt = DateTime.UtcNow.AddMinutes(5)
@@ -277,8 +292,7 @@ public class CommentsController : ControllerBase
             }
 
             // 内容验证
-            var validationResult = await _commentValidationService.ValidateCommentContentAsync(
-                createCommentDto.Content, currentUserId.Value);
+            var validationResult = await _commentValidationService.ValidateCommentContentAsync(createCommentDto.Content);
             if (!validationResult.IsValid)
             {
                 return BadRequest(new { message = validationResult.ErrorMessage });
@@ -363,8 +377,7 @@ public class CommentsController : ControllerBase
             }
 
             // 内容验证
-            var validationResult = await _commentValidationService.ValidateCommentContentAsync(
-                updateCommentDto.Content, currentUserId.Value);
+            var validationResult = await _commentValidationService.ValidateCommentContentAsync(updateCommentDto.Content);
             if (!validationResult.IsValid)
             {
                 return BadRequest(new { message = validationResult.ErrorMessage });
@@ -531,12 +544,16 @@ public class CommentsController : ControllerBase
             }
 
             _logger.LogInformation("用户 {UserId} {Action} 评论，评论ID: {CommentId}", 
-                currentUserId.Value, result.IsLiked ? "点赞" : "取消点赞", id);
+                currentUserId.Value, result ? "点赞" : "取消点赞", id);
+
+            // 获取更新后的点赞状态和数量
+            var isLiked = result; // true表示点赞成功，false表示取消点赞
+            var likeCount = comment?.LikeCount ?? 0;
 
             return Ok(new { 
-                isLiked = result.IsLiked, 
-                likeCount = result.LikeCount,
-                message = result.IsLiked ? "点赞成功" : "取消点赞成功" 
+                isLiked = isLiked, 
+                likeCount = likeCount,
+                message = isLiked ? "点赞成功" : "取消点赞成功" 
             });
         }
         catch (ArgumentException ex)
@@ -605,7 +622,7 @@ public class CommentsController : ControllerBase
                 IncludeUser = true
             };
 
-            var result = await _commentService.GetCommentLikesPaginatedAsync(filter);
+            var result = await _commentService.GetCommentLikesAsync(id, page, pageSize);
 
             _logger.LogInformation("获取评论点赞列表成功，评论ID: {CommentId}, 页码: {Page}, 每页大小: {PageSize}", 
                 id, page, pageSize);
@@ -758,9 +775,9 @@ public class CommentsController : ControllerBase
             var report = await _commentReportManagementService.CreateReportAsync(reportDto, currentUserId.Value);
 
             _logger.LogInformation("用户 {UserId} 成功举报评论，评论ID: {CommentId}, 举报ID: {ReportId}, 原因: {Reason}", 
-                currentUserId.Value, id, report.Id, report.Reason);
+                currentUserId.Value, id, report, reportDto.Reason);
 
-            return CreatedAtAction(nameof(GetCommentReport), new { commentId = id, reportId = report.Id }, report);
+            return CreatedAtAction(nameof(GetCommentReport), new { commentId = id, reportId = report }, report);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -818,7 +835,7 @@ public class CommentsController : ControllerBase
                 return Unauthorized(new { message = "用户未登录" });
             }
 
-            var report = await _commentReportManagementService.GetReportByIdAsync(reportId, currentUserId.Value);
+            var report = await _commentReportManagementService.GetReportByIdAsync(reportId);
 
             if (report == null)
             {
@@ -1014,7 +1031,17 @@ public class CommentsController : ControllerBase
             filter.Status = CommentStatus.Pending;
             filter.CurrentUserId = currentUserId.Value;
 
-            var result = await _commentModerationService.GetPendingCommentsAsync(filter);
+            var moderationFilter = new ModerationQueueFilterDto
+            {
+                Status = CommentStatus.Pending,
+                Page = filter.Page,
+                PageSize = filter.PageSize,
+                Search = filter.Search,
+                StartDate = filter.StartDate,
+                EndDate = filter.EndDate
+            };
+
+            var result = await _commentModerationService.GetPendingCommentsAsync(moderationFilter);
 
             _logger.LogInformation("获取待审核评论列表成功，页码: {Page}, 每页大小: {PageSize}, 总数: {TotalCount}", 
                 filter.Page, filter.PageSize, result.TotalCount);
@@ -1084,15 +1111,20 @@ public class CommentsController : ControllerBase
                 return Unauthorized(new { message = "用户未登录" });
             }
 
-            var comment = await _commentModerationService.ModerateCommentAsync(id, moderationDto, currentUserId.Value);
+            var moderationResult = await _commentModerationService.ModerateCommentAsync(id, moderationDto.Status == CommentStatus.Normal, moderationDto.Reason, currentUserId.Value);
 
-            // 清除相关缓存
-            ClearCommentCache(comment.SnippetId);
+            // 获取评论数据以清除缓存
+            var commentData = await _commentService.GetCommentByIdAsync(id, currentUserId.Value);
+            if (commentData != null)
+            {
+                // 清除相关缓存
+                ClearCommentCache(commentData.SnippetId);
+            }
 
             _logger.LogInformation("用户 {UserId} 成功审核评论，评论ID: {CommentId}, 审核结果: {Status}", 
                 currentUserId.Value, id, moderationDto.Status);
 
-            return Ok(comment);
+            return Ok(moderationResult);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -1160,7 +1192,21 @@ public class CommentsController : ControllerBase
                 return Unauthorized(new { message = "用户未登录" });
             }
 
-            var result = await _commentReportManagementService.GetReportsPaginatedAsync(filter);
+            var reportFilterDto = new CommentReportFilterDto
+            {
+                Status = filter.Status,
+                Reason = filter.Reason,
+                CommentId = filter.CommentId,
+                UserId = filter.UserId,
+                StartDate = filter.StartDate,
+                EndDate = filter.EndDate,
+                Search = filter.Search,
+                SortBy = (ReportSort)filter.SortBy,
+                Page = filter.Page,
+                PageSize = filter.PageSize
+            };
+
+            var result = await _commentReportManagementService.GetReportsPaginatedAsync(reportFilterDto);
 
             _logger.LogInformation("获取评论举报管理列表成功，页码: {Page}, 每页大小: {PageSize}, 总数: {TotalCount}", 
                 filter.Page, filter.PageSize, result.TotalCount);

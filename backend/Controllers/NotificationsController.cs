@@ -174,7 +174,7 @@ public class NotificationsController : ControllerBase
 
             var sendRequest = new NotificationSendRequestDto
             {
-                UserId = request.UserId,
+                UserIds = new List<Guid> { request.UserId },
                 Type = request.Type,
                 Title = request.Title,
                 Content = request.Content,
@@ -184,7 +184,7 @@ public class NotificationsController : ControllerBase
                 RelatedEntityId = request.RelatedEntityId,
                 TriggeredByUserId = request.TriggeredByUserId,
                 Action = request.Action,
-                Channel = request.Channel,
+                Channels = request.Channel != null ? new List<NotificationChannel> { request.Channel } : new List<NotificationChannel>(),
                 ExpiresAt = request.ExpiresAt,
                 ScheduledToSendAt = request.ScheduledToSendAt,
                 DataJson = request.DataJson,

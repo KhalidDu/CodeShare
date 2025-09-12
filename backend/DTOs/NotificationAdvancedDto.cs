@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CodeSnippetManager.Api.Models;
 
 namespace CodeSnippetManager.Api.DTOs;
